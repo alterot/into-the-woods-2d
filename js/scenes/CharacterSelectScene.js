@@ -1,80 +1,173 @@
 // ===== CHARACTER SELECT SCENE =====
+import Wisp from '../entities/Wisp.js';
+
 class CharacterSelectScene extends Phaser.Scene {
     constructor() {
         super({ key: 'CharacterSelectScene' });
     }
 
+    preload() {
+    // Bakgrund för menyn
+    this.load.image('scen0-menu', 'assets/scenes/scen0-menu.png');
+
+    // Träskylt-knappen
+    this.load.image('scen0-menu-button', 'assets/scenes/scen0-menu-button.png');
+
+    // Wisp (om inte redan laddad i tidigare scen)
+    this.load.image('wisp', 'assets/sprites/whisp.png');
+
+    // Klickljud
+    this.load.audio('click', 'assets/sound/click.wav');
+}
+
+
     create() {
-        // Background color - forest green
-        this.cameras.main.setBackgroundColor('#2a3d2a');
+        const { width, height } = this.scale;
 
-        // Title text
-        const titleText = this.add.text(512, 200, 'Vem spelar?', {
-            fontSize: '48px',
-            fontFamily: 'Arial',
-            color: '#D4A574',
-            fontStyle: 'bold'
-        });
-        titleText.setOrigin(0.5);
+        // --- Bakgrundsbild ---
+        const bg = this.add.image(width / 2, height / 2, 'scen0-menu');
+        bg.setOrigin(0.5);
+        bg.setDisplaySize(width, height);
 
-        // Button style constants
-        const buttonWidth = 300;
-        const buttonHeight = 80;
-        const buttonColor = 0x8B6F47;
-        const buttonHoverColor = 0xA58A68;
+        // Mörk overlay för att text/knappar ska poppa
+        const overlay = this.add.rectangle(
+            width / 2,
+            height / 2,
+            width,
+            height,
+            0x06130a,
+            0.45
+        );
 
-        // Big Sister Button
-        const bigSisterBtn = this.add.rectangle(512, 400, buttonWidth, buttonHeight, buttonColor);
-        bigSisterBtn.setInteractive({ useHandCursor: true });
-        const bigSisterText = this.add.text(512, 400, 'Storasyster', {
-            fontSize: '28px',
-            fontFamily: 'Arial',
-            color: '#FFFFFF'
-        });
-        bigSisterText.setOrigin(0.5);
+        // --- Titel + undertitel ---
+        const titleText = this.add.text(width / 2, height * 0.22, 'Vem spelar?', {
+            fontSize: '52px',
+            fontFamily: 'Georgia',
+            color: '#e9c08b'
+        }).setOrigin(0.5);
 
-        // Little Sister Button
-        const littleSisterBtn = this.add.rectangle(512, 520, buttonWidth, buttonHeight, buttonColor);
-        littleSisterBtn.setInteractive({ useHandCursor: true });
-        const littleSisterText = this.add.text(512, 520, 'Lillasyster', {
-            fontSize: '28px',
-            fontFamily: 'Arial',
-            color: '#FFFFFF'
-        });
-        littleSisterText.setOrigin(0.5);
+        const subtitle = this.add.text(
+            width / 2,
+            height * 0.29,
+            'Välj vilken syster som leder vägen',
+            {
+                fontSize: '20px',
+                fontFamily: 'Georgia',
+                color: '#cfa56f'
+            }
+        ).setOrigin(0.5);
 
-        // Hover effects for Big Sister button
-        bigSisterBtn.on('pointerover', () => {
-            bigSisterBtn.setFillStyle(buttonHoverColor);
-        });
-        bigSisterBtn.on('pointerout', () => {
-            bigSisterBtn.setFillStyle(buttonColor);
+        this.tweens.add({
+            targets: [titleText, subtitle],
+            alpha: { from: 0, to: 1 },
+            duration: 800,
+            ease: 'Quad.Out'
         });
 
-        // Hover effects for Little Sister button
-        littleSisterBtn.on('pointerover', () => {
-            littleSisterBtn.setFillStyle(buttonHoverColor);
-        });
-        littleSisterBtn.on('pointerout', () => {
-            littleSisterBtn.setFillStyle(buttonColor);
+        const menuWisp = new Wisp(this, width / 2 - 260, height / 2 + 10);
+
+        menuWisp.onClick(() => {
+            // liten "pop"-animation
+            this.tweens.add({
+                targets: menuWisp.sprite,
+                scaleX: 0.14,
+                scaleY: 0.14,
+                yoyo: true,
+                duration: 120,
+                ease: 'Quad.Out'
+            });
         });
 
-        // Click handlers
-        bigSisterBtn.on('pointerdown', () => {
+
+        // --- Gemensam knapp-fabrik (träskylt) ---
+        const makeWoodButton = (y, label, onClick) => {
+            const container = this.add.container(width / 2, y);
+
+            const base = this.add.image(0, 0, 'scen0-menu-button');
+            // Skala ner knappen till rimlig meny-storlek
+            base.setDisplaySize(320, 96);
+            base.setAlpha(0.9);
+
+            const txt = this.add.text(0, 0, label, {
+                fontSize: '26px',
+                fontFamily: 'Georgia',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+
+            container.add([base, txt]);
+            container.setSize(320, 96);
+            container.setInteractive({ useHandCursor: true });
+
+            // Hover: lite större + ljusare
+            container.on('pointerover', () => {
+                this.tweens.add({
+                    targets: container,
+                    scaleX: 1.05,
+                    scaleY: 1.05,
+                    duration: 130,
+                    ease: 'Quad.Out'
+                });
+                this.tweens.add({
+                    targets: base,
+                    alpha: 1,
+                    duration: 130,
+                    ease: 'Quad.Out'
+                });
+            });
+
+            container.on('pointerout', () => {
+                this.tweens.add({
+                    targets: container,
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 130,
+                    ease: 'Quad.Out'
+                });
+                this.tweens.add({
+                    targets: base,
+                    alpha: 0.9,
+                    duration: 130,
+                    ease: 'Quad.Out'
+                });
+            });
+
+        container.on('pointerdown', () => {
+
+            // liten press-animation
+            this.tweens.add({
+                targets: container,
+                scaleX: 0.97,
+                scaleY: 0.97,
+                yoyo: true,
+                duration: 90,
+                ease: 'Quad.Out'
+            });
+
+            // SPELA KLICKLJUDET DIREKT
+            this.sound.play('click', { volume: 0.7 });
+
+            // fade + start scen
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.time.delayedCall(500, onClick);
+        });
+
+
+            return container;
+        };
+
+        // --- Skapa knapparna ---
+        const bigBtn = makeWoodButton(height / 2 - 40, 'Storasyster', () => {
             window.gameState = { selectedCharacter: 'big' };
-            this.cameras.main.fadeOut(500);
-            this.time.delayedCall(500, () => {
-                this.scene.start('IntroScene');
-            });
+            this.scene.start('IntroScene');
         });
 
-        littleSisterBtn.on('pointerdown', () => {
+        const littleBtn = makeWoodButton(height / 2 + 80, 'Lillasyster', () => {
             window.gameState = { selectedCharacter: 'little' };
-            this.cameras.main.fadeOut(500);
-            this.time.delayedCall(500, () => {
-                this.scene.start('IntroScene');
-            });
+            this.scene.start('IntroScene');
         });
+
+        // --- Fade in hela scenen ---
+        this.cameras.main.fadeIn(600, 0, 0, 0);
     }
 }
 
