@@ -115,14 +115,16 @@ class GameScene extends Phaser.Scene {
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
-                // Walkable area - find path to target using A*
+                // Walkable area - find path
                 this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
             } else if (color === 'red') {
-                // Interactive object - show text
+                // Interactive object
                 console.log('Interactive object clicked!');
-                // TODO: Show proper UI text
+                this.showNoPathIndicator(pointer.x, pointer.y); // ← LÄGG TILL!
+            } else {
+                // Blocked (black/unpainted)
+                this.showNoPathIndicator(pointer.x, pointer.y); // ← LÄGG TILL!
             }
-            // All other colors are ignored (no action)
         });
     }
 
@@ -238,20 +240,25 @@ class GameScene extends Phaser.Scene {
         this.easystar.calculate();
     }
 
-    showNoPathIndicator(x, y) {
-        // Remove previous indicator if it exists
+        showNoPathIndicator(x, y) {
+            // Remove previous indicator
         if (this.pathIndicator) {
+            this.tweens.killTweensOf(this.pathIndicator);
             this.pathIndicator.destroy();
         }
 
-        // Create red circle indicator
-        this.pathIndicator = this.add.circle(x, y, 10, 0xff0000, 0.7);
+        // Create red circle (larger!)
+        this.pathIndicator = this.add.circle(x, y, 2, 0xff6b6b, 0.8);
+        this.pathIndicator.setDepth(1000);
+        console.log('Circle visible?', this.pathIndicator.visible);
 
-        // Fade out and destroy after 500ms
+        // Expand + fade animation (like water ripple!)
         this.tweens.add({
             targets: this.pathIndicator,
-            alpha: 0,
-            duration: 500,
+            radius: 10,        // ← Expand to 40px
+            alpha: 0,          // ← Fade out
+            duration: 600,
+            ease: 'Quad.easeOut',
             onComplete: () => {
                 if (this.pathIndicator) {
                     this.pathIndicator.destroy();
