@@ -91,6 +91,12 @@ class GameScene extends Phaser.Scene {
         this.bobTime2 = 0;
         this.baseY2 = 0;
         this.isMoving2 = false;
+
+        // Dialog system variables
+        this.canMove = false;
+        this.dialogData = null;
+        this.currentLine = 0;
+        this.dialogUI = null;
     }
 
     preload() {
@@ -103,6 +109,13 @@ class GameScene extends Phaser.Scene {
         // Load character sprites
         this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
         this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
+
+        // Load portraits (large, for dialog scenes)
+        this.load.image('portrait1', 'assets/portraits/sister1-portrait.png');
+        this.load.image('portrait2', 'assets/portraits/sister2-portrait.png');
+
+        // Load dialogue data
+        this.load.json('introDialogue', 'assets/dialogues/intro-dialogue.json');
     }
 
     create() {
@@ -112,17 +125,35 @@ class GameScene extends Phaser.Scene {
         // Create mask texture for pixel detection (invisible)
         this.maskTexture = this.textures.get('mask').getSourceImage();
 
-        // Add character sprites WITH const keyword
-        this.sister1 = this.add.image(400, 500, 'sister1');
-        this.sister1.setScale(0.55);
-        this.baseY = this.sister1.y;
+        // Determine player character based on selection
+        const isPlayingBig = window.gameState?.selectedCharacter === 'big';
 
-        this.sister2 = this.add.image(450, 500, 'sister2');
-        this.sister2.setScale(0.5);
-        this.baseY2 = this.sister2.y;
+        // Position sprites: player at x:400 (left), sibling at x:450 (right)
+        if (isPlayingBig) {
+            // Playing as big sister - she's on the left
+            this.sister1 = this.add.image(400, 500, 'sister1');
+            this.sister1.setScale(0.55);
+            this.baseY = this.sister1.y;
+
+            this.sister2 = this.add.image(450, 500, 'sister2');
+            this.sister2.setScale(0.5);
+            this.baseY2 = this.sister2.y;
+        } else {
+            // Playing as little sister - she's on the left
+            this.sister2 = this.add.image(400, 500, 'sister2');
+            this.sister2.setScale(0.5);
+            this.baseY2 = this.sister2.y;
+
+            this.sister1 = this.add.image(450, 500, 'sister1');
+            this.sister1.setScale(0.55);
+            this.baseY = this.sister1.y;
+        }
 
         // Add click handler for movement with mask checking
         this.input.on('pointerdown', (pointer) => {
+            // Don't allow movement during dialog
+            if (!this.canMove) return;
+
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
@@ -137,6 +168,9 @@ class GameScene extends Phaser.Scene {
             }
             // All other colors are ignored (no action)
         });
+
+        // Start intro dialog sequence
+        this.startIntroDialog();
     }
 
     getPixelColor(x, y) {
@@ -163,7 +197,167 @@ class GameScene extends Phaser.Scene {
         return 'other'; // Ignore
     }
 
+    // ===== DIALOG SYSTEM =====
+    startIntroDialog() {
+        // Fade in from black
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+        // Hide game sprites during dialog
+        this.sister1.setAlpha(0);
+        this.sister2.setAlpha(0);
+
+        // Load dialogue data
+        this.dialogData = this.cache.json.get('introDialogue').conversations[0].lines;
+        this.currentLine = 0;
+
+        // Determine player and sibling based on selection
+        const isPlayingBig = window.gameState?.selectedCharacter === 'big';
+        const playerPortrait = isPlayingBig ? 'portrait1' : 'portrait2';
+        const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
+
+        // Canvas dimensions
+        const canvasWidth = 1024;
+        const canvasHeight = 1024;
+
+        // Portrait positions at bottom of screen
+        const portraitY = canvasHeight - 150;
+        const leftX = 200;
+        const rightX = canvasWidth - 200;
+
+        // Textbox positions (above portraits)
+        const textboxY = portraitY - 200;
+        const textboxWidth = 300;
+        const textboxHeight = 120;
+
+        // Create dialog UI
+        this.dialogUI = {
+            // Portraits at bottom of screen (scaled to ~200-250px height)
+            leftPortrait: this.add.image(leftX, portraitY, playerPortrait).setScale(0.15).setAlpha(0.7),
+            rightPortrait: this.add.image(rightX, portraitY, siblingPortrait).setScale(0.15).setAlpha(0.7),
+
+            // Left textbox (above left portrait)
+            leftTextboxBg: this.add.rectangle(leftX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.9)
+                .setStrokeStyle(3, 0x5C4A30),
+            leftTextboxText: this.add.text(leftX, textboxY, '', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#FFFFFF',
+                align: 'center',
+                wordWrap: { width: textboxWidth - 30 }
+            }).setOrigin(0.5),
+
+            // Right textbox (above right portrait)
+            rightTextboxBg: this.add.rectangle(rightX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.9)
+                .setStrokeStyle(3, 0x5C4A30),
+            rightTextboxText: this.add.text(rightX, textboxY, '', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#FFFFFF',
+                align: 'center',
+                wordWrap: { width: textboxWidth - 30 }
+            }).setOrigin(0.5)
+        };
+
+        // Initially hide both textboxes
+        this.dialogUI.leftTextboxBg.setVisible(false);
+        this.dialogUI.leftTextboxText.setVisible(false);
+        this.dialogUI.rightTextboxBg.setVisible(false);
+        this.dialogUI.rightTextboxText.setVisible(false);
+
+        // Show first line
+        this.showDialogLine();
+
+        // Add input for advancing dialog (store handlers to remove later)
+        this.dialogSpaceHandler = () => this.advanceDialog();
+        this.dialogClickHandler = () => this.advanceDialog();
+        this.input.keyboard.on('keydown-SPACE', this.dialogSpaceHandler);
+        this.dialogClickEvent = this.input.on('pointerdown', this.dialogClickHandler);
+    }
+
+    showDialogLine() {
+        if (this.currentLine >= this.dialogData.length) {
+            this.endDialog();
+            return;
+        }
+
+        const line = this.dialogData[this.currentLine];
+
+        // Show only the active speaker's textbox
+        if (line.role === 'player') {
+            // Player is speaking (left side)
+            this.dialogUI.leftTextboxBg.setVisible(true);
+            this.dialogUI.leftTextboxText.setVisible(true).setText(line.text);
+            this.dialogUI.rightTextboxBg.setVisible(false);
+            this.dialogUI.rightTextboxText.setVisible(false);
+
+            // Highlight left portrait (active speaker)
+            this.dialogUI.leftPortrait.setAlpha(1).setScale(0.165); // Scale 1.1x
+            this.dialogUI.rightPortrait.setAlpha(0.7).setScale(0.15);
+        } else {
+            // Sibling is speaking (right side)
+            this.dialogUI.rightTextboxBg.setVisible(true);
+            this.dialogUI.rightTextboxText.setVisible(true).setText(line.text);
+            this.dialogUI.leftTextboxBg.setVisible(false);
+            this.dialogUI.leftTextboxText.setVisible(false);
+
+            // Highlight right portrait (active speaker)
+            this.dialogUI.rightPortrait.setAlpha(1).setScale(0.165); // Scale 1.1x
+            this.dialogUI.leftPortrait.setAlpha(0.7).setScale(0.15);
+        }
+    }
+
+    advanceDialog() {
+        if (!this.dialogUI) return;
+
+        this.currentLine++;
+        this.showDialogLine();
+    }
+
+    endDialog() {
+        if (!this.dialogUI) return;
+
+        // Remove dialog input handlers
+        this.input.keyboard.off('keydown-SPACE', this.dialogSpaceHandler);
+        this.input.off('pointerdown', this.dialogClickHandler);
+
+        // Fade out portraits and textboxes
+        this.tweens.add({
+            targets: [
+                this.dialogUI.leftPortrait,
+                this.dialogUI.rightPortrait,
+                this.dialogUI.leftTextboxBg,
+                this.dialogUI.leftTextboxText,
+                this.dialogUI.rightTextboxBg,
+                this.dialogUI.rightTextboxText
+            ],
+            alpha: 0,
+            duration: 500,
+            onComplete: () => {
+                this.dialogUI.leftPortrait.destroy();
+                this.dialogUI.rightPortrait.destroy();
+                this.dialogUI.leftTextboxBg.destroy();
+                this.dialogUI.leftTextboxText.destroy();
+                this.dialogUI.rightTextboxBg.destroy();
+                this.dialogUI.rightTextboxText.destroy();
+                this.dialogUI = null;
+            }
+        });
+
+        // Fade in game sprites
+        this.tweens.add({
+            targets: [this.sister1, this.sister2],
+            alpha: 1,
+            duration: 500
+        });
+
+        // Enable movement
+        this.canMove = true;
+    }
+
     update() {
+        // Don't update movement during dialog
+        if (!this.canMove) return;
+
         // Handle sister1 movement
         if (this.isMoving && this.targetX !== null && this.targetY !== null) {
             const dx = this.targetX - this.sister1.x;
