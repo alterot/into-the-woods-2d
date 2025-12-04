@@ -27,6 +27,14 @@ class GameScene extends Phaser.Scene {
         this.bobTime2 = 0;
         this.baseY2 = 0;
         this.isMoving2 = false;
+
+        // Pathfinding properties
+        this.easystar = null;
+        this.grid = null;
+        this.gridSize = 32; // Size of each grid cell in pixels
+        this.path = null;
+        this.currentWaypoint = 0;
+        this.pathIndicator = null;
     }
 
     preload() {
@@ -50,6 +58,10 @@ class GameScene extends Phaser.Scene {
 
         // Create mask texture for pixel detection (invisible)
         this.maskTexture = this.textures.get('mask').getSourceImage();
+
+        // Initialize pathfinding grid and EasyStar
+        this.createGridFromMask();
+        this.initializePathfinding();
 
         // Determine player character based on selection
         const isPlayingBig = window.gameState?.selectedCharacter === 'big';
@@ -103,10 +115,8 @@ class GameScene extends Phaser.Scene {
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
-                // Walkable area - move player character
-                this.targetX = pointer.x;
-                this.targetY = pointer.y;
-                this.isMoving = true;
+                // Walkable area - find path to target using A*
+                this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
             } else if (color === 'red') {
                 // Interactive object - show text
                 console.log('Interactive object clicked!');
@@ -140,20 +150,137 @@ class GameScene extends Phaser.Scene {
         return 'other'; // Ignore
     }
 
+    createGridFromMask() {
+        // Create a grid by sampling the mask image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = this.maskTexture.width;
+        canvas.height = this.maskTexture.height;
+        ctx.drawImage(this.maskTexture, 0, 0);
+
+        // Calculate grid dimensions
+        const cols = Math.ceil(canvas.width / this.gridSize);
+        const rows = Math.ceil(canvas.height / this.gridSize);
+
+        // Initialize grid array
+        this.grid = [];
+
+        // Sample each grid cell
+        for (let row = 0; row < rows; row++) {
+            this.grid[row] = [];
+            for (let col = 0; col < cols; col++) {
+                // Sample the center of the grid cell
+                const x = col * this.gridSize + this.gridSize / 2;
+                const y = row * this.gridSize + this.gridSize / 2;
+
+                // Get pixel color at this position
+                const imageData = ctx.getImageData(x, y, 1, 1);
+                const pixel = imageData.data;
+                const r = pixel[0];
+                const g = pixel[1];
+                const b = pixel[2];
+
+                // Green = walkable (0), anything else = blocked (1)
+                if (r === 0 && g === 255 && b === 0) {
+                    this.grid[row][col] = 0; // Walkable
+                } else {
+                    this.grid[row][col] = 1; // Blocked
+                }
+            }
+        }
+    }
+
+    initializePathfinding() {
+        // Initialize EasyStar
+        this.easystar = new EasyStar.js();
+        this.easystar.setGrid(this.grid);
+        this.easystar.setAcceptableTiles([0]); // Only walkable tiles
+        this.easystar.enableDiagonals(); // Allow diagonal movement
+        this.easystar.enableCornerCutting(false); // Don't cut corners
+    }
+
+    worldToGrid(x, y) {
+        // Convert world coordinates to grid coordinates
+        return {
+            col: Math.floor(x / this.gridSize),
+            row: Math.floor(y / this.gridSize)
+        };
+    }
+
+    gridToWorld(col, row) {
+        // Convert grid coordinates to world coordinates (center of cell)
+        return {
+            x: col * this.gridSize + this.gridSize / 2,
+            y: row * this.gridSize + this.gridSize / 2
+        };
+    }
+
+    findPath(startX, startY, endX, endY) {
+        // Convert world coordinates to grid coordinates
+        const start = this.worldToGrid(startX, startY);
+        const end = this.worldToGrid(endX, endY);
+
+        // Find path using EasyStar
+        this.easystar.findPath(start.col, start.row, end.col, end.row, (path) => {
+            if (path === null) {
+                // No path found - show red indicator
+                this.showNoPathIndicator(endX, endY);
+                this.path = null;
+            } else {
+                // Path found - convert grid coordinates back to world coordinates
+                this.path = path.map(point => this.gridToWorld(point.x, point.y));
+                this.currentWaypoint = 0;
+                this.isMoving = true;
+            }
+        });
+
+        // Calculate the path immediately
+        this.easystar.calculate();
+    }
+
+    showNoPathIndicator(x, y) {
+        // Remove previous indicator if it exists
+        if (this.pathIndicator) {
+            this.pathIndicator.destroy();
+        }
+
+        // Create red circle indicator
+        this.pathIndicator = this.add.circle(x, y, 10, 0xff0000, 0.7);
+
+        // Fade out and destroy after 500ms
+        this.tweens.add({
+            targets: this.pathIndicator,
+            alpha: 0,
+            duration: 500,
+            onComplete: () => {
+                if (this.pathIndicator) {
+                    this.pathIndicator.destroy();
+                    this.pathIndicator = null;
+                }
+            }
+        });
+    }
+
     update() {
-        // Handle player movement
-        if (this.isMoving && this.targetX !== null && this.targetY !== null) {
-            const dx = this.targetX - this.player.x;
-            const dy = this.targetY - this.player.y;
+        // Handle player movement along path
+        if (this.isMoving && this.path && this.currentWaypoint < this.path.length) {
+            // Get current waypoint
+            const waypoint = this.path[this.currentWaypoint];
+            const dx = waypoint.x - this.player.x;
+            const dy = waypoint.y - this.player.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Stop if close enough to target (within move speed distance)
-            if (distance < this.moveSpeed) {
-                this.player.x = this.targetX;
-                this.player.y = this.targetY;
-                this.playerBaseY = this.player.y;
-                this.isMoving = false;
-                this.playerBobTime = 0; // Reset bob animation
+            // Check if reached current waypoint
+            if (distance < this.moveSpeed * 2) {
+                // Move to next waypoint
+                this.currentWaypoint++;
+
+                // Check if path is complete
+                if (this.currentWaypoint >= this.path.length) {
+                    this.isMoving = false;
+                    this.playerBobTime = 0; // Reset bob animation
+                    this.path = null;
+                }
             } else {
                 // Flip sprite based on horizontal direction (accounting for initial flip)
                 if (dx < 0) {
@@ -162,7 +289,7 @@ class GameScene extends Phaser.Scene {
                     this.player.flipX = true; // Moving right
                 }
 
-                // Move towards target at constant speed
+                // Move towards waypoint at constant speed
                 const angle = Math.atan2(dy, dx);
                 this.player.x += Math.cos(angle) * this.moveSpeed;
 
