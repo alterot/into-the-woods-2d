@@ -54,16 +54,16 @@ class GameScene extends Phaser.Scene {
         // Determine player character based on selection
         const isPlayingBig = window.gameState?.selectedCharacter === 'big';
 
-        // Position sprites
+        // Position sprites - player always on the right
         if (isPlayingBig) {
-            // Playing as big sister
-            this.sister1 = this.add.image(150, 700, 'sister1');
-            this.sister1.setScale(0.55);
-            this.baseY = this.sister1.y;
-
-            this.sister2 = this.add.image(200, 700, 'sister2');
+            // Playing as big sister - she's the player (right)
+            this.sister2 = this.add.image(150, 700, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
+
+            this.sister1 = this.add.image(200, 700, 'sister1');
+            this.sister1.setScale(0.55);
+            this.baseY = this.sister1.y;
 
             // Assign player and follower
             this.player = this.sister1;
@@ -71,14 +71,14 @@ class GameScene extends Phaser.Scene {
             this.playerBaseY = this.baseY;
             this.followerBaseY = this.baseY2;
         } else {
-            // Playing as little sister
-            this.sister2 = this.add.image(200, 700, 'sister2');
-            this.sister2.setScale(0.5);
-            this.baseY2 = this.sister2.y;
-
-            this.sister1 = this.add.image(250, 700, 'sister1');
+            // Playing as little sister - she's the player (right)
+            this.sister1 = this.add.image(200, 700, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
+
+            this.sister2 = this.add.image(250, 700, 'sister2');
+            this.sister2.setScale(0.5);
+            this.baseY2 = this.sister2.y;
 
             // Assign player and follower
             this.player = this.sister2;
