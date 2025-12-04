@@ -5,6 +5,11 @@ class GameScene extends Phaser.Scene {
         this.targetY = null;
         this.isMoving = false;
         this.moveSpeed = 2;
+        this.bobTime = 0;
+        this.baseY = 0;
+        this.bobTime2 = 0;
+        this.baseY2 = 0;
+        this.isMoving2 = false;
     }
 
     preload() {
@@ -23,9 +28,11 @@ class GameScene extends Phaser.Scene {
         // Add character sprites WITH const keyword
         this.sister1 = this.add.image(400, 500, 'sister1');
         this.sister1.setScale(0.55);
+        this.baseY = this.sister1.y;
 
-        const s2 = this.add.image(450, 500, 'sister2');
-        s2.setScale(0.5);
+        this.sister2 = this.add.image(450, 500, 'sister2');
+        this.sister2.setScale(0.5);
+        this.baseY2 = this.sister2.y;
 
         // Add click handler for movement
         this.input.on('pointerdown', (pointer) => {
@@ -46,13 +53,73 @@ class GameScene extends Phaser.Scene {
             if (distance < this.moveSpeed) {
                 this.sister1.x = this.targetX;
                 this.sister1.y = this.targetY;
+                this.baseY = this.sister1.y;
                 this.isMoving = false;
+                this.bobTime = 0; // Reset bob animation
             } else {
+                // Flip sprite based on horizontal direction
+                if (dx < 0) {
+                    this.sister1.flipX = false;  // Går vänster
+                } else if (dx > 0) {
+                    this.sister1.flipX = true; // Går höger
+                }
+
                 // Move towards target at constant speed
                 const angle = Math.atan2(dy, dx);
                 this.sister1.x += Math.cos(angle) * this.moveSpeed;
-                this.sister1.y += Math.sin(angle) * this.moveSpeed;
+
+                // Apply vertical bob animation (3 pixels up/down)
+                this.bobTime += 0.15; // Controls bob speed
+                const bobOffset = Math.sin(this.bobTime) * 3;
+                this.baseY += Math.sin(angle) * this.moveSpeed;
+                this.sister1.y = this.baseY + bobOffset;
             }
+        }
+
+        // Handle sister2 following sister1
+        // Calculate direction from sister2 to sister1
+        const dx2 = this.sister1.x - this.sister2.x;
+        const dy2 = this.sister1.y - this.sister2.y;
+        const angle2 = Math.atan2(dy2, dx2);
+
+        // Calculate target follow position (50 pixels behind sister1)
+        const targetX2 = this.sister1.x - Math.cos(angle2) * 50;
+        const targetY2 = this.sister1.y - Math.sin(angle2) * 50;
+
+        // Calculate distance to target follow position
+        const distToTarget = Math.sqrt(
+            (targetX2 - this.sister2.x) ** 2 +
+            (targetY2 - this.sister2.y) ** 2
+        );
+
+        // Only move if distance to target is significant
+        if (distToTarget > 5) {
+            this.isMoving2 = true;
+
+            // Lerp towards follow position (slower than sister1)
+            const lerpFactor = 0.03;
+            const newX = this.sister2.x + (targetX2 - this.sister2.x) * lerpFactor;
+            const newY = this.sister2.y + (targetY2 - this.sister2.y) * lerpFactor;
+
+            // Flip sprite based on movement direction
+            const moveDx = newX - this.sister2.x;
+            if (moveDx < 0) {
+                this.sister2.flipX = false; // Moving left
+            } else if (moveDx > 0) {
+                this.sister2.flipX = true; // Moving right
+            }
+
+            // Apply vertical bob animation only when moving
+            this.bobTime2 += 0.15;
+            const bobOffset2 = Math.sin(this.bobTime2) * 3;
+            this.baseY2 += (newY - this.sister2.y);
+            this.sister2.x = newX;
+            this.sister2.y = this.baseY2 + bobOffset2;
+        } else {
+            // Stop completely when close enough
+            this.isMoving2 = false;
+            this.bobTime2 = 0;
+            this.sister2.y = this.baseY2;
         }
     }
 }
