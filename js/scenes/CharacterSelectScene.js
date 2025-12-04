@@ -27,7 +27,13 @@ class CharacterSelectScene extends Phaser.Scene {
         // --- Bakgrundsbild ---
         const bg = this.add.image(width / 2, height / 2, 'scen0-menu');
         bg.setOrigin(0.5);
-        bg.setDisplaySize(width, height);
+        const scale = Math.max(
+            width / bg.width,
+            height / bg.height
+        );
+
+        bg.setScale(scale);
+        bg.setPosition(width / 2, height / 2);
 
         // Mörk overlay för att text/knappar ska poppa
         const overlay = this.add.rectangle(
