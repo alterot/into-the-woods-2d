@@ -44,26 +44,26 @@ class GameScene extends Phaser.Scene {
         // Position sprites: player at x:400 (left), sibling at x:450 (right)
         if (isPlayingBig) {
             // Playing as big sister - she's on the left
-            this.sister1 = this.add.image(400, 500, 'sister1');
+            this.sister1 = this.add.image(150, 700, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
 
-            this.sister2 = this.add.image(450, 500, 'sister2');
+            this.sister2 = this.add.image(200, 700, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
         } else {
             // Playing as little sister - she's on the left
-            this.sister2 = this.add.image(400, 500, 'sister2');
+            this.sister2 = this.add.image(200, 700, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
 
-            this.sister1 = this.add.image(450, 500, 'sister1');
+            this.sister1 = this.add.image(250, 700, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
         }
 
         // Create wisp entity (example usage)
-        this.wisp = new Wisp(this, 650, 350);
+        this.wisp = new Wisp(this, 800, 450);
         this.wisp.onClick(() => {
             console.log('Wisp clicked! Add custom behavior here.');
             // TODO: Show proper dialog or interaction
