@@ -1,5 +1,7 @@
 // ===== GAME SCENE =====
 // Main gameplay scene with character movement and interactions
+import Wisp from '../entities/Wisp.js';
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
@@ -24,6 +26,9 @@ class GameScene extends Phaser.Scene {
         // Load character sprites
         this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
         this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
+
+        // Load wisp sprite
+        Wisp.preload(this);
     }
 
     create() {
@@ -56,6 +61,13 @@ class GameScene extends Phaser.Scene {
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
         }
+
+        // Create wisp entity (example usage)
+        this.wisp = new Wisp(this, 650, 350);
+        this.wisp.onClick(() => {
+            console.log('Wisp clicked! Add custom behavior here.');
+            // TODO: Show proper dialog or interaction
+        });
 
         // Add click handler for movement with mask checking
         this.input.on('pointerdown', (pointer) => {
