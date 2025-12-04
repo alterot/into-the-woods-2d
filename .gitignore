@@ -1,0 +1,21 @@
+# Claude Code
+.claude/
+
+#Documentation
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Optional: If you add npm later
+node_modules/
+package-lock.json
