@@ -161,6 +161,10 @@ class GameScene extends Phaser.Scene {
             this.bobTime2 = 0;
             this.sister2.y = this.baseY2;
         }
+
+        // Depth sorting: higher Y = closer to camera = render on top
+        this.sister1.setDepth(this.sister1.y);
+        this.sister2.setDepth(this.sister2.y);
     }
 }
 

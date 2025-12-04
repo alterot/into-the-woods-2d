@@ -1,0 +1,38 @@
+{
+  "sceneId": "glantan",
+  "conversations": [
+    {
+      "id": "intro",
+      "lines": [
+        {
+          "role": "player",
+          "text": "…vakna. Du måste vakna."
+        },
+        {
+          "role": "sibling",
+          "text": "Mm… är det morgon? …Var är vi?"
+        },
+        {
+          "role": "player",
+          "text": "Jag vet inte. Jag minns… ingenting efter att vi gick genom granarna."
+        },
+        {
+          "role": "sibling",
+          "text": "Det känns som en dröm. Fast… för riktigt."
+        },
+        {
+          "role": "player",
+          "text": "Den där stenen… ser du? Den glimmar."
+        },
+        {
+          "role": "sibling",
+          "text": "Skogen känns annorlunda på något sätt. Och hur ska vi hitta ut?"
+        },
+        {
+          "role": "player",
+          "text": "Vi tar reda på det. Tillsammans."
+        }
+      ]
+    }
+  ]
+}
