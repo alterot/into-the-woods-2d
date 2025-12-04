@@ -163,7 +163,7 @@ class IntroScene extends Phaser.Scene {
             duration: 500,
             onComplete: () => {
                 // Transition to gameplay scene
-                this.scene.start('GameScene');
+                this.scene.start('Scene1_Meadow');
             }
         });
     }

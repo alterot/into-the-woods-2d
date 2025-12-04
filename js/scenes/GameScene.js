@@ -1,10 +1,17 @@
-// ===== GAME SCENE =====
-// Main gameplay scene with character movement and interactions
-import Wisp from '../entities/Wisp.js';
+// ===== GAME SCENE (BASE CLASS) =====
+// Abstract base class for all gameplay scenes
+// Handles movement, pathfinding, follower AI, mask detection, depth sorting
 
 class GameScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'GameScene' });
+    constructor(sceneKey, backgroundKey, maskKey) {
+        super({ key: sceneKey });
+
+        // Scene configuration
+        this.sceneKey = sceneKey;
+        this.backgroundKey = backgroundKey;
+        this.maskKey = maskKey;
+
+        // Movement properties
         this.targetX = null;
         this.targetY = null;
         this.isMoving = false;
@@ -37,32 +44,46 @@ class GameScene extends Phaser.Scene {
         this.pathIndicator = null;
     }
 
+    // Subclasses must implement preload() to load scene-specific assets
     preload() {
-        // Load the background image
-        this.load.image('background', 'assets/scenes/scen1-meadow.png');
-
-        // Load mask image (invisible, used for walkability detection)
-        this.load.image('mask', 'assets/scenes/scen1-mask.png');
-
-        // Load character sprites
-        this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
-        this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
-
-        // Load wisp sprite
-        Wisp.preload(this);
+        // Override in subclass to load background, mask, sprites, etc.
     }
 
     create() {
         // Display the background image centered
-        this.add.image(512, 512, 'background');
+        this.add.image(512, 512, this.backgroundKey);
 
         // Create mask texture for pixel detection (invisible)
-        this.maskTexture = this.textures.get('mask').getSourceImage();
+        this.maskTexture = this.textures.get(this.maskKey).getSourceImage();
 
         // Initialize pathfinding grid and EasyStar
         this.createGridFromMask();
         this.initializePathfinding();
 
+        // Setup player characters
+        this.setupCharacters();
+
+        // Hook for subclasses to add scene-specific content (wisp, objects, etc.)
+        this.createSceneContent();
+
+        // Add click handler for movement with mask checking
+        this.input.on('pointerdown', (pointer) => {
+            const color = this.getPixelColor(pointer.x, pointer.y);
+
+            if (color === 'green') {
+                // Walkable area - find path
+                this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
+            } else if (color === 'red') {
+                // Interactive object - handled by subclass
+                this.handleInteractiveClick(pointer.x, pointer.y);
+            } else {
+                // Blocked (black/unpainted)
+                this.showNoPathIndicator(pointer.x, pointer.y);
+            }
+        });
+    }
+
+    setupCharacters() {
         // Determine player character based on selection
         const isPlayingBig = window.gameState?.selectedCharacter === 'big';
 
@@ -102,30 +123,18 @@ class GameScene extends Phaser.Scene {
         // Flip both sprites to face INTO the clearing
         this.sister1.setFlipX(true);
         this.sister2.setFlipX(true);
+    }
 
-        // Create wisp entity (example usage)
-        this.wisp = new Wisp(this, 800, 450);
-        this.wisp.onClick(() => {
-            console.log('Wisp clicked! Add custom behavior here.');
-            // TODO: Show proper dialog or interaction
-        });
+    // Hook for subclasses to add scene-specific content
+    createSceneContent() {
+        // Override in subclass to add wisps, objects, interactions, etc.
+    }
 
-        // Add click handler for movement with mask checking
-        this.input.on('pointerdown', (pointer) => {
-            const color = this.getPixelColor(pointer.x, pointer.y);
-
-            if (color === 'green') {
-                // Walkable area - find path
-                this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
-            } else if (color === 'red') {
-                // Interactive object
-                console.log('Interactive object clicked!');
-                this.showNoPathIndicator(pointer.x, pointer.y); // ← LÄGG TILL!
-            } else {
-                // Blocked (black/unpainted)
-                this.showNoPathIndicator(pointer.x, pointer.y); // ← LÄGG TILL!
-            }
-        });
+    // Hook for subclasses to handle interactive object clicks
+    handleInteractiveClick(x, y) {
+        // Override in subclass to handle red (interactive) clicks
+        console.log('Interactive object clicked!');
+        this.showNoPathIndicator(x, y);
     }
 
     getPixelColor(x, y) {
@@ -240,8 +249,8 @@ class GameScene extends Phaser.Scene {
         this.easystar.calculate();
     }
 
-        showNoPathIndicator(x, y) {
-            // Remove previous indicator
+    showNoPathIndicator(x, y) {
+        // Remove previous indicator
         if (this.pathIndicator) {
             this.tweens.killTweensOf(this.pathIndicator);
             this.pathIndicator.destroy();
@@ -250,13 +259,12 @@ class GameScene extends Phaser.Scene {
         // Create red circle (larger!)
         this.pathIndicator = this.add.circle(x, y, 2, 0xff6b6b, 0.8);
         this.pathIndicator.setDepth(1000);
-        console.log('Circle visible?', this.pathIndicator.visible);
 
         // Expand + fade animation (like water ripple!)
         this.tweens.add({
             targets: this.pathIndicator,
-            radius: 10,        // ← Expand to 40px
-            alpha: 0,          // ← Fade out
+            radius: 10,
+            alpha: 0,
             duration: 600,
             ease: 'Quad.easeOut',
             onComplete: () => {

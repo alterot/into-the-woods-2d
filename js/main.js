@@ -2,7 +2,7 @@
 // Import all scenes
 import CharacterSelectScene from './scenes/CharacterSelectScene.js';
 import IntroScene from './scenes/IntroScene.js';
-import GameScene from './scenes/GameScene.js';
+import Scene1_Meadow from './scenes/Scene1_Meadow.js';
 
 // Game configuration
 const config = {
@@ -14,7 +14,7 @@ const config = {
     },
     parent: document.body,
     backgroundColor: '#000000',
-    scene: [CharacterSelectScene, IntroScene, GameScene],
+    scene: [CharacterSelectScene, IntroScene, Scene1_Meadow],
     physics: {
         default: 'arcade',
         arcade: {
