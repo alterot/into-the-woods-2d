@@ -9,7 +9,7 @@ class CharacterSelectScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#2a3d2a');
 
         // Title text
-        const titleText = this.add.text(512, 200, 'Choose Your Character', {
+        const titleText = this.add.text(512, 200, 'Vem spelar?', {
             fontSize: '48px',
             fontFamily: 'Arial',
             color: '#D4A574',
@@ -26,7 +26,7 @@ class CharacterSelectScene extends Phaser.Scene {
         // Big Sister Button
         const bigSisterBtn = this.add.rectangle(512, 400, buttonWidth, buttonHeight, buttonColor);
         bigSisterBtn.setInteractive({ useHandCursor: true });
-        const bigSisterText = this.add.text(512, 400, 'Play as Big Sister', {
+        const bigSisterText = this.add.text(512, 400, 'Storasyster', {
             fontSize: '28px',
             fontFamily: 'Arial',
             color: '#FFFFFF'
@@ -36,7 +36,7 @@ class CharacterSelectScene extends Phaser.Scene {
         // Little Sister Button
         const littleSisterBtn = this.add.rectangle(512, 520, buttonWidth, buttonHeight, buttonColor);
         littleSisterBtn.setInteractive({ useHandCursor: true });
-        const littleSisterText = this.add.text(512, 520, 'Play as Little Sister', {
+        const littleSisterText = this.add.text(512, 520, 'Lillasyster', {
             fontSize: '28px',
             fontFamily: 'Arial',
             color: '#FFFFFF'
