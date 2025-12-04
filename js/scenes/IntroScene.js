@@ -79,6 +79,14 @@ class IntroScene extends Phaser.Scene {
             }).setOrigin(0.5)
         };
 
+        // Fix portrait facing direction - make them face each other
+        if (isPlayingBig) {
+            // When playing as Big Sister, flip BOTH portraits to face each other
+            this.dialogUI.leftPortrait.setFlipX(true);
+            this.dialogUI.rightPortrait.setFlipX(true);
+        }
+        // When playing as Little Sister, no flip needed (default orientation)
+
         // Initially hide both textboxes
         this.dialogUI.leftTextboxBg.setVisible(false);
         this.dialogUI.leftTextboxText.setVisible(false);
