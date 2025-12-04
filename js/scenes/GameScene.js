@@ -84,11 +84,11 @@ class GameScene extends Phaser.Scene {
             this.followerBaseY = this.baseY2;
         } else {
             // Playing as little sister - she's the player (right)
-            this.sister1 = this.add.image(200, 700, 'sister1');
+            this.sister1 = this.add.image(150, 700, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
 
-            this.sister2 = this.add.image(250, 700, 'sister2');
+            this.sister2 = this.add.image(200, 700, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
 
