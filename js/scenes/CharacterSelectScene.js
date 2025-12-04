@@ -70,7 +70,12 @@ class CharacterSelectScene extends Phaser.Scene {
             ease: 'Quad.Out'
         });
 
-        const menuWisp = new Wisp(this, width / 2 - 260, height / 2 + 10);
+        const menuWisp = new Wisp(
+            this,
+            width - 120,     // nära högerkanten
+            height - 120     // nära botten
+        );
+
 
         menuWisp.onClick(() => {
             // liten "pop"-animation
