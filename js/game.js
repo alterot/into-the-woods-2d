@@ -16,6 +16,9 @@ class GameScene extends Phaser.Scene {
         // Load the background image
         this.load.image('background', 'assets/scenes/scen1-meadow.png');
 
+        // Load mask image (invisible, used for walkability detection)
+        this.load.image('mask', 'assets/scenes/scen1-mask.png');
+
         // Load character sprites
         this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
         this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
@@ -24,6 +27,9 @@ class GameScene extends Phaser.Scene {
     create() {
         // Display the background image centered
         this.add.image(512, 512, 'background');
+
+        // Create mask texture for pixel detection (invisible)
+        this.maskTexture = this.textures.get('mask').getSourceImage();
 
         // Add character sprites WITH const keyword
         this.sister1 = this.add.image(400, 500, 'sister1');
@@ -34,12 +40,46 @@ class GameScene extends Phaser.Scene {
         this.sister2.setScale(0.5);
         this.baseY2 = this.sister2.y;
 
-        // Add click handler for movement
+        // Add click handler for movement with mask checking
         this.input.on('pointerdown', (pointer) => {
-            this.targetX = pointer.x;
-            this.targetY = pointer.y;
-            this.isMoving = true;
+            const color = this.getPixelColor(pointer.x, pointer.y);
+
+            if (color === 'green') {
+                // Walkable area - move sister1
+                this.targetX = pointer.x;
+                this.targetY = pointer.y;
+                this.isMoving = true;
+            } else if (color === 'red') {
+                // Interactive object - show text
+                console.log('Interactive object clicked!');
+                // TODO: Show proper UI text
+            }
+            // All other colors are ignored (no action)
         });
+    }
+
+    getPixelColor(x, y) {
+        // Create a temporary canvas to read pixel data
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = this.maskTexture.width;
+        canvas.height = this.maskTexture.height;
+        ctx.drawImage(this.maskTexture, 0, 0);
+
+        // Get pixel data at the clicked position
+        const imageData = ctx.getImageData(x, y, 1, 1);
+        const pixel = imageData.data;
+        const r = pixel[0];
+        const g = pixel[1];
+        const b = pixel[2];
+
+        // Check for specific colors
+        if (r === 0 && g === 255 && b === 0) {
+            return 'green'; // Walkable
+        } else if (r === 255 && g === 0 && b === 0) {
+            return 'red'; // Interactive
+        }
+        return 'other'; // Ignore
     }
 
     update() {
