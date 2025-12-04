@@ -13,8 +13,8 @@ class IntroScene extends Phaser.Scene {
         this.load.image('background', 'assets/scenes/scen1-meadow.png');
 
         // Load portraits (large, for dialog scenes)
-        this.load.image('portrait1', 'assets/portraits/sister1-portrait.png');
-        this.load.image('portrait2', 'assets/portraits/sister2-portrait.png');
+        this.load.image('portrait1', 'assets/portraits/sister1-portrait-S.png');
+        this.load.image('portrait2', 'assets/portraits/sister2-portrait-S.png');
 
         // Load dialogue data
         this.load.json('introDialogue', 'assets/dialogues/intro-dialogue.json');
@@ -41,7 +41,7 @@ class IntroScene extends Phaser.Scene {
         const canvasHeight = 1024;
 
         // Portrait positions at bottom of screen
-        const portraitY = canvasHeight - 150;
+        const portraitY = canvasHeight - 200;
         const leftX = 200;
         const rightX = canvasWidth - 200;
 
@@ -120,8 +120,8 @@ class IntroScene extends Phaser.Scene {
             this.dialogUI.rightTextboxText.setVisible(false);
 
             // Highlight left portrait (active speaker)
-            this.dialogUI.leftPortrait.setAlpha(1).setScale(0.165); // Scale 1.1x
-            this.dialogUI.rightPortrait.setAlpha(0.7).setScale(0.15);
+            this.dialogUI.leftPortrait.setAlpha(1).setScale(1); // Scale 1.1x
+            this.dialogUI.rightPortrait.setAlpha(0.7).setScale(1);
         } else {
             // Sibling is speaking (right side)
             this.dialogUI.rightTextboxBg.setVisible(true);
@@ -130,8 +130,8 @@ class IntroScene extends Phaser.Scene {
             this.dialogUI.leftTextboxText.setVisible(false);
 
             // Highlight right portrait (active speaker)
-            this.dialogUI.rightPortrait.setAlpha(1).setScale(0.165); // Scale 1.1x
-            this.dialogUI.leftPortrait.setAlpha(0.7).setScale(0.15);
+            this.dialogUI.rightPortrait.setAlpha(1).setScale(1); // Scale 1.1x
+            this.dialogUI.leftPortrait.setAlpha(0.7).setScale(1);
         }
     }
 
