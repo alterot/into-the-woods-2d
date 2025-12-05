@@ -180,34 +180,17 @@ class IntroScene extends Phaser.Scene {
         }
 
     advanceDialog() {
-        console.log('advanceDialog called, isTyping:', this.isTyping, 'currentLine:', this.currentLine);
-        
         if (!this.dialogUI) return;
 
         // If currently typing, skip to full text (don't advance to next line)
         if (this.isTyping) {
-            console.log('Skipping animation, showing full text');
-            
-            // Stop the typing animation
+        
             if (this.currentTypingEvent) {
-                this.currentTypingEvent.remove();
-                this.currentTypingEvent = null;
-            }
+            this.currentTypingEvent.delay = 3; // Speed up to 5ms per character
+            }  
 
-            // Show full text immediately
-            if (this.currentRole === 'player') {
-                this.dialogUI.leftTextboxText.setText(this.currentFullText);
-            } else {
-                this.dialogUI.rightTextboxText.setText(this.currentFullText);
-            }
-
-            // Mark typing as complete
-            this.isTyping = false;
-            console.log('isTyping set to false, returning');
             return; // Don't advance to next line
         }
-
-        console.log('Not typing, advancing to next line');
         // If not typing, advance to next line
         this.currentLine++;
         this.showDialogLine();
