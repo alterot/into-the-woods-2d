@@ -6,6 +6,10 @@ class IntroScene extends Phaser.Scene {
         this.dialogData = null;
         this.currentLine = 0;
         this.dialogUI = null;
+        this.isTyping = false;
+        this.currentTypingEvent = null;
+        this.currentFullText = '';
+        this.currentRole = null;
     }
 
     preload() {
@@ -111,41 +115,112 @@ class IntroScene extends Phaser.Scene {
             return;
         }
 
+        // Stop any active typing animation
+        if (this.currentTypingEvent) {
+            this.currentTypingEvent.remove();
+            this.currentTypingEvent = null;
+        }
+
         const line = this.dialogData[this.currentLine];
+        this.currentFullText = line.text;
+        this.currentRole = line.role;
 
         // Show only the active speaker's textbox
         if (line.role === 'player') {
             // Player is speaking (left side)
             this.dialogUI.leftTextboxBg.setVisible(true);
-            this.dialogUI.leftTextboxText.setVisible(true).setText(line.text);
+            this.dialogUI.leftTextboxText.setVisible(true).setText('');
             this.dialogUI.rightTextboxBg.setVisible(false);
             this.dialogUI.rightTextboxText.setVisible(false);
 
             // Highlight left portrait (active speaker)
             this.dialogUI.leftPortrait.setAlpha(1).setScale(1); // Scale 1.1x
             this.dialogUI.rightPortrait.setAlpha(0.7).setScale(1);
+
+            // Start typewriter effect for left text
+            this.startTypewriter(this.dialogUI.leftTextboxText, line.text);
         } else {
             // Sibling is speaking (right side)
             this.dialogUI.rightTextboxBg.setVisible(true);
-            this.dialogUI.rightTextboxText.setVisible(true).setText(line.text);
+            this.dialogUI.rightTextboxText.setVisible(true).setText('');
             this.dialogUI.leftTextboxBg.setVisible(false);
             this.dialogUI.leftTextboxText.setVisible(false);
 
             // Highlight right portrait (active speaker)
             this.dialogUI.rightPortrait.setAlpha(1).setScale(1); // Scale 1.1x
             this.dialogUI.leftPortrait.setAlpha(0.7).setScale(1);
+
+            // Start typewriter effect for right text
+            this.startTypewriter(this.dialogUI.rightTextboxText, line.text);
         }
     }
 
+        startTypewriter(textObject, fullText) {
+            this.isTyping = true;
+            let currentIndex = 0;
+
+            this.currentTypingEvent = this.time.addEvent({
+                delay: 75,
+                repeat: fullText.length - 1,
+                callback: () => {
+                    currentIndex++;
+                    textObject.setText(fullText.substring(0, currentIndex));
+                    
+                    // Check if we've shown all characters
+                    if (currentIndex >= fullText.length) {
+                        this.isTyping = false; // ← LÄGG TILL DETTA!
+                    }
+                },
+                callbackScope: this,
+                onComplete: () => {
+                    this.isTyping = false;
+                    this.currentTypingEvent = null;
+                }
+            });
+        }
+
     advanceDialog() {
+        console.log('advanceDialog called, isTyping:', this.isTyping, 'currentLine:', this.currentLine);
+        
         if (!this.dialogUI) return;
 
+        // If currently typing, skip to full text (don't advance to next line)
+        if (this.isTyping) {
+            console.log('Skipping animation, showing full text');
+            
+            // Stop the typing animation
+            if (this.currentTypingEvent) {
+                this.currentTypingEvent.remove();
+                this.currentTypingEvent = null;
+            }
+
+            // Show full text immediately
+            if (this.currentRole === 'player') {
+                this.dialogUI.leftTextboxText.setText(this.currentFullText);
+            } else {
+                this.dialogUI.rightTextboxText.setText(this.currentFullText);
+            }
+
+            // Mark typing as complete
+            this.isTyping = false;
+            console.log('isTyping set to false, returning');
+            return; // Don't advance to next line
+        }
+
+        console.log('Not typing, advancing to next line');
+        // If not typing, advance to next line
         this.currentLine++;
         this.showDialogLine();
     }
 
     endDialog() {
         if (!this.dialogUI) return;
+
+        // Stop any active typing animation
+        if (this.currentTypingEvent) {
+            this.currentTypingEvent.remove();
+            this.currentTypingEvent = null;
+        }
 
         // Remove dialog input handlers
         this.input.keyboard.off('keydown-SPACE', this.dialogSpaceHandler);
