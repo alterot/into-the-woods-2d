@@ -1,5 +1,6 @@
 // ===== CHARACTER SELECT SCENE =====
 import Wisp from '../entities/Wisp.js';
+import AudioManager from '../AudioManager.js';
 
 class CharacterSelectScene extends Phaser.Scene {
     constructor() {
@@ -7,22 +8,31 @@ class CharacterSelectScene extends Phaser.Scene {
     }
 
     preload() {
-    // Bakgrund för menyn
-    this.load.image('scen0-menu', 'assets/scenes/scen0-menu.png');
+        // Bakgrund för menyn
+        this.load.image('scen0-menu', 'assets/scenes/scen0-menu.png');
 
-    // Träskylt-knappen
-    this.load.image('scen0-menu-button', 'assets/scenes/scen0-menu-button.png');
+        // Träskylt-knappen
+        this.load.image('scen0-menu-button', 'assets/scenes/scen0-menu-button.png');
 
-    // Wisp (om inte redan laddad i tidigare scen)
-    this.load.image('wisp', 'assets/sprites/whisp.png');
+        // Wisp (om inte redan laddad i tidigare scen)
+        this.load.image('wisp', 'assets/sprites/whisp.png');
 
-    // Klickljud
-    this.load.audio('click', 'assets/sound/click.wav');
-}
+        // Audio assets
+        this.load.audio('click', 'assets/sound/click.wav');
+        this.load.audio('forest-ambient', 'assets/sound/forest-ambient.mp3');
+    }
 
 
     create() {
         const { width, height } = this.scale;
+
+        // Initialize AudioManager and start background music
+        const audioManager = new AudioManager(this);
+        audioManager.init(this);
+        audioManager.startMusic();
+
+        // Store in registry for access from other scenes
+        this.registry.set('audioManager', audioManager);
 
         // --- Bakgrundsbild ---
         const bg = this.add.image(width / 2, height / 2, 'scen0-menu');
@@ -154,8 +164,11 @@ class CharacterSelectScene extends Phaser.Scene {
                 ease: 'Quad.Out'
             });
 
-            // SPELA KLICKLJUDET DIREKT
-            this.sound.play('click', { volume: 0.7 });
+            // Play click sound via AudioManager
+            const audioManager = this.registry.get('audioManager');
+            if (audioManager) {
+                audioManager.playClick();
+            }
 
             // fade + start scen
             this.cameras.main.fadeOut(500, 0, 0, 0);

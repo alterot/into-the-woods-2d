@@ -1,5 +1,7 @@
 // ===== INTRO SCENE =====
 // Handles the intro dialog sequence with portraits
+import AudioManager from '../AudioManager.js';
+
 class IntroScene extends Phaser.Scene {
     constructor() {
         super({ key: 'IntroScene' });
@@ -218,12 +220,18 @@ class IntroScene extends Phaser.Scene {
     advanceDialog() {
         if (!this.dialogUI) return;
 
+        // Play click sound
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            audioManager.playClick();
+        }
+
         // If currently typing, skip to full text (don't advance to next line)
         if (this.isTyping) {
-        
+
             if (this.currentTypingEvent) {
             this.currentTypingEvent.delay = 3; // Speed up to 5ms per character
-            }  
+            }
 
             return; // Don't advance to next line
         }

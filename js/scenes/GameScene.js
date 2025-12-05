@@ -1,6 +1,7 @@
 // ===== GAME SCENE (BASE CLASS) =====
 // Abstract base class for all gameplay scenes
 // Handles movement, pathfinding, follower AI, mask detection, depth sorting
+import AudioManager from '../AudioManager.js';
 
 class GameScene extends Phaser.Scene {
     constructor(sceneKey, backgroundKey, maskKey) {
@@ -72,6 +73,11 @@ class GameScene extends Phaser.Scene {
 
             if (color === 'green') {
                 // Walkable area - find path
+                // Play click sound
+                const audioManager = this.registry.get('audioManager');
+                if (audioManager) {
+                    audioManager.playClick();
+                }
                 this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
             } else if (color === 'red') {
                 // Interactive object - handled by subclass
