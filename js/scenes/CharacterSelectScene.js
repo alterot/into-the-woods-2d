@@ -19,6 +19,7 @@ class CharacterSelectScene extends Phaser.Scene {
 
         // Audio assets
         this.load.audio('click', 'assets/sound/click.wav');
+        this.load.audio('menu-select', 'assets/sound/menu-select.wav');
         this.load.audio('forest-ambient', 'assets/sound/forest-ambient.mp3');
     }
 
@@ -93,6 +94,12 @@ class CharacterSelectScene extends Phaser.Scene {
 
 
         menuWisp.onClick(() => {
+            // Play menu select sound
+            const audioManager = this.registry.get('audioManager');
+            if (audioManager) {
+                audioManager.playMenuSelect();
+            }
+
             // liten "pop"-animation
             this.tweens.add({
                 targets: menuWisp.sprite,
@@ -169,10 +176,10 @@ class CharacterSelectScene extends Phaser.Scene {
                 ease: 'Quad.Out'
             });
 
-            // Play click sound via AudioManager
+            // Play menu select sound via AudioManager
             const audioManager = this.registry.get('audioManager');
             if (audioManager) {
-                audioManager.playClick();
+                audioManager.playMenuSelect();
             }
 
             // fade + start scen

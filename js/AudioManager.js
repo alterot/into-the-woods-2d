@@ -12,6 +12,7 @@ class AudioManager {
 
         this.scene = scene;
         this.clickSound = null;
+        this.menuSelectSound = null;
         this.bgMusic = null;
         this.initialized = false;
     }
@@ -27,9 +28,14 @@ class AudioManager {
 
         this.scene = scene;
 
-        // Setup click sound
+        // Setup click sound (for gameplay and dialog)
         this.clickSound = this.scene.sound.add('click', {
             volume: 0.2
+        });
+
+        // Setup menu select sound (for menu buttons and UI)
+        this.menuSelectSound = this.scene.sound.add('menu-select', {
+            volume: 0.7
         });
 
         // Setup background music
@@ -43,7 +49,7 @@ class AudioManager {
     }
 
     /**
-     * Play click sound
+     * Play click sound (for gameplay and dialog)
      * Stops previous click if still playing to prevent overlap
      */
     playClick() {
@@ -59,6 +65,25 @@ class AudioManager {
 
         // Play new click
         this.clickSound.play();
+    }
+
+    /**
+     * Play menu select sound (for menu buttons and UI)
+     * Stops previous sound if still playing to prevent overlap
+     */
+    playMenuSelect() {
+        if (!this.menuSelectSound) {
+            console.warn('[AudioManager] Menu select sound not initialized');
+            return;
+        }
+
+        // Stop previous sound if still playing
+        if (this.menuSelectSound.isPlaying) {
+            this.menuSelectSound.stop();
+        }
+
+        // Play new sound
+        this.menuSelectSound.play();
     }
 
     /**
