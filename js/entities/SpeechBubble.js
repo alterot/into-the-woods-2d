@@ -135,19 +135,9 @@ class SpeechBubble {
 
     handleClick() {
         if (this.isTyping) {
-            // Skip typing - show full text immediately
+            // Speed up typewriter drastically (fast forward)
             if (this.typingEvent) {
-                this.typingEvent.remove();
-                this.typingEvent = null;
-            }
-            this.textObject.setText(this.fullText);
-            this.isTyping = false;
-
-            // Start auto-destroy timer if duration is set
-            if (this.duration !== null && this.duration > 0) {
-                this.destroyTimeout = this.scene.time.delayedCall(this.duration, () => {
-                    this.destroy();
-                });
+                this.typingEvent.delay = 3;  // Fast forward to 3ms per character
             }
         } else {
             // Typing complete - destroy on click

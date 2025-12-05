@@ -79,15 +79,27 @@ class GameScene extends Phaser.Scene {
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
+                // Dismiss any active feedback bubble
+                if (this.feedbackBubble) {
+                    this.feedbackBubble.destroy();
+                    this.feedbackBubble = null;
+                }
+
                 // Walkable area - find path
                 // Play click sound
                 const audioManager = this.registry.get('audioManager');
                 if (audioManager) {
                     audioManager.playClick();
                 }
-                this.showValidClickIndicator(pointer.x, pointer.y); 
+                this.showValidClickIndicator(pointer.x, pointer.y);
                 this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
             } else if (color === 'red') {
+                // Dismiss any active feedback bubble
+                if (this.feedbackBubble) {
+                    this.feedbackBubble.destroy();
+                    this.feedbackBubble = null;
+                }
+
                 // Interactive object - handled by subclass
                 this.handleInteractiveClick(pointer.x, pointer.y);
             } else {
@@ -324,17 +336,17 @@ class GameScene extends Phaser.Scene {
             this.feedbackBubble.destroy();
         }
 
-        // Smart positioning: place bubble AWAY from follower
+        // Smart positioning: place bubble AWAY from follower (closer to character)
         // If player is left of follower → bubble to LEFT of player
         // If player is right of follower → bubble to RIGHT of player
         const isPlayerLeftOfFollower = this.player.x < this.follower.x;
-        const offsetX = isPlayerLeftOfFollower ? -150 : 150;
+        const offsetX = isPlayerLeftOfFollower ? -80 : 80;  // Closer to character
 
         // Create new bubble beside player character
         this.feedbackBubble = new SpeechBubble(
             this,
             this.player.x + offsetX,  // Offset to side away from follower
-            this.player.y - 80,        // Above player vertically
+            this.player.y - 60,        // Above player vertically (closer)
             message,
             3000  // Auto-destroy after 3 seconds
         );
