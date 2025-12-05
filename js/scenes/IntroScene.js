@@ -45,12 +45,12 @@ class IntroScene extends Phaser.Scene {
         const canvasHeight = 720;
 
         // Portrait positions - touch bottom and edges
-        const portraitY = canvasHeight;
-        const leftX = 0;
-        const rightX = canvasWidth;
+        const portraitY = canvasHeight - 100;
+        const leftX = 100;
+        const rightX = canvasWidth - 150;
 
         // Textbox positions (beside portraits, slightly above bottom)
-        const textboxY = portraitY - 100;
+        const textboxY = portraitY - 60;
         const leftTextboxX = leftX + 250;
         const rightTextboxX = rightX - 250;
         const textboxWidth = 280;
