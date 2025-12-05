@@ -29,7 +29,7 @@ class AudioManager {
 
         // Setup click sound
         this.clickSound = this.scene.sound.add('click', {
-            volume: 0.7
+            volume: 0.2
         });
 
         // Setup background music

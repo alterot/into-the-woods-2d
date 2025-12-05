@@ -6,25 +6,30 @@ All sound effects from [Freesound.org](https://freesound.org)
 
 ### Music
 - **forest-ambient.mp3**  
-  Author: [username]  
-  License: [CC0 / CC-BY 4.0]  
-  https://freesound.org/people/...
+  Author: [RandomRecord19]  
+  License: [Attribution 4.0]
+  https://freesound.org/people/RandomRecord19/sounds/735632/
 
 ### Sound Effects
 - **click.wav**  
-  Author: [username]  
-  License: [license]  
-  https://freesound.org/...
+  Author: [NenadSimic]  
+  License: [Creative Commons 0]  
+  https://freesound.org/people/NenadSimic/sounds/157539/
+
+- **Menu_Select_00.wav**
+  Author: [LittleRobotS...]  
+  License: [Attribution 4.0]  
+  https://freesound.org/people/LittleRobotSoundFactory/sounds/270401/
 
 - **grass-step-left.wav**  
-  Author: [username]  
-  License: [license]  
-  https://freesound.org/...
+  Author: [spycrah]  
+  License: [Attribution 4.0]  
+  https://freesound.org/people/spycrah/sounds/535220/
 
 - **grass-step-right.wav**  
-  Author: [username]  
-  License: [license]  
-  https://freesound.org/...
+  Author: [spycrah]  
+  License: [Attribution 4.0]  
+  https://freesound.org/people/spycrah/sounds/535222/
 
 ## Visuals
 
