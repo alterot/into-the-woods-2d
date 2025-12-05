@@ -40,13 +40,15 @@ class IntroScene extends Phaser.Scene {
         const canvasWidth = 1024;
         const canvasHeight = 1024;
 
-        // Portrait positions at bottom of screen
+        // Portrait positions at bottom of screen (moved closer to edges)
         const portraitY = canvasHeight - 200;
-        const leftX = 200;
-        const rightX = canvasWidth - 200;
+        const leftX = 150;
+        const rightX = 874;
 
-        // Textbox positions (above portraits)
-        const textboxY = portraitY - 200;
+        // Textbox positions (beside portraits, not above)
+        const textboxY = portraitY;
+        const leftTextboxX = leftX + 200;
+        const rightTextboxX = rightX - 200;
         const textboxWidth = 300;
         const textboxHeight = 120;
 
@@ -56,23 +58,23 @@ class IntroScene extends Phaser.Scene {
             leftPortrait: this.add.image(leftX, portraitY, playerPortrait).setScale(0.15).setAlpha(0.7),
             rightPortrait: this.add.image(rightX, portraitY, siblingPortrait).setScale(0.15).setAlpha(0.7),
 
-            // Left textbox (above left portrait)
-            leftTextboxBg: this.add.rectangle(leftX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.9)
+            // Left textbox (beside left portrait)
+            leftTextboxBg: this.add.rectangle(leftTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85)
                 .setStrokeStyle(3, 0x5C4A30),
-            leftTextboxText: this.add.text(leftX, textboxY, '', {
+            leftTextboxText: this.add.text(leftTextboxX, textboxY, '', {
                 fontSize: '18px',
-                fontFamily: 'Arial',
+                fontFamily: 'Georgia',
                 color: '#FFFFFF',
                 align: 'center',
                 wordWrap: { width: textboxWidth - 30 }
             }).setOrigin(0.5),
 
-            // Right textbox (above right portrait)
-            rightTextboxBg: this.add.rectangle(rightX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.9)
+            // Right textbox (beside right portrait)
+            rightTextboxBg: this.add.rectangle(rightTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85)
                 .setStrokeStyle(3, 0x5C4A30),
-            rightTextboxText: this.add.text(rightX, textboxY, '', {
+            rightTextboxText: this.add.text(rightTextboxX, textboxY, '', {
                 fontSize: '18px',
-                fontFamily: 'Arial',
+                fontFamily: 'Georgia',
                 color: '#FFFFFF',
                 align: 'center',
                 wordWrap: { width: textboxWidth - 30 }
