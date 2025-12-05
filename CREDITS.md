@@ -15,8 +15,6 @@ All sound effects from [Freesound.org](https://freesound.org)
   License: [Attribution 4.0]
   https://freesound.org/people/Universfield/sounds/832545/
 
-
-
 ### Sound Effects
 - **click.wav**  
   Author: [NenadSimic]  

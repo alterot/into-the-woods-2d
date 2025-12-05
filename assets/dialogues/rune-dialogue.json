@@ -1,0 +1,46 @@
+{
+  "sceneId": "meadow",
+  "conversations": [
+    {
+      "id": "runestone_read",
+      "lines": [
+        {
+          "role": "player",
+          "text": "Det står något här på stenen..."
+        },
+        {
+          "role": "sister",
+          "text": "Vad står det?"
+        },
+        {
+          "role": "player",
+          "text": "Hm... det ser ut som en gammal inskription. Jag försöker läsa..."
+        },
+        {
+          "role": "player",
+          "text": "“En gång skrev jag detta, för att minnas när min röst en dag tystnar…”"
+        },
+        {
+          "role": "player",
+          "text": "“GRÖNT är vårens löfte...”"
+        },
+        {
+          "role": "player",
+          "text": "“BLÅ är sommarens himmel...”"
+        },
+        {
+          "role": "player",
+          "text": "“GULT är höstens minne...”"
+        },
+        {
+          "role": "sister",
+          "text": "Det låter som en gåta... men vad betyder det?"
+        },
+        {
+          "role": "player",
+          "text": "Jag vet inte. Det är nog inte skrivet till oss. Men vi borde komma ihåg det."
+        }
+      ]
+    }
+  ]
+}
