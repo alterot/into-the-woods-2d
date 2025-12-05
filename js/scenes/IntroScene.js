@@ -42,15 +42,15 @@ class IntroScene extends Phaser.Scene {
 
         // Portrait positions at bottom of screen (moved closer to edges)
         const portraitY = canvasHeight - 200;
-        const leftX = 150;
-        const rightX = 874;
+        const leftX = 100;
+        const rightX = 925;
 
         // Textbox positions (beside portraits, not above)
         const textboxY = portraitY;
-        const leftTextboxX = leftX + 200;
-        const rightTextboxX = rightX - 200;
-        const textboxWidth = 300;
-        const textboxHeight = 120;
+        const leftTextboxX = leftX + 250;
+        const rightTextboxX = rightX - 250;
+        const textboxWidth = 280;
+        const textboxHeight = 150;
 
         // Create dialog UI
         this.dialogUI = {
