@@ -52,21 +52,49 @@ class LoadingScene extends Phaser.Scene {
             }
         ).setOrigin(0.5);
 
-        // Update progress bar as assets load
+        // Track actual load progress vs display progress
+        let actualProgress = 0;
+        let displayProgress = 0;
+
         this.load.on('progress', (value) => {
-            barFill.width = barWidth * value;
-            percentText.setText(Math.floor(value * 100) + '%');
+            actualProgress = value;
         });
 
-        this.load.on('complete', () => {
-            // Small delay to show 100%, then transition
-            this.time.delayedCall(300, () => {
-                this.scene.start('CharacterSelectScene');
-            });
+        // Smooth progress animation over 2 seconds
+        const progressDuration = 2000; // 2 seconds
+        const startTime = Date.now();
+
+        const progressTimer = this.time.addEvent({
+            delay: 16, // ~60fps
+            loop: true,
+            callback: () => {
+                const elapsed = Date.now() - startTime;
+                const timeProgress = Math.min(elapsed / progressDuration, 1);
+
+                // Blend actual load progress with time-based progress
+                // This ensures it takes at least 2 seconds
+                displayProgress = Math.min(timeProgress, actualProgress);
+
+                barFill.width = barWidth * displayProgress;
+                percentText.setText(Math.floor(displayProgress * 100) + '%');
+
+                // Stop when we reach 100%
+                if (displayProgress >= 1) {
+                    progressTimer.remove();
+
+                    // Small delay at 100%, then transition
+                    this.time.delayedCall(300, () => {
+                        this.scene.start('CharacterSelectScene');
+                    });
+                }
+            }
         });
 
-        // Load all game assets
-        this.loadGameAssets();
+        // Small delay before starting load (so user sees 0%)
+        this.time.delayedCall(200, () => {
+            this.loadGameAssets();
+            this.load.start(); // Manually start the loader
+        });
     }
 
     loadGameAssets() {
