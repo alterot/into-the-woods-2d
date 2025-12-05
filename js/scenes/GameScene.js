@@ -2,6 +2,7 @@
 // Abstract base class for all gameplay scenes
 // Handles movement, pathfinding, follower AI, mask detection, depth sorting
 import AudioManager from '../AudioManager.js';
+import SpeechBubble from '../entities/SpeechBubble.js';
 
 class GameScene extends Phaser.Scene {
     constructor(sceneKey, backgroundKey, maskKey) {
@@ -43,6 +44,12 @@ class GameScene extends Phaser.Scene {
         this.path = null;
         this.currentWaypoint = 0;
         this.pathIndicator = null;
+
+        // Feedback messages and bubble
+        this.feedbackMessages = {
+            cannotWalk: "Vi kan inte gå dit, skogen är för djup"
+        };
+        this.feedbackBubble = null;
     }
 
     // Subclasses must implement preload() to load scene-specific assets
@@ -84,8 +91,9 @@ class GameScene extends Phaser.Scene {
                 // Interactive object - handled by subclass
                 this.handleInteractiveClick(pointer.x, pointer.y);
             } else {
-                // Blocked (black/unpainted)
+                // Blocked (black/unpainted) - show red indicator AND speech bubble
                 this.showNoPathIndicator(pointer.x, pointer.y);
+                this.showFeedbackBubble(this.feedbackMessages.cannotWalk);
             }
         });
     }
@@ -308,7 +316,29 @@ class GameScene extends Phaser.Scene {
                 }
             }
         });
-    }   
+    }
+
+    showFeedbackBubble(message) {
+        // Destroy previous bubble if exists
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+        }
+
+        // Smart positioning: place bubble AWAY from follower
+        // If player is left of follower → bubble to LEFT of player
+        // If player is right of follower → bubble to RIGHT of player
+        const isPlayerLeftOfFollower = this.player.x < this.follower.x;
+        const offsetX = isPlayerLeftOfFollower ? -150 : 150;
+
+        // Create new bubble beside player character
+        this.feedbackBubble = new SpeechBubble(
+            this,
+            this.player.x + offsetX,  // Offset to side away from follower
+            this.player.y - 80,        // Above player vertically
+            message,
+            3000  // Auto-destroy after 3 seconds
+        );
+    }
 
     update() {
         // Handle player movement along path

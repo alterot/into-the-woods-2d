@@ -2,7 +2,6 @@
 // First gameplay scene - meadow clearing with wisp
 import GameScene from './GameScene.js';
 import Wisp from '../entities/Wisp.js';
-import SpeechBubble from '../entities/SpeechBubble.js';
 
 class Scene1_Meadow extends GameScene {
     constructor() {
@@ -32,18 +31,6 @@ class Scene1_Meadow extends GameScene {
         this.wisp.onClick(() => {
             console.log('Wisp clicked in meadow! Add dialog or interaction here.');
             // TODO: Show proper dialog or interaction
-        });
-
-        // TEST: Create a test speech bubble
-        const testBubble = new SpeechBubble(
-            this,
-            400,
-            300,
-            "Detta är en testbubbla med typewriter-effekt!",
-            3000
-        );
-        testBubble.onClick(() => {
-            console.log('Speech bubble clicked!');
         });
     }
 

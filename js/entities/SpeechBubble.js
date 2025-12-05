@@ -63,39 +63,12 @@ class SpeechBubble {
 
         // Main bubble background (more transparent)
         const background = this.scene.add.graphics();
-        background.fillStyle(0xFFFFFF, 0.85);
+        background.fillStyle(0xFFFFFF, 0.75);
         background.fillRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
 
         // Border
         background.lineStyle(2, 0xCCCCCC, 1);
         background.strokeRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
-
-        // Tail position at edge of bubble (dynamic based on side)
-        const tailX = this.isLeftSide ? -bubbleWidth/2 + 20 : bubbleWidth/2 - 20;
-
-        // Tail (triangle pointing to character - left or right)
-        let tail;
-        if (this.isLeftSide) {
-            // Tail points LEFT (toward character on left)
-            tail = this.scene.add.triangle(
-                tailX, 0,           // Position at left edge, vertically centered
-                -10, 0,             // tip (pointing left)
-                0, -10,             // top base
-                0, 10,              // bottom base
-                0xFFFFFF,
-                0.85
-            );
-        } else {
-            // Tail points RIGHT (toward character on right)
-            tail = this.scene.add.triangle(
-                tailX, 0,           // Position at right edge, vertically centered
-                10, 0,              // tip (pointing right)
-                0, -10,             // top base
-                0, 10,              // bottom base
-                0xFFFFFF,
-                0.85
-            );
-        }
 
         // Text object
         this.textObject = this.scene.add.text(0, 0, '', {
@@ -107,8 +80,8 @@ class SpeechBubble {
         });
         this.textObject.setOrigin(0.5);
 
-        // Add all components to container (NO tail border)
-        this.container.add([shadow, background, tail, this.textObject]);
+        // Add all components to container (no tail)
+        this.container.add([shadow, background, this.textObject]);
 
         // Make container interactive
         const hitArea = new Phaser.Geom.Rectangle(
