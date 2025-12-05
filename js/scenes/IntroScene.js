@@ -1,263 +1,38 @@
 // ===== INTRO SCENE =====
 // Handles the intro dialog sequence with portraits
-import AudioManager from '../AudioManager.js';
+import DialogOverlay from '../systems/DialogOverlay.js';
 
 class IntroScene extends Phaser.Scene {
     constructor() {
         super({ key: 'IntroScene' });
-        this.dialogData = null;
-        this.currentLine = 0;
-        this.dialogUI = null;
-        this.isTyping = false;
-        this.currentTypingEvent = null;
-        this.currentFullText = '';
-        this.currentRole = null;
+        this.dialogOverlay = null;
     }
 
     create() {
-        // Display background image FIRST (before portraits)
+        // Display background image
         this.add.image(640, 360, 'background');
 
         // Fade in from black
         this.cameras.main.fadeIn(1000, 0, 0, 0);
 
         // Load dialogue data
-        this.dialogData = this.cache.json.get('introDialogue').conversations[0].lines;
-        this.currentLine = 0;
+        const dialogData = this.cache.json.get('introDialogue').conversations[0].lines;
 
-        // Determine player and sibling based on selection
-        const isPlayingBig = window.gameState?.selectedCharacter === 'big';
-        const playerPortrait = isPlayingBig ? 'portrait1' : 'portrait2';
-        const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
-
-        // Canvas dimensions
-        const canvasWidth = 1280;
-        const canvasHeight = 720;
-
-        // Portrait positions - touch bottom and edges
-        const portraitY = canvasHeight - 100;
-        const leftX = 100;
-        const rightX = canvasWidth - 150;
-
-        // Textbox positions (beside portraits, slightly above bottom)
-        const textboxY = portraitY - 60;
-        const leftTextboxX = leftX + 250;
-        const rightTextboxX = rightX - 250;
-        const textboxWidth = 280;
-        const textboxHeight = 150;
-
-        // Create dialog UI
-        this.dialogUI = {
-            // Portraits at bottom of screen (scaled to ~200-250px height)
-            leftPortrait: this.add.image(leftX, portraitY, playerPortrait).setScale(1).setAlpha(0.7).setOrigin(0.5, 0.5),
-            rightPortrait: this.add.image(rightX, portraitY, siblingPortrait).setScale(1).setAlpha(0.7).setOrigin(0.5, 0.5),
-
-            // Left textbox (beside left portrait)
-            leftTextboxBg: this.add.rectangle(leftTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85)
-                .setStrokeStyle(3, 0x5C4A30),
-            leftTextboxText: this.add.text(leftTextboxX, textboxY, '', {
-                fontSize: '18px',
-                fontFamily: 'Georgia',
-                color: '#FFFFFF',
-                align: 'center',
-                wordWrap: { width: textboxWidth - 30 }
-            }).setOrigin(0.5),
-
-            // Right textbox (beside right portrait)
-            rightTextboxBg: this.add.rectangle(rightTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85)
-                .setStrokeStyle(3, 0x5C4A30),
-            rightTextboxText: this.add.text(rightTextboxX, textboxY, '', {
-                fontSize: '18px',
-                fontFamily: 'Georgia',
-                color: '#FFFFFF',
-                align: 'center',
-                wordWrap: { width: textboxWidth - 30 }
-            }).setOrigin(0.5)
-        };
-
-        // Fix portrait facing direction - make them face each other
-        if (isPlayingBig) {
-            // When playing as Big Sister, flip BOTH portraits to face each other
-            this.dialogUI.leftPortrait.setFlipX(true);
-            this.dialogUI.rightPortrait.setFlipX(true);
-        }
-        // When playing as Little Sister, no flip needed (default orientation)
-
-        // Initially hide both textboxes
-        this.dialogUI.leftTextboxBg.setVisible(false);
-        this.dialogUI.leftTextboxText.setVisible(false);
-        this.dialogUI.rightTextboxBg.setVisible(false);
-        this.dialogUI.rightTextboxText.setVisible(false);
-
-        // Show first line
-        this.showDialogLine();
-
-        // Add input for advancing dialog
-        this.dialogSpaceHandler = () => this.advanceDialog();
-        this.dialogClickHandler = () => this.advanceDialog();
-        this.input.keyboard.on('keydown-SPACE', this.dialogSpaceHandler);
-        this.input.on('pointerdown', this.dialogClickHandler);
-    }
-
-    showDialogLine() {
-        if (this.currentLine >= this.dialogData.length) {
-            this.endDialog();
-            return;
-        }
-
-        // Stop any active typing animation
-        if (this.currentTypingEvent) {
-            this.currentTypingEvent.remove();
-            this.currentTypingEvent = null;
-        }
-
-        const line = this.dialogData[this.currentLine];
-        this.currentFullText = line.text;
-        this.currentRole = line.role;
-
-        // Define scale values (base scale is 0.15)
-        const activeScale = 1;  // Slightly larger for active speaker
-        const inactiveScale = 0.95; // Base scale for inactive
-
-        // Kill any existing tweens on portraits to prevent conflicts
-        this.tweens.killTweensOf(this.dialogUI.leftPortrait);
-        this.tweens.killTweensOf(this.dialogUI.rightPortrait);
-
-        // Show only the active speaker's textbox
-        if (line.role === 'player') {
-            // Player is speaking (left side)
-            this.dialogUI.leftTextboxBg.setVisible(true);
-            this.dialogUI.leftTextboxText.setVisible(true).setText('');
-            this.dialogUI.rightTextboxBg.setVisible(false);
-            this.dialogUI.rightTextboxText.setVisible(false);
-
-            // Animate left portrait to active state
-            this.tweens.add({
-                targets: this.dialogUI.leftPortrait,
-                alpha: 1,
-                scale: activeScale,
-                duration: 200,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Animate right portrait to inactive state
-            this.tweens.add({
-                targets: this.dialogUI.rightPortrait,
-                alpha: 0.7,
-                scale: inactiveScale,
-                duration: 200,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Start typewriter effect for left text
-            this.startTypewriter(this.dialogUI.leftTextboxText, line.text);
-        } else {
-            // Sibling is speaking (right side)
-            this.dialogUI.rightTextboxBg.setVisible(true);
-            this.dialogUI.rightTextboxText.setVisible(true).setText('');
-            this.dialogUI.leftTextboxBg.setVisible(false);
-            this.dialogUI.leftTextboxText.setVisible(false);
-
-            // Animate right portrait to active state
-            this.tweens.add({
-                targets: this.dialogUI.rightPortrait,
-                alpha: 1,
-                scale: activeScale,
-                duration: 200,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Animate left portrait to inactive state
-            this.tweens.add({
-                targets: this.dialogUI.leftPortrait,
-                alpha: 0.7,
-                scale: inactiveScale,
-                duration: 200,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Start typewriter effect for right text
-            this.startTypewriter(this.dialogUI.rightTextboxText, line.text);
-        }
-    }
-
-        startTypewriter(textObject, fullText) {
-            this.isTyping = true;
-            let currentIndex = 0;
-
-            this.currentTypingEvent = this.time.addEvent({
-                delay: 75,
-                repeat: fullText.length - 1,
-                callback: () => {
-                    currentIndex++;
-                    textObject.setText(fullText.substring(0, currentIndex));
-                    
-                    // Check if we've shown all characters
-                    if (currentIndex >= fullText.length) {
-                        this.isTyping = false; // ← LÄGG TILL DETTA!
-                    }
-                },
-                callbackScope: this,
-                onComplete: () => {
-                    this.isTyping = false;
-                    this.currentTypingEvent = null;
-                }
-            });
-        }
-
-    advanceDialog() {
-        if (!this.dialogUI) return;
-
-        // Play click sound
-        const audioManager = this.registry.get('audioManager');
-        if (audioManager) {
-            audioManager.playClick();
-        }
-
-        // If currently typing, skip to full text (don't advance to next line)
-        if (this.isTyping) {
-
-            if (this.currentTypingEvent) {
-            this.currentTypingEvent.delay = 3; // Speed up to 5ms per character
-            }
-
-            return; // Don't advance to next line
-        }
-        // If not typing, advance to next line
-        this.currentLine++;
-        this.showDialogLine();
-    }
-
-    endDialog() {
-        if (!this.dialogUI) return;
-
-        // Stop any active typing animation
-        if (this.currentTypingEvent) {
-            this.currentTypingEvent.remove();
-            this.currentTypingEvent = null;
-        }
-
-        // Remove dialog input handlers
-        this.input.keyboard.off('keydown-SPACE', this.dialogSpaceHandler);
-        this.input.off('pointerdown', this.dialogClickHandler);
-
-        // Fade out portraits and textboxes
-        this.tweens.add({
-            targets: [
-                this.dialogUI.leftPortrait,
-                this.dialogUI.rightPortrait,
-                this.dialogUI.leftTextboxBg,
-                this.dialogUI.leftTextboxText,
-                this.dialogUI.rightTextboxBg,
-                this.dialogUI.rightTextboxText
-            ],
-            alpha: 0,
-            duration: 500,
+        // Create dialog overlay
+        this.dialogOverlay = new DialogOverlay(this, {
+            dialogueData: dialogData,
+            spritesVisible: false,  // Hide background during intro
+            backgroundDim: 0,       // No dark overlay needed
+            portraitScale: 1,       // Full size portraits
+            textSpeed: 75,          // 75ms per character
             onComplete: () => {
                 // Transition to gameplay scene
                 this.scene.start('Scene1_Meadow');
             }
         });
+
+        // Start dialog
+        this.dialogOverlay.start();
     }
 }
 
