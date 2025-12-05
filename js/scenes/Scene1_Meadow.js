@@ -9,20 +9,6 @@ class Scene1_Meadow extends GameScene {
         super('Scene1_Meadow', 'background', 'mask');
     }
 
-    preload() {
-        // Load scene-specific assets
-        // Background and mask
-        this.load.image('background', 'assets/scenes/scen1-meadow.png');
-        this.load.image('mask', 'assets/scenes/scen1-mask.png');
-
-        // Character sprites
-        this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
-        this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
-
-        // Wisp sprite
-        Wisp.preload(this);
-    }
-
     createSceneContent() {
         // Add scene-specific content (wisp, interactive objects, etc.)
 

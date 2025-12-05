@@ -7,23 +7,6 @@ class CharacterSelectScene extends Phaser.Scene {
         super({ key: 'CharacterSelectScene' });
     }
 
-    preload() {
-        // Bakgrund för menyn
-        this.load.image('scen0-menu', 'assets/scenes/scen0-menu.png');
-
-        // Träskylt-knappen
-        this.load.image('scen0-menu-button', 'assets/scenes/scen0-menu-button.png');
-
-        // Wisp (om inte redan laddad i tidigare scen)
-        this.load.image('wisp', 'assets/sprites/whisp.png');
-
-        // Audio assets
-        this.load.audio('click', 'assets/sound/click.wav');
-        this.load.audio('menu-select', 'assets/sound/menu-select.wav');
-        this.load.audio('forest-ambient', 'assets/sound/forest-ambient.mp3');
-    }
-
-
     create() {
         const { width, height } = this.scale;
         

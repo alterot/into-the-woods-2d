@@ -1,5 +1,6 @@
 // ===== MAIN ENTRY POINT =====
 // Import all scenes
+import LoadingScene from './scenes/LoadingScene.js';
 import CharacterSelectScene from './scenes/CharacterSelectScene.js';
 import IntroScene from './scenes/IntroScene.js';
 import Scene1_Meadow from './scenes/Scene1_Meadow.js';
@@ -14,7 +15,7 @@ const config = {
     },
     parent: document.body,
     backgroundColor: '#000000',
-    scene: [CharacterSelectScene, IntroScene, Scene1_Meadow],
+    scene: [LoadingScene, CharacterSelectScene, IntroScene, Scene1_Meadow],
     physics: {
         default: 'arcade',
         arcade: {

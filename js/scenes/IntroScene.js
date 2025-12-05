@@ -14,18 +14,6 @@ class IntroScene extends Phaser.Scene {
         this.currentRole = null;
     }
 
-    preload() {
-        // Load background image
-        this.load.image('background', 'assets/scenes/scen1-meadow.png');
-
-        // Load portraits (large, for dialog scenes)
-        this.load.image('portrait1', 'assets/portraits/sister1-portrait-S.png');
-        this.load.image('portrait2', 'assets/portraits/sister2-portrait-S.png');
-
-        // Load dialogue data
-        this.load.json('introDialogue', 'assets/dialogues/intro-dialogue.json');
-    }
-
     create() {
         // Display background image FIRST (before portraits)
         this.add.image(640, 360, 'background');
