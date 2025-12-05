@@ -7,8 +7,8 @@ import Scene1_Meadow from './scenes/Scene1_Meadow.js';
 // Game configuration
 const config = {
     type: Phaser.AUTO,
-    width: 1024,
-    height: 1024,
+    width: 1280,
+    height: 720,
     render: {
         pixelArt: true
     },

@@ -26,7 +26,7 @@ class IntroScene extends Phaser.Scene {
 
     create() {
         // Display background image FIRST (before portraits)
-        this.add.image(512, 512, 'background');
+        this.add.image(640, 360, 'background');
 
         // Fade in from black
         this.cameras.main.fadeIn(1000, 0, 0, 0);
@@ -41,16 +41,16 @@ class IntroScene extends Phaser.Scene {
         const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
 
         // Canvas dimensions
-        const canvasWidth = 1024;
-        const canvasHeight = 1024;
+        const canvasWidth = 1280;
+        const canvasHeight = 720;
 
-        // Portrait positions at bottom of screen (moved closer to edges)
-        const portraitY = canvasHeight - 200;
-        const leftX = 100;
-        const rightX = 925;
+        // Portrait positions - touch bottom and edges
+        const portraitY = canvasHeight;
+        const leftX = 0;
+        const rightX = canvasWidth;
 
-        // Textbox positions (beside portraits, not above)
-        const textboxY = portraitY;
+        // Textbox positions (beside portraits, slightly above bottom)
+        const textboxY = portraitY - 100;
         const leftTextboxX = leftX + 250;
         const rightTextboxX = rightX - 250;
         const textboxWidth = 280;

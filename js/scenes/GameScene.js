@@ -51,7 +51,7 @@ class GameScene extends Phaser.Scene {
 
     create() {
         // Display the background image centered
-        this.add.image(512, 512, this.backgroundKey);
+        this.add.image(640, 360, this.backgroundKey);
 
         // Create mask texture for pixel detection (invisible)
         this.maskTexture = this.textures.get(this.maskKey).getSourceImage();
@@ -90,11 +90,11 @@ class GameScene extends Phaser.Scene {
         // Position sprites - player always on the right
         if (isPlayingBig) {
             // Playing as big sister - she's the player (right)
-            this.sister2 = this.add.image(150, 700, 'sister2');
+            this.sister2 = this.add.image(150, 550, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
 
-            this.sister1 = this.add.image(200, 700, 'sister1');
+            this.sister1 = this.add.image(200, 550, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
 
@@ -105,11 +105,11 @@ class GameScene extends Phaser.Scene {
             this.followerBaseY = this.baseY2;
         } else {
             // Playing as little sister - she's the player (right)
-            this.sister1 = this.add.image(150, 700, 'sister1');
+            this.sister1 = this.add.image(150, 550, 'sister1');
             this.sister1.setScale(0.55);
             this.baseY = this.sister1.y;
 
-            this.sister2 = this.add.image(200, 700, 'sister2');
+            this.sister2 = this.add.image(200, 550, 'sister2');
             this.sister2.setScale(0.5);
             this.baseY2 = this.sister2.y;
 
