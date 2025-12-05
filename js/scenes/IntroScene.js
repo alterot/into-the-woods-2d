@@ -59,8 +59,8 @@ class IntroScene extends Phaser.Scene {
         // Create dialog UI
         this.dialogUI = {
             // Portraits at bottom of screen (scaled to ~200-250px height)
-            leftPortrait: this.add.image(leftX, portraitY, playerPortrait).setScale(0.15).setAlpha(0.7),
-            rightPortrait: this.add.image(rightX, portraitY, siblingPortrait).setScale(0.15).setAlpha(0.7),
+            leftPortrait: this.add.image(leftX, portraitY, playerPortrait).setScale(1).setAlpha(0.7).setOrigin(0.5, 0.5),
+            rightPortrait: this.add.image(rightX, portraitY, siblingPortrait).setScale(1).setAlpha(0.7).setOrigin(0.5, 0.5),
 
             // Left textbox (beside left portrait)
             leftTextboxBg: this.add.rectangle(leftTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85)
@@ -125,6 +125,14 @@ class IntroScene extends Phaser.Scene {
         this.currentFullText = line.text;
         this.currentRole = line.role;
 
+        // Define scale values (base scale is 0.15)
+        const activeScale = 1;  // Slightly larger for active speaker
+        const inactiveScale = 0.95; // Base scale for inactive
+
+        // Kill any existing tweens on portraits to prevent conflicts
+        this.tweens.killTweensOf(this.dialogUI.leftPortrait);
+        this.tweens.killTweensOf(this.dialogUI.rightPortrait);
+
         // Show only the active speaker's textbox
         if (line.role === 'player') {
             // Player is speaking (left side)
@@ -133,9 +141,23 @@ class IntroScene extends Phaser.Scene {
             this.dialogUI.rightTextboxBg.setVisible(false);
             this.dialogUI.rightTextboxText.setVisible(false);
 
-            // Highlight left portrait (active speaker)
-            this.dialogUI.leftPortrait.setAlpha(1).setScale(1); // Scale 1.1x
-            this.dialogUI.rightPortrait.setAlpha(0.7).setScale(1);
+            // Animate left portrait to active state
+            this.tweens.add({
+                targets: this.dialogUI.leftPortrait,
+                alpha: 1,
+                scale: activeScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
+
+            // Animate right portrait to inactive state
+            this.tweens.add({
+                targets: this.dialogUI.rightPortrait,
+                alpha: 0.7,
+                scale: inactiveScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
 
             // Start typewriter effect for left text
             this.startTypewriter(this.dialogUI.leftTextboxText, line.text);
@@ -146,9 +168,23 @@ class IntroScene extends Phaser.Scene {
             this.dialogUI.leftTextboxBg.setVisible(false);
             this.dialogUI.leftTextboxText.setVisible(false);
 
-            // Highlight right portrait (active speaker)
-            this.dialogUI.rightPortrait.setAlpha(1).setScale(1); // Scale 1.1x
-            this.dialogUI.leftPortrait.setAlpha(0.7).setScale(1);
+            // Animate right portrait to active state
+            this.tweens.add({
+                targets: this.dialogUI.rightPortrait,
+                alpha: 1,
+                scale: activeScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
+
+            // Animate left portrait to inactive state
+            this.tweens.add({
+                targets: this.dialogUI.leftPortrait,
+                alpha: 0.7,
+                scale: inactiveScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
 
             // Start typewriter effect for right text
             this.startTypewriter(this.dialogUI.rightTextboxText, line.text);
