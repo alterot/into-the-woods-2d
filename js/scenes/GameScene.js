@@ -78,6 +78,7 @@ class GameScene extends Phaser.Scene {
                 if (audioManager) {
                     audioManager.playClick();
                 }
+                this.showValidClickIndicator(pointer.x, pointer.y); 
                 this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
             } else if (color === 'red') {
                 // Interactive object - handled by subclass
@@ -281,6 +282,33 @@ class GameScene extends Phaser.Scene {
             }
         });
     }
+
+    showValidClickIndicator(x, y) {
+        // Remove previous indicator
+        if (this.validClickIndicator) {
+            this.tweens.killTweensOf(this.validClickIndicator);
+            this.validClickIndicator.destroy();
+        }
+
+        // Create green circle
+        this.validClickIndicator = this.add.circle(x, y, 2, 0x6bff6b, 0.8);  // Ljusgrön
+        this.validClickIndicator.setDepth(1000);
+
+        // Expand + fade animation
+        this.tweens.add({
+            targets: this.validClickIndicator,
+            radius: 10,
+            alpha: 0,
+            duration: 600,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                if (this.validClickIndicator) {
+                    this.validClickIndicator.destroy();
+                    this.validClickIndicator = null;
+                }
+            }
+        });
+    }   
 
     update() {
         // Handle player movement along path
