@@ -25,14 +25,19 @@ class CharacterSelectScene extends Phaser.Scene {
 
     create() {
         const { width, height } = this.scale;
-
-        // Initialize AudioManager and start background music
+        
+        // Initialize AudioManager
         const audioManager = new AudioManager(this);
         audioManager.init(this);
-        audioManager.startMusic();
 
-        // Store in registry for access from other scenes
+        // Start music ONLY after user gesture
+        this.input.once('pointerdown', () => {
+            audioManager.startMusic();
+        });
+
+        // Store in registry for other scenes
         this.registry.set('audioManager', audioManager);
+
 
         // --- Bakgrundsbild ---
         const bg = this.add.image(width / 2, height / 2, 'scen0-menu');
