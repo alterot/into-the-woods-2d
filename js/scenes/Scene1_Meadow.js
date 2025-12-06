@@ -83,31 +83,39 @@ class Scene1_Meadow extends GameScene {
         this.runestoneOverlay.start();
     }
 
-    update() {
-        // Call parent update for movement and pathfinding
+update() {
+    // Låt GameScene sköta pathfinding och följlogik
         super.update();
 
-        // Fix facing direction when dialog is active and both sisters stopped
         if (this.dialogActive && this.runestonePosition) {
-            const bothStopped = !this.isMoving && !this.isFollowerMoving;
+            const playerStopped = !this.isMoving;
+            const followerStopped = !this.isFollowerMoving;
 
-            if (bothStopped) {
-                // Determine which direction to face based on runestone position
-                const sistersLeftOfStone = this.player.x < this.runestonePosition.x;
+            // Player vänder sig direkt när hen är framme
+            if (playerStopped && this.player) {
+                const playerLeftOfStone = this.player.x < this.runestonePosition.x;
 
-                // Face toward runestone
-                if (sistersLeftOfStone) {
-                    // Sisters are left of stone → face right
-                    this.sister1.setFlipX(true);
-                    this.sister2.setFlipX(true);
+                // Är spelaren till vänster om stenen? → titta åt höger (flipX = true)
+                if (playerLeftOfStone) {
+                    this.player.setFlipX(true);
                 } else {
-                    // Sisters are right of stone → face left
-                    this.sister1.setFlipX(false);
-                    this.sister2.setFlipX(false);
+                    this.player.setFlipX(false);
+                }
+            }
+
+            // Follower vänder sig när hen är framme
+            if (followerStopped && this.follower) {
+                const followerLeftOfStone = this.follower.x < this.runestonePosition.x;
+
+                if (followerLeftOfStone) {
+                    this.follower.setFlipX(true);
+                } else {
+                    this.follower.setFlipX(false);
                 }
             }
         }
     }
+
 }
 
 export default Scene1_Meadow;
