@@ -57,7 +57,20 @@ class Wisp {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+
+        // Diskret "studs" via liten scale-pop ibland
+        this.scene.tweens.add({
+            targets: this.sprite,
+            scaleX: 0.12,  // från 0.10 → 0.12
+            scaleY: 0.12,
+            duration: 400,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+            repeatDelay: 2500   // paus mellan studsar
+        });
     }
+
 
     // Set custom click handler
     onClick(callback) {
