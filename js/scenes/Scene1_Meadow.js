@@ -19,7 +19,7 @@ class Scene1_Meadow extends GameScene {
         // Add scene-specific content (wisp, interactive objects, etc.)
 
         // Create wisp at specified position
-        this.wisp = new Wisp(this, 1150, 550);
+        this.wisp = new Wisp(this, 1150, 450);
         this.wisp.onClick(() => {
             console.log('Wisp clicked in meadow! Add dialog or interaction here.');
             // TODO: Show proper dialog or interaction

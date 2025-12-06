@@ -74,7 +74,7 @@ class DialogOverlay {
         const rightX = canvasWidth - 150;
 
         // Textbox positions (beside portraits)
-        const textboxY = portraitY - 60;
+        const textboxY = portraitY - 20;
         const leftTextboxX = leftX + 250;
         const rightTextboxX = rightX - 250;
         const textboxWidth = 280;
