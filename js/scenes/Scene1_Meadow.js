@@ -25,6 +25,25 @@ class Scene1_Meadow extends GameScene {
         });
     }
 
+    findNearestWalkable(targetX, targetY, maxRadius = 50) {
+        // Try increasingly larger radiuses
+        for (let radius = 5; radius <= maxRadius; radius += 5) {
+            // Check 8 directions around target
+            const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+
+            for (let angle of angles) {
+                const rad = angle * Math.PI / 180;
+                const x = Math.round(targetX + Math.cos(rad) * radius);
+                const y = Math.round(targetY + Math.sin(rad) * radius);
+
+                if (this.getPixelColor(x, y) === 'green') {
+                    return { x, y };
+                }
+            }
+        }
+        return null;
+    }
+
     handleInteractiveClick(x, y) {
         // Ignore clicks if dialog is already active
         if (this.dialogActive) {
@@ -35,8 +54,14 @@ class Scene1_Meadow extends GameScene {
         const runeData = this.cache.json.get('runeDialogue');
         const dialogData = runeData.conversations[0].lines;
 
-        // Start pathfinding - sisters walk to runestone
-        this.findPath(this.player.x, this.player.y, x, y);
+        // Find nearest walkable spot around the runestone (red pixels are not walkable)
+        const walkableSpot = this.findNearestWalkable(x, y, 50);
+        if (walkableSpot) {
+            // Start pathfinding to nearest walkable spot
+            this.findPath(this.player.x, this.player.y, walkableSpot.x, walkableSpot.y);
+        } else {
+            console.warn('No walkable spot found near runestone');
+        }
 
         // Immediately start dialog overlay
         this.dialogActive = true;
