@@ -76,6 +76,11 @@ class GameScene extends Phaser.Scene {
 
         // Add click handler for movement with mask checking
         this.input.on('pointerdown', (pointer) => {
+            // Block clicks if dialog is active
+            if (this.dialogActive) {
+                return;
+            }
+
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
