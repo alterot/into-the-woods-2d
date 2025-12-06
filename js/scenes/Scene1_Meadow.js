@@ -12,6 +12,7 @@ class Scene1_Meadow extends GameScene {
         // Dialog state
         this.dialogActive = false;
         this.runestoneOverlay = null;
+        this.runestonePosition = null;
     }
 
     createSceneContent() {
@@ -50,6 +51,9 @@ class Scene1_Meadow extends GameScene {
             return;
         }
 
+        // Save runestone position for facing direction
+        this.runestonePosition = { x, y };
+
         // Get runestone dialogue data
         const runeData = this.cache.json.get('runeDialogue');
         const dialogData = runeData.conversations[0].lines;
@@ -72,10 +76,37 @@ class Scene1_Meadow extends GameScene {
             onComplete: () => {
                 this.dialogActive = false;
                 this.runestoneOverlay = null;
+                this.runestonePosition = null;
                 // TODO: Mark runestone as read
             }
         });
         this.runestoneOverlay.start();
+    }
+
+    update() {
+        // Call parent update for movement and pathfinding
+        super.update();
+
+        // Fix facing direction when dialog is active and both sisters stopped
+        if (this.dialogActive && this.runestonePosition) {
+            const bothStopped = !this.isMoving && !this.isFollowerMoving;
+
+            if (bothStopped) {
+                // Determine which direction to face based on runestone position
+                const sistersLeftOfStone = this.player.x < this.runestonePosition.x;
+
+                // Face toward runestone
+                if (sistersLeftOfStone) {
+                    // Sisters are left of stone → face right
+                    this.sister1.setFlipX(true);
+                    this.sister2.setFlipX(true);
+                } else {
+                    // Sisters are right of stone → face left
+                    this.sister1.setFlipX(false);
+                    this.sister2.setFlipX(false);
+                }
+            }
+        }
     }
 }
 
