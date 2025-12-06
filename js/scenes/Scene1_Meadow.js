@@ -13,17 +13,25 @@ class Scene1_Meadow extends GameScene {
         this.dialogActive = false;
         this.runestoneOverlay = null;
         this.runestonePosition = null;
+        
+        // Hover / glitter över runstenen
+        this.isPointerOverRunestone = false;
+        this.lastHoverSparkTime = 0;
+        this.lastHoverX = null;
+        this.lastHoverY = null;
     }
 
     createSceneContent() {
         // Add scene-specific content (wisp, interactive objects, etc.)
 
         // Create wisp at specified position
-        this.wisp = new Wisp(this, 1150, 450);
+        this.wisp = new Wisp(this, 1075, 500);
         this.wisp.onClick(() => {
             console.log('Wisp clicked in meadow! Add dialog or interaction here.');
             // TODO: Show proper dialog or interaction
         });
+        // Hover-effekt över runstenen
+        this.setupRunestoneHoverHighlight();
     }
 
     findNearestWalkable(targetX, targetY, maxRadius = 150) {
@@ -82,6 +90,127 @@ class Scene1_Meadow extends GameScene {
         });
         this.runestoneOverlay.start();
     }
+
+    setupRunestoneHoverHighlight() {
+        this.input.on('pointermove', (pointer) => {
+            // Ingen effekt när dialogen är aktiv
+            if (this.dialogActive) {
+                this.isPointerOverRunestone = false;
+                this.lastHoverX = null;
+                this.lastHoverY = null;
+                return;
+            }
+
+            const color = this.getPixelColor(pointer.x, pointer.y);
+
+            if (color === 'red') {
+                this.isPointerOverRunestone = true;
+
+                const now = this.time.now;
+
+                // Finns en tidigare punkt att dra spår från?
+                if (this.lastHoverX !== null && this.lastHoverY !== null) {
+                    const dx = pointer.x - this.lastHoverX;
+                    const dy = pointer.y - this.lastHoverY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    // Hur många "steg" längs linjen? (max 4)
+                    const steps = Math.min(4, Math.max(1, Math.floor(dist / 12)));
+
+                    // Lite throttling så vi inte går bananas
+                    if (now - this.lastHoverSparkTime > 30) {
+                        this.lastHoverSparkTime = now;
+
+                        for (let i = 0; i <= steps; i++) {
+                            const t = i / (steps || 1);
+                            const px = this.lastHoverX + dx * t;
+                            const py = this.lastHoverY + dy * t;
+                            this.spawnRunestoneSparkTrail(px, py);
+                        }
+                    }
+                }
+
+                // Uppdatera "förra" positionen
+                this.lastHoverX = pointer.x;
+                this.lastHoverY = pointer.y;
+            } else {
+                this.isPointerOverRunestone = false;
+                this.lastHoverX = null;
+                this.lastHoverY = null;
+            }
+        });
+    }
+
+
+
+spawnRunestoneSparkTrail(x, y) {
+    const sparkCount = 2; // få, men tydliga glittror
+
+    for (let i = 0; i < sparkCount; i++) {
+        // Liten random offset runt spåret
+        const offsetX = Phaser.Math.Between(-4, 4);
+        const offsetY = Phaser.Math.Between(-4, 4);
+
+        const radius = Phaser.Math.Between(1, 2); // riktigt små
+        const colors = [0xffffff, 0xfff8d8, 0xfff0b5, 0xdde9ff];
+        const color = Phaser.Utils.Array.GetRandom(colors);
+
+        const startAlpha = Phaser.Math.FloatBetween(0.6, 1.0);
+
+        const spark = this.add.circle(
+            x + offsetX,
+            y + offsetY,
+            radius,
+            color,
+            startAlpha
+        );
+        spark.setDepth(1500);
+
+        // Viktigt för glitter: ADD-blend gör att de "lyser"
+        spark.setBlendMode(Phaser.BlendModes.ADD);
+
+        // Liten, snabb blink → twinkle
+        this.tweens.add({
+            targets: spark,
+            alpha: { from: startAlpha, to: 0 },
+            // lite längre liv = tydligare spår, men inte dimma
+            duration: Phaser.Math.Between(220, 360),
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                if (spark && spark.destroy) {
+                    spark.destroy();
+                }
+            }
+        });
+    }
+
+    // Ibland en extra "flash" för extra glitter
+    if (Phaser.Math.Between(0, 5) === 0) { // ~16% chans
+        const flash = this.add.circle(
+            x + Phaser.Math.Between(-2, 2),
+            y + Phaser.Math.Between(-2, 2),
+            1,
+            0xffffff,
+            0
+        );
+        flash.setDepth(1501);
+        flash.setBlendMode(Phaser.BlendModes.ADD);
+
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0, to: 1 },
+            duration: 80,
+            yoyo: true,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                if (flash && flash.destroy) {
+                    flash.destroy();
+                }
+            }
+        });
+    }
+}
+
 
 update() {
     // Låt GameScene sköta pathfinding och följlogik

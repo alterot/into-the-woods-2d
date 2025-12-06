@@ -11,7 +11,7 @@ class Wisp {
         this.sprite.setScale(0.1);
 
         // Make it interactive
-        this.sprite.setInteractive({ useHandCursor: true });
+        this.sprite.setInteractive({ useHandCursor: false });
 
         // Store the click handler
         this.clickHandler = null;
