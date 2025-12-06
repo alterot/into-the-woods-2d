@@ -245,6 +245,11 @@ class DialogOverlay {
         callback: () => {
             currentIndex++;
             textObject.setText(fullText.substring(0, currentIndex));
+
+            // Set isTyping false immediately when last character is displayed
+            if (currentIndex >= fullText.length) {
+                this.isTyping = false;
+            }
         },
         callbackScope: this,
         onComplete: () => {
