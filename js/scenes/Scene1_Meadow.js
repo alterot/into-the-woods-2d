@@ -25,7 +25,7 @@ class Scene1_Meadow extends GameScene {
         });
     }
 
-    findNearestWalkable(targetX, targetY, maxRadius = 50) {
+    findNearestWalkable(targetX, targetY, maxRadius = 150) {
         // Try increasingly larger radiuses
         for (let radius = 5; radius <= maxRadius; radius += 5) {
             // Check 8 directions around target
