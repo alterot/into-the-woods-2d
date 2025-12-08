@@ -23,6 +23,7 @@ class Scene1_Meadow extends GameScene {
 
         //Whisp dialog check
         this.wispConversationActive = false;
+        this.wispConversationCompleted = false; // Track if they've seen the full conversation
         this.wispIntroBubble = null;
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false; // Track if they've started walking to wisp
@@ -65,7 +66,7 @@ class Scene1_Meadow extends GameScene {
         this.dialogActive = true;
         this.wispConversationActive = true;
         this.wispArrivalHandled = false;
-        this.wispWalkStarted = false; // Reset - they haven't started walking yet  
+        this.wispWalkStarted = false; // Reset - they haven't started walking yet
 
         // Hitta en gångbar punkt nära wispen (grönt i masken)
         let target = null;
@@ -80,6 +81,13 @@ class Scene1_Meadow extends GameScene {
             console.warn('[Scene1_Meadow] Hittade ingen gångbar punkt nära wispen');
         }
 
+        // If already seen full conversation, skip to choice bubble on arrival
+        if (this.wispConversationCompleted) {
+            // Don't create bubble #1 - will show choice bubble directly in update()
+            return;
+        }
+
+        // First time - show bubble #1
         // Städa ev. tidigare bubbla
         if (this.wispIntroBubble) {
             this.wispIntroBubble.destroy();
@@ -206,6 +214,43 @@ class Scene1_Meadow extends GameScene {
         });
     }
 
+showChoiceBubble() {
+    const choiceBubble = new SpeechBubble(
+        this,
+        this.player.x,
+        this.player.y,
+        'Vad ska vi göra?',
+        null,
+        this.player,
+        [
+            {
+                text: 'Följa efter wispen',
+                callback: () => {
+                    this.wispConversationCompleted = true;
+                    this.currentConversationBubble = null;
+                    this.cameras.main.fadeOut(500, 0, 0, 0);
+                    this.time.delayedCall(500, () => {
+                        this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
+                    });
+                }
+            },
+            {
+                text: 'Stanna här',
+                callback: () => {
+                    this.wispConversationCompleted = true;
+                    choiceBubble.destroy();
+                    this.time.delayedCall(10, () => {
+                        this.dialogActive = false;
+                        this.wispConversationActive = false;
+                        this.currentConversationBubble = null;
+                    });
+                }
+            }
+        ]
+    );
+    this.currentConversationBubble = null;
+}
+
 spawnRunestoneSparkTrail(x, y) {
     const sparkCount = 2; // få, men tydliga glittror
 
@@ -321,6 +366,13 @@ update() {
         if (this.wispWalkStarted && playerStopped && followerStopped) {
             this.wispArrivalHandled = true;
 
+            // If already seen full conversation, skip to choice bubble
+            if (this.wispConversationCompleted) {
+                this.showChoiceBubble();
+                return;
+            }
+
+            // First time - show full conversation
             // 1) Stäng första bubblan (på playern)
             if (this.wispIntroBubble) {
                 this.wispIntroBubble.destroy();
@@ -366,43 +418,7 @@ update() {
 
                     // Chain to bubble #5 with YES/NO choice
                     bubble4.onClick(() => {
-                        // Single bubble with two choices
-                        const choiceBubble = new SpeechBubble(
-                            this,
-                            this.player.x,
-                            this.player.y,
-                            'Vad ska vi göra?',
-                            null,
-                            this.player,
-                            [
-                                {
-                                    text: 'Följa efter wispen',
-                                    callback: () => {
-                                        this.currentConversationBubble = null;
-                                        this.cameras.main.fadeOut(500, 0, 0, 0);
-                                        this.time.delayedCall(500, () => {
-                                            this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
-                                        });
-                                    }
-                                },
-                                {
-                                    text: 'Stanna här',
-                                    callback: () => {
-                                        choiceBubble.destroy(); // Close the bubble first
-
-                                        // Reset flags AFTER current click finishes (next frame)
-                                        this.time.delayedCall(10, () => {
-                                            this.dialogActive = false;
-                                            this.wispConversationActive = false;
-                                            this.currentConversationBubble = null;
-                                        });
-                                    }
-                                }
-                            ]
-                        );
-
-                        // Don't set as currentConversationBubble - choices handle their own clicks
-                        this.currentConversationBubble = null;
+                        this.showChoiceBubble();
                     });
                 });
             });
