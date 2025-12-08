@@ -28,6 +28,11 @@ class GameScene extends Phaser.Scene {
         this.followerBaseY = 0;
         this.isFollowerMoving = false;
 
+        // Footstep tracking
+        this.lastStepX = null;
+        this.lastStepY = null;
+        this.stepDistanceAccum = 0;
+
         // Keep legacy variables for backward compatibility
         this.sister1 = null;
         this.sister2 = null;
@@ -70,6 +75,11 @@ class GameScene extends Phaser.Scene {
 
         // Setup player characters
         this.setupCharacters();
+
+        // Initiera fotstegsposition vid start
+        this.lastStepX = this.player.x;
+        this.lastStepY = this.player.y;
+        this.stepDistanceAccum = 0;
 
         // Hook for subclasses to add scene-specific content (wisp, objects, etc.)
         this.createSceneContent();
@@ -442,7 +452,44 @@ class GameScene extends Phaser.Scene {
         // Depth sorting: higher Y = closer to camera = render on top
         this.sister1.setDepth(this.sister1.y);
         this.sister2.setDepth(this.sister2.y);
+
+        // --- Fotsteg baserat på distans ---
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            const anyMoving = this.isMoving || this.isFollowerMoving;
+
+            // Om ingen rör sig: nollställ accumulatorn
+            if (!anyMoving) {
+                this.lastStepX = this.player.x;
+                this.lastStepY = this.player.y;
+                this.stepDistanceAccum = 0;
+            } else {
+                // Se till att vi har en startpunkt
+                if (this.lastStepX == null || this.lastStepY == null) {
+                    this.lastStepX = this.player.x;
+                    this.lastStepY = this.player.y;
+                }
+
+                const dx = this.player.x - this.lastStepX;
+                const dy = this.player.y - this.lastStepY;
+                const frameDist = Math.sqrt(dx * dx + dy * dy);
+
+                this.stepDistanceAccum += frameDist;
+
+                // Tröskel för ett fotsteg – tweaka 12–20 px efter känsla
+                const STEP_DISTANCE = 16;
+
+                if (this.stepDistanceAccum >= STEP_DISTANCE) {
+                    audioManager.playFootstep();
+                    this.stepDistanceAccum = 0;
+                }
+
+                this.lastStepX = this.player.x;
+                this.lastStepY = this.player.y;
+            }
+        }
     }
 }
+
 
 export default GameScene;

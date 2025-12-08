@@ -15,6 +15,11 @@ class AudioManager {
         this.menuSelectSound = null;
         this.bgMusic = null;
         this.initialized = false;
+
+        // Footstep state
+        this.footstepLeft = null;
+        this.footstepRight = null;
+        this.stepToggle = false; 
     }
 
     /**
@@ -43,6 +48,16 @@ class AudioManager {
             volume: 0.4,
             loop: true
         });
+
+        // Setup footstep sounds (om de finns laddade)
+        this.footstepLeft = this.scene.sound.add('step-left', {
+            volume: 0.4
+        });
+        this.footstepRight = this.scene.sound.add('step-right', {
+            volume: 0.4
+        });
+        this.stepToggle = false;
+
 
         this.initialized = true;
         console.log('[AudioManager] Initialized');
@@ -144,6 +159,22 @@ class AudioManager {
             console.log('[AudioManager] Background music resumed');
         }
     }
+
+    
+        /**
+         * Spela ett fotsteg. Växlar mellan vänster och höger.
+         */
+        playFootstep() {
+            if (!this.footstepLeft || !this.footstepRight) {
+                // Ljud inte initierade
+                return;
+            }
+
+            const sound = this.stepToggle ? this.footstepRight : this.footstepLeft;
+            this.stepToggle = !this.stepToggle;
+
+            sound.play();
+        }
 
     /**
      * Set click sound volume (0.0 to 1.0)

@@ -129,7 +129,7 @@ class SpeechBubble {
         const sideFactor = this.isLeftSide ? -1 : 1;
 
         this.tailBg.x = sideFactor * tailOffsetX;
-        this.tailBg.y = bottomY;
+        this.tailBg.y = bottomY - 1;
 
         this.tailShadow.x = this.tailBg.x + 2;
         this.tailShadow.y = this.tailBg.y + 2;
@@ -233,7 +233,7 @@ class SpeechBubble {
         const sideFactor = this.isLeftSide ? -1 : 1;
 
         this.tailBg.x = sideFactor * tailOffsetX;
-        this.tailBg.y = bottomY;
+        this.tailBg.y = bottomY - 1;
 
         this.tailShadow.x = this.tailBg.x + 2;
         this.tailShadow.y = this.tailBg.y + 2;
