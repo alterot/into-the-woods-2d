@@ -87,7 +87,6 @@ class GameScene extends Phaser.Scene {
 
         // Add click handler for movement with mask checking
         this.input.on('pointerdown', (pointer) => {
-            // Block clicks if dialog is active
             if (this.dialogActive) {
                 return;
             }
@@ -95,31 +94,44 @@ class GameScene extends Phaser.Scene {
             const color = this.getPixelColor(pointer.x, pointer.y);
 
             if (color === 'green') {
-                // Dismiss any active feedback bubble
+                // Walkable area - find path
                 if (this.feedbackBubble) {
                     this.feedbackBubble.destroy();
                     this.feedbackBubble = null;
                 }
 
-                // Walkable area - find path
-                // Play click sound
                 const audioManager = this.registry.get('audioManager');
                 if (audioManager) {
                     audioManager.playClick();
                 }
+
                 this.showValidClickIndicator(pointer.x, pointer.y);
                 this.findPath(this.player.x, this.player.y, pointer.x, pointer.y);
-            } else if (color === 'red') {
-                // Dismiss any active feedback bubble
+            }
+            else if (color === 'red') {
+                // Interaktivt objekt (kummel, runsten etc)
                 if (this.feedbackBubble) {
                     this.feedbackBubble.destroy();
                     this.feedbackBubble = null;
                 }
 
-                // Interactive object - handled by subclass
                 this.handleInteractiveClick(pointer.x, pointer.y);
-            } else {
-                // Blocked (black/unpainted) - show red indicator AND speech bubble
+            }
+            else if (color === 'blue') {
+                // Transition area – ny hook
+                if (this.feedbackBubble) {
+                    this.feedbackBubble.destroy();
+                    this.feedbackBubble = null;
+                }
+
+                this.handleTransitionClick(pointer.x, pointer.y);
+            }
+            else if (color === 'black') {
+                // Svart = ”ingen klickyta” → gör ingenting alls
+                return;
+            }
+            else {
+                // Övrigt (om du har någon annan färg som är hårt block)
                 this.showNoPathIndicator(pointer.x, pointer.y);
                 this.showFeedbackBubble(this.feedbackMessages.cannotWalk);
             }
@@ -181,28 +193,39 @@ class GameScene extends Phaser.Scene {
     }
 
     getPixelColor(x, y) {
-        // Create a temporary canvas to read pixel data
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = this.maskTexture.width;
         canvas.height = this.maskTexture.height;
         ctx.drawImage(this.maskTexture, 0, 0);
 
-        // Get pixel data at the clicked position
         const imageData = ctx.getImageData(x, y, 1, 1);
         const pixel = imageData.data;
         const r = pixel[0];
         const g = pixel[1];
         const b = pixel[2];
 
-        // Check for specific colors
+        // Grönt = gångbart
         if (r === 0 && g === 255 && b === 0) {
-            return 'green'; // Walkable
-        } else if (r === 255 && g === 0 && b === 0) {
-            return 'red'; // Interactive
+            return 'green';
         }
-        return 'other'; // Ignore
+        // Rött = interaktivt objekt (kummel / runsten / liknande)
+        if (r === 255 && g === 0 && b === 0) {
+            return 'red';
+        }
+        // Blått = transitions-zon (t.ex. nästa scen)
+        if (r === 0 && g === 0 && b === 255) {
+            return 'blue';
+        }
+        // Svart = ”ingen klickyta” (osynlig vägg / utanför karta)
+        if (r === 0 && g === 0 && b === 0) {
+            return 'black';
+        }
+
+        // Övriga färger – just nu behandlar vi dem som ”övrigt”
+        return 'other';
     }
+
 
     createGridFromMask() {
         // Create a grid by sampling the mask image
