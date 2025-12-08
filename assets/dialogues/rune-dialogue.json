@@ -14,7 +14,7 @@
         },
         {
           "role": "player",
-          "text": "Hm... det ser ut som en gammal inskription. Jag försöker läsa..."
+          "text": "Hm... Jag kan knappt se, jag försöker läsa..."
         },
         {
           "role": "player",
@@ -34,7 +34,7 @@
         },
         {
           "role": "sister",
-          "text": "Det låter som en gåta... men vad betyder det?"
+          "text": "Vad betyder det? Det låter som en gåta."
         },
         {
           "role": "player",

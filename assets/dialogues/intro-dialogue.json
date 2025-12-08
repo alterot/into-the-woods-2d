@@ -6,7 +6,7 @@
       "lines": [
         {
           "role": "player",
-          "text": "…vakna. Du måste vakna."
+          "text": "Vakna... Du måste vakna!"
         },
         {
           "role": "sibling",
@@ -14,7 +14,7 @@
         },
         {
           "role": "player",
-          "text": "Jag vet inte. Jag minns… ingenting efter att vi gick genom granarna."
+          "text": "Jag vet inte. Jag minns… ingenting efter att dimman la sig."
         },
         {
           "role": "sibling",
@@ -26,11 +26,11 @@
         },
         {
           "role": "sibling",
-          "text": "Skogen känns annorlunda på något sätt. Och hur ska vi hitta ut?"
+          "text": "Mm... Och skogen känns annorlunda på något sätt. Och hur ska vi hitta ut?"
         },
         {
           "role": "player",
-          "text": "Vi tar reda på det. Tillsammans."
+          "text": "Låt oss ta reda på det. Tillsammans."
         }
       ]
     }
