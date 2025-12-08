@@ -32,6 +32,7 @@ class GameScene extends Phaser.Scene {
         this.lastStepX = null;
         this.lastStepY = null;
         this.stepDistanceAccum = 0;
+        
 
         // Keep legacy variables for backward compatibility
         this.sister1 = null;
@@ -453,39 +454,43 @@ class GameScene extends Phaser.Scene {
         this.sister1.setDepth(this.sister1.y);
         this.sister2.setDepth(this.sister2.y);
 
-        // --- Fotsteg baserat på distans ---
+        // --- Fotsteg baserat på mittpunkten mellan systrarna ---
         const audioManager = this.registry.get('audioManager');
         if (audioManager) {
             const anyMoving = this.isMoving || this.isFollowerMoving;
 
-            // Om ingen rör sig: nollställ accumulatorn
+            // Mittpunkt mellan player och follower
+            const centerX = (this.player.x + this.follower.x) / 2;
+            const centerY = (this.player.y + this.follower.y) / 2;
+
             if (!anyMoving) {
-                this.lastStepX = this.player.x;
-                this.lastStepY = this.player.y;
+                // Ingen rör sig → nollställ fotstegstillstånd
+                this.lastStepX = null;
+                this.lastStepY = null;
                 this.stepDistanceAccum = 0;
             } else {
                 // Se till att vi har en startpunkt
                 if (this.lastStepX == null || this.lastStepY == null) {
-                    this.lastStepX = this.player.x;
-                    this.lastStepY = this.player.y;
+                    this.lastStepX = centerX;
+                    this.lastStepY = centerY;
                 }
 
-                const dx = this.player.x - this.lastStepX;
-                const dy = this.player.y - this.lastStepY;
-                const frameDist = Math.sqrt(dx * dx + dy * dy);
+                const dxCenter = centerX - this.lastStepX;
+                const dyCenter = centerY - this.lastStepY;
+                const frameDist = Math.sqrt(dxCenter * dxCenter + dyCenter * dyCenter);
 
                 this.stepDistanceAccum += frameDist;
 
-                // Tröskel för ett fotsteg – tweaka 12–20 px efter känsla
-                const STEP_DISTANCE = 16;
+                // Glesare, lugnare steg
+                const STEP_DISTANCE = 24; // testa 24–28 vid behov
 
                 if (this.stepDistanceAccum >= STEP_DISTANCE) {
                     audioManager.playFootstep();
                     this.stepDistanceAccum = 0;
                 }
 
-                this.lastStepX = this.player.x;
-                this.lastStepY = this.player.y;
+                this.lastStepX = centerX;
+                this.lastStepY = centerY;
             }
         }
     }
