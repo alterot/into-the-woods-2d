@@ -1,11 +1,12 @@
 // ===== SPEECH BUBBLE ENTITY =====
 // Reusable speech bubble class with typewriter effect and auto-destroy
 class SpeechBubble {
-    constructor(scene, x, y, text, duration = 2500, followTarget = null) {
+    constructor(scene, x, y, text, duration = 2500, followTarget = null, choices = null) {
         this.scene = scene;
         this.text = text;
         this.duration = duration;
         this.followTarget = followTarget;
+        this.choices = choices; // Array of { text, callback }
 
         // Determine side based on screen position
         const screenCenterX = scene.scale.width / 2;
@@ -52,10 +53,18 @@ class SpeechBubble {
         const textBounds = testText.getBounds();
         testText.destroy();
 
-        // Calculate bubble dimensions
+        // Calculate bubble dimensions (with extra space for choices if present)
         const padding = 15;
-        const bubbleWidth = Math.max(150, Math.min(300, textBounds.width + padding * 2));
-        const bubbleHeight = textBounds.height + padding * 2;
+        let bubbleWidth = Math.max(150, Math.min(300, textBounds.width + padding * 2));
+        let bubbleHeight = textBounds.height + padding * 2;
+
+        // Add extra height for choices
+        if (this.choices && this.choices.length > 0) {
+            const choiceHeight = 22;
+            const choiceSpacing = 10;
+            bubbleHeight += choiceSpacing + (this.choices.length * choiceHeight);
+            bubbleWidth = Math.max(bubbleWidth, 220); // Ensure wide enough for choices
+        }
 
         // 🔹 spara storlek så vi kan använda i update()
         this.bubbleWidth = bubbleWidth;
@@ -144,14 +153,68 @@ class SpeechBubble {
         });
         this.textObject.setOrigin(0.5);
 
-        // Add all components to container (med svans)
-        this.container.add([
+        // Position main text higher if choices exist
+        if (this.choices && this.choices.length > 0) {
+            const choiceHeight = 22;
+            const totalChoiceHeight = this.choices.length * choiceHeight;
+            this.textObject.y = -(totalChoiceHeight / 2) - 8;
+        }
+
+        // Container children array
+        const containerChildren = [
             shadow,
             this.tailShadow,
             background,
             this.tailBg,
             this.textObject
-        ]);
+        ];
+
+        // Add choice text objects if provided
+        this.choiceTexts = [];
+        if (this.choices && this.choices.length > 0) {
+            const choiceStartY = this.textObject.y + textBounds.height / 2 + 15;
+            const choiceHeight = 22;
+
+            this.choices.forEach((choice, index) => {
+                const choiceText = this.scene.add.text(
+                    0,
+                    choiceStartY + (index * choiceHeight),
+                    `→ ${choice.text}`,
+                    {
+                        fontSize: '14px',
+                        fontFamily: 'Georgia, serif',
+                        color: '#555555',
+                        align: 'center',
+                        fontStyle: 'bold'
+                    }
+                );
+                choiceText.setOrigin(0.5);
+                choiceText.setInteractive({ useHandCursor: true });
+
+                // Hover effect - brighten color
+                choiceText.on('pointerover', () => {
+                    choiceText.setColor('#000000');
+                    choiceText.setScale(1.05);
+                });
+                choiceText.on('pointerout', () => {
+                    choiceText.setColor('#555555');
+                    choiceText.setScale(1);
+                });
+
+                // Click handler
+                choiceText.on('pointerdown', () => {
+                    if (choice.callback) {
+                        choice.callback();
+                    }
+                });
+
+                this.choiceTexts.push(choiceText);
+                containerChildren.push(choiceText);
+            });
+        }
+
+        // Add all components to container
+        this.container.add(containerChildren);
 
         // Make container interactive (inkl svanshöjd)
         const hitArea = new Phaser.Geom.Rectangle(

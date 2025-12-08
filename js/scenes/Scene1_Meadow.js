@@ -367,28 +367,45 @@ update() {
                     );
                     this.currentConversationBubble = bubble4; // Track for scene-wide clicks
 
-                    // Chain to bubble #5
+                    // Chain to bubble #5 with YES/NO choice
                     bubble4.onClick(() => {
-                        // Create bubble #5 - final question
-                        const bubble5 = new SpeechBubble(
+                        console.log('🎯 Creating choice bubble with YES/NO options');
+
+                        // Single bubble with two choices
+                        const choiceBubble = new SpeechBubble(
                             this,
                             this.player.x,
                             this.player.y,
-                            'Ska vi följa efter wispen?',
+                            'Vad ska vi göra?',
                             null,
-                            this.player
+                            this.player,
+                            [
+                                {
+                                    text: 'Följa efter wispen',
+                                    callback: () => {
+                                        console.log('✅ YES chosen - Transitioning to Scene2_Crossroads');
+                                        this.currentConversationBubble = null;
+                                        this.cameras.main.fadeOut(500, 0, 0, 0);
+                                        this.time.delayedCall(500, () => {
+                                            this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
+                                        });
+                                    }
+                                },
+                                {
+                                    text: 'Stanna här',
+                                    callback: () => {
+                                        console.log('❌ NO chosen - Closing conversation');
+                                        this.dialogActive = false;
+                                        this.wispConversationActive = false;
+                                        this.currentConversationBubble = null;
+                                        choiceBubble.destroy(); // Close the bubble
+                                    }
+                                }
+                            ]
                         );
-                        this.currentConversationBubble = bubble5; // Track for scene-wide clicks
 
-                        // Clicking bubble #5 transitions to Scene2
-                        bubble5.onClick(() => {
-                            console.log('🚀 Transitioning to Scene2_Crossroads');
-                            this.currentConversationBubble = null; // Clear before transition
-                            this.cameras.main.fadeOut(500, 0, 0, 0);
-                            this.time.delayedCall(500, () => {
-                                this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
-                            });
-                        });
+                        // Don't set as currentConversationBubble - choices handle their own clicks
+                        this.currentConversationBubble = null;
                     });
                 });
             });
