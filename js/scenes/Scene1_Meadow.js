@@ -27,9 +27,13 @@ class Scene1_Meadow extends GameScene {
         // Create wisp at specified position
         this.wisp = new Wisp(this, 1075, 500);
         this.wisp.onClick(() => {
-            console.log('Wisp clicked in meadow! Add dialog or interaction here.');
-            // TODO: Show proper dialog or interaction
+            // Tillfällig lösning: direkt transition till scen 2
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.time.delayedCall(500, () => {
+                this.scene.start('Scene2_Crossroads');
+            });
         });
+
         // Hover-effekt över runstenen
         this.setupRunestoneHoverHighlight();
     }
