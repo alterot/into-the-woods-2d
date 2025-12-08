@@ -18,7 +18,7 @@ class Scene2_Crossroads extends GameScene {
      */
     getSpawnPoint(entryTag) {
         const spawns = {
-            from_meadow: { x: 570, y: 640 },
+            from_meadow: { x: 570, y: 660 },
             default:     { x: 610, y: 690 }
         };
 

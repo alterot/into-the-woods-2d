@@ -3,6 +3,7 @@
 import GameScene from './GameScene.js';
 import Wisp from '../entities/Wisp.js';
 import DialogOverlay from '../systems/DialogOverlay.js';
+import SpeechBubble from '../entities/SpeechBubble.js'; 
 
 class Scene1_Meadow extends GameScene {
     constructor() {
@@ -19,6 +20,10 @@ class Scene1_Meadow extends GameScene {
         this.lastHoverSparkTime = 0;
         this.lastHoverX = null;
         this.lastHoverY = null;
+
+        //Whisp dialog check
+        this.wispConversationActive = false;
+        this.wispIntroBubble = null;
     }
 
     createSceneContent() {
@@ -27,17 +32,49 @@ class Scene1_Meadow extends GameScene {
         // Create wisp at specified position
         this.wisp = new Wisp(this, 1075, 500);
         this.wisp.onClick(() => {
-            // Tillfällig lösning: direkt transition till scen 2
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.time.delayedCall(500, () => {
-                this.scene.start('Scene2_Crossroads', {
-                    entry: 'from_meadow'
-                });
-            });
+            this.handleWispClick();
         });
 
         // Hover-effekt över runstenen
         this.setupRunestoneHoverHighlight();
+    }
+
+    handleWispClick() {
+        // Blockera om annat dialogläge är aktivt
+        if (this.dialogActive || this.wispConversationActive) {
+            return;
+        }
+
+        this.wispConversationActive = true;
+
+        // Hitta en gångbar punkt nära wispen (grönt i masken)
+        let target = null;
+        if (this.wisp && this.wisp.sprite) {
+            target = this.findNearestWalkable(this.wisp.sprite.x, this.wisp.sprite.y, 80);
+        }
+
+        if (target) {
+            // Starta pathfinding mot platsen vid wispen
+            this.findPath(this.player.x, this.player.y, target.x, target.y);
+        } else {
+            console.warn('[Scene1_Meadow] Hittade ingen gångbar punkt nära wispen');
+        }
+
+        // Städa ev. tidigare bubbla
+        if (this.wispIntroBubble) {
+            this.wispIntroBubble.destroy();
+            this.wispIntroBubble = null;
+        }
+
+        // Skapa bubbla på playern som följer med när de går
+        this.wispIntroBubble = new SpeechBubble(
+            this,
+            this.player.x,
+            this.player.y,
+            'Vad är detta? Verkar som att den vill säga något.',
+            null,          // null = ingen auto-destroy, styrs av klick
+            this.player    // followTarget → behåller samma placeringslogik + svans mot player
+        );
     }
 
     findNearestWalkable(targetX, targetY, maxRadius = 150) {
