@@ -13,6 +13,43 @@ class Wisp {
         // Make it interactive
         this.sprite.setInteractive({ useHandCursor: false });
 
+        // Extra hover-wobble
+        this.hoverTween = null;
+        this.baseScale = 0.1;
+
+        this.sprite.on('pointerover', () => {
+            // Lägg på en extra snabb liten wobble, men stör inte befintliga tweens
+            if (!this.hoverTween) {
+                this.hoverTween = this.scene.tweens.add({
+                    targets: this.sprite,
+                    scaleX: this.baseScale * 1.15,
+                    scaleY: this.baseScale * 1.15,
+                    duration: 180,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        });
+
+        this.sprite.on('pointerout', () => {
+            // Stoppa bara hover-effekten
+            if (this.hoverTween) {
+                this.hoverTween.stop();
+                this.hoverTween = null;
+            }
+
+            // Återställ till originalskalan utan att påverka float/sway/studs
+            this.scene.tweens.add({
+                targets: this.sprite,
+                scaleX: this.baseScale,
+                scaleY: this.baseScale,
+                duration: 150,
+                ease: 'Quad.Out'
+            });
+        });
+
+
         // Store the click handler
         this.clickHandler = null;
 
