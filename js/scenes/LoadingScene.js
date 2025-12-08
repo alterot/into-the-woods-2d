@@ -14,7 +14,7 @@ class LoadingScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(0x06130a);
 
         // Title text
-        const title = this.add.text(width / 2, height / 2 - 50, 'Dimman lättar', {
+        const title = this.add.text(width / 2, height / 2 - 50, 'Dimman lättar...', {
             fontSize: '32px',
             fontFamily: 'Georgia',
             color: '#e9c08b'

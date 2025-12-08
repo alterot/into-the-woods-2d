@@ -11,9 +11,9 @@ class SpeechBubble {
         this.isLeftSide = x < screenCenterX;
 
         // Position bubble to side of character
-        const bubbleOffsetX = this.isLeftSide ? 120 : -120;
+        const bubbleOffsetX = this.isLeftSide ? 60 : -60;
         this.x = x + bubbleOffsetX;
-        this.y = y - 80; // Above character
+        this.y = y - 50; // Above character
 
         // Store character position for tail
         this.characterX = x;

@@ -47,7 +47,7 @@ class GameScene extends Phaser.Scene {
 
         // Feedback messages and bubble
         this.feedbackMessages = {
-            cannotWalk: "Vi kan inte gå dit, skogen är för djup"
+            cannotWalk: "Vi kan inte gå dit, skogen är för tät."
         };
         this.feedbackBubble = null;
     }
