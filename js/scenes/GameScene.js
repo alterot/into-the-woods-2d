@@ -13,6 +13,10 @@ class GameScene extends Phaser.Scene {
         this.backgroundKey = backgroundKey;
         this.maskKey = maskKey;
 
+        // Info om hur vi kom in i scenen
+        this.entryTag = null;
+        this.entryData = null;
+
         // Movement properties
         this.targetX = null;
         this.targetY = null;
@@ -63,6 +67,13 @@ class GameScene extends Phaser.Scene {
         // Override in subclass to load background, mask, sprites, etc.
     }
 
+    init(data) {
+    // data kan t.ex. vara { entry: 'from_meadow', ... }
+    this.entryTag = data?.entry || null;
+    this.entryData = data || {};
+    }
+
+
     create() {
         // Display the background image centered
         this.add.image(640, 360, this.backgroundKey);
@@ -76,6 +87,9 @@ class GameScene extends Phaser.Scene {
 
         // Setup player characters
         this.setupCharacters();
+
+        // Flytta dem vid behov beroende på entryTag
+        this.applySpawnPoint();
 
         // Initiera fotstegsposition vid start
         this.lastStepX = this.player.x;
@@ -179,6 +193,60 @@ class GameScene extends Phaser.Scene {
         this.sister1.setFlipX(true);
         this.sister2.setFlipX(true);
     }
+
+        applySpawnPoint() {
+        // Om vi inte fått någon entryTag → använd standardläget (ingen flytt)
+        if (!this.entryTag) {
+            return;
+        }
+
+        // Scenen måste själv definiera getSpawnPoint(entryTag)
+        if (typeof this.getSpawnPoint !== 'function') {
+            console.warn(`[GameScene] getSpawnPoint() saknas i scen "${this.sceneKey}"`);
+            return;
+        }
+
+        const spawn = this.getSpawnPoint(this.entryTag);
+        if (!spawn) {
+            console.warn(
+                `[GameScene] Ingen spawn point för entry "${this.entryTag}" i scen "${this.sceneKey}"`
+            );
+            return;
+        }
+
+        const { x, y } = spawn;
+        const followerOffsetX = -50; // följaren står ~50px till vänster
+
+        if (!this.player || !this.follower || !this.sister1 || !this.sister2) {
+            console.warn('[GameScene] Kan inte applicera spawn, saknar sprites');
+            return;
+        }
+
+        // Om player = sister1 (storasyster leder)
+        if (this.player === this.sister1) {
+            this.sister1.x = x;
+            this.sister1.y = y;
+            this.baseY = y;
+            this.playerBaseY = y;
+
+            this.sister2.x = x + followerOffsetX;
+            this.sister2.y = y;
+            this.baseY2 = y;
+            this.followerBaseY = y;
+        } else {
+            // Player = sister2 (lillasyster leder)
+            this.sister2.x = x;
+            this.sister2.y = y;
+            this.baseY2 = y;
+            this.playerBaseY = y;
+
+            this.sister1.x = x + followerOffsetX;
+            this.sister1.y = y;
+            this.baseY = y;
+            this.followerBaseY = y;
+        }
+    }
+
 
     // Hook for subclasses to add scene-specific content
     createSceneContent() {
