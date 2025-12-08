@@ -219,7 +219,8 @@ showChoiceBubble() {
         this,
         this.player.x,
         this.player.y,
-        null,
+        '',  // Empty string for no header text
+        null,  // duration
         this.player,
         [
             {
@@ -365,6 +366,13 @@ update() {
         if (this.wispWalkStarted && playerStopped && followerStopped) {
             this.wispArrivalHandled = true;
 
+            // If already seen full conversation, skip to choice bubble
+            if (this.wispConversationCompleted) {
+                this.showChoiceBubble();
+                return;
+            }
+
+            // First time - show full conversation
             // 1) Stäng första bubblan (på playern)
             if (this.wispIntroBubble) {
                 this.wispIntroBubble.destroy();
@@ -389,7 +397,7 @@ update() {
                     this,
                     this.player.x,
                     this.player.y,
-                    'Ett Irrbloss tror jag. Verkar som att den vill visa oss något',
+                    'Ett Irrbloss tror jag. Verkar som att den vill visa oss något.',
                     null,
                     this.player
                 );
@@ -410,42 +418,7 @@ update() {
 
                     // Chain to bubble #5 with YES/NO choice
                     bubble4.onClick(() => {
-                        // Single bubble with two choices
-                        const choiceBubble = new SpeechBubble(
-                            this,
-                            this.player.x,
-                            this.player.y,
-                            null,
-                            this.player,
-                            [
-                                {
-                                    text: 'Vi följer efter och ser vad den vill.',
-                                    callback: () => {
-                                        this.currentConversationBubble = null;
-                                        this.cameras.main.fadeOut(500, 0, 0, 0);
-                                        this.time.delayedCall(500, () => {
-                                            this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
-                                        });
-                                    }
-                                },
-                                {
-                                    text: 'Vi stannar kvar i gläntan.',
-                                    callback: () => {
-                                        choiceBubble.destroy(); // Close the bubble first
-
-                                        // Reset flags AFTER current click finishes (next frame)
-                                        this.time.delayedCall(10, () => {
-                                            this.dialogActive = false;
-                                            this.wispConversationActive = false;
-                                            this.currentConversationBubble = null;
-                                        });
-                                    }
-                                }
-                            ]
-                        );
-
-                        // Don't set as currentConversationBubble - choices handle their own clicks
-                        this.currentConversationBubble = null;
+                        this.showChoiceBubble();
                     });
                 });
             });
