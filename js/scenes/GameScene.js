@@ -358,8 +358,8 @@ class GameScene extends Phaser.Scene {
             this.player.x,     // Startposition – bubblan flyttar sig sen själv
             this.player.y,
             message,
-            3000,              // Duration (vi ändrar i steg 3)
-            this.player        // 🟢 followTarget → bubblan följer spelaren
+            4000,              // Duration (vi ändrar i steg 3)
+            this.player        // FollowTarget → bubblan följer spelaren
         );
     }
 
