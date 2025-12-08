@@ -78,7 +78,7 @@ class SpeechBubble {
 
         // Main bubble background (more transparent)
         const background = this.scene.add.graphics();
-        background.fillStyle(0xFFFFFF, 0.75);
+        background.fillStyle(0xFFFFFF, 1);
         background.fillRoundedRect(
             -bubbleWidth/2,
             -bubbleHeight/2,
@@ -88,7 +88,7 @@ class SpeechBubble {
         );
 
         // Border
-        background.lineStyle(2, 0xCCCCCC, 0.75);
+        background.lineStyle(2, 0xCCCCCC, 1);
         background.strokeRoundedRect(
             -bubbleWidth/2,
             -bubbleHeight/2,
@@ -111,7 +111,7 @@ class SpeechBubble {
         );
 
         const tailBg = this.scene.add.graphics();
-        tailBg.fillStyle(0xFFFFFF, 0.75);
+        tailBg.fillStyle(0xFFFFFF, 1);
         tailBg.fillTriangle(
             -tailWidth / 2, 0,
             tailWidth / 2, 0,
