@@ -191,6 +191,12 @@ class GameScene extends Phaser.Scene {
         console.log('Interactive object clicked!');
         this.showNoPathIndicator(x, y);
     }
+    // Hook för transitions-zoner (blå pixlar i masken)
+    handleTransitionClick(x, y) {
+        // Default: gör ingenting, bara logga
+        console.log('Transition area clicked at', x, y);
+    }
+
 
     getPixelColor(x, y) {
         const canvas = document.createElement('canvas');
