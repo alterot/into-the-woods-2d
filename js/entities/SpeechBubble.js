@@ -1,7 +1,7 @@
 // ===== SPEECH BUBBLE ENTITY =====
 // Reusable speech bubble class with typewriter effect and auto-destroy
 class SpeechBubble {
-    constructor(scene, x, y, text, duration = 3000, followTarget = null) {
+    constructor(scene, x, y, text, duration = 2500, followTarget = null) {
         this.scene = scene;
         this.text = text;
         this.duration = duration;
@@ -12,9 +12,9 @@ class SpeechBubble {
         this.isLeftSide = x < screenCenterX;
 
         // Position bubble to side of character
-        const bubbleOffsetX = this.isLeftSide ? 60 : -60;
+        const bubbleOffsetX = this.isLeftSide ? 80 : -80;
         this.x = x + bubbleOffsetX;
-        this.y = y - 50; // Above character
+        this.y = y - 80; // Above character
 
         // Store character position for tail
         this.characterX = x;
@@ -45,7 +45,7 @@ class SpeechBubble {
     createBubble() {
         // Measure text to determine bubble size
         const testText = this.scene.add.text(0, 0, this.fullText, {
-            fontSize: '16px',
+            fontSize: '14px',
             fontFamily: 'Georgia, serif',
             wordWrap: { width: 280 }
         });
@@ -53,7 +53,7 @@ class SpeechBubble {
         testText.destroy();
 
         // Calculate bubble dimensions
-        const padding = 20;
+        const padding = 15;
         const bubbleWidth = Math.max(150, Math.min(300, textBounds.width + padding * 2));
         const bubbleHeight = textBounds.height + padding * 2;
 
@@ -72,12 +72,12 @@ class SpeechBubble {
         background.fillRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
 
         // Border
-        background.lineStyle(2, 0xCCCCCC, 1);
+        background.lineStyle(2, 0xCCCCCC, 0.75);
         background.strokeRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
 
         // Text object
         this.textObject = this.scene.add.text(0, 0, '', {
-            fontSize: '16px',
+            fontSize: '14px',
             fontFamily: 'Georgia, serif',
             color: '#000000',
             align: 'center',
@@ -148,8 +148,8 @@ class SpeechBubble {
     const screenCenterX = this.scene.scale.width / 2;
     this.isLeftSide = spriteX < screenCenterX;
 
-    const bubbleOffsetX = this.isLeftSide ? 60 : -60;
-    const bubbleOffsetY = -50;
+    const bubbleOffsetX = this.isLeftSide ? 80 : -80;
+    const bubbleOffsetY = -80;
 
     this.container.x = spriteX + bubbleOffsetX;
     this.container.y = spriteY + bubbleOffsetY;
