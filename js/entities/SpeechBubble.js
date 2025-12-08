@@ -167,8 +167,9 @@ class SpeechBubble {
         );
 
         // Set up click behavior
-        this.container.on('pointerdown', () => {
+        this.container.on('pointerdown', (pointer) => {
             this.handleClick();
+            pointer.stopPropagation(); // Prevent scene-wide handler from also firing
         });
 
         // Initial alpha 0 for fade in
@@ -215,14 +216,16 @@ class SpeechBubble {
             callback: () => {
                 this.currentIndex++;
                 this.textObject.setText(this.fullText.substring(0, this.currentIndex));
+
+                // Check if we've shown all text
+                if (this.currentIndex >= this.fullText.length) {
+                    console.log('⏹️ Typing completed! Setting isTyping = false');
+                    this.isTyping = false;
+                    this.typingEvent = null;
+                    console.log('✓ Bubble ready for next click');
+                }
             },
-            callbackScope: this,
-            onComplete: () => {
-                console.log('⏹️ Typing completed! Setting isTyping = false');
-                this.isTyping = false;
-                this.typingEvent = null;
-                console.log('✓ Bubble ready for next click');
-            }
+            callbackScope: this
         });
     }
 
@@ -271,13 +274,11 @@ class SpeechBubble {
             // Show all text immediately
             this.textObject.setText(this.fullText);
             this.isTyping = false;
-            console.log('✓ All text shown, isTyping set to false');
-        }
-
-        // Always check if we should call the handler (whether we just fast-forwarded or typing was already done)
-        if (!this.isTyping) {
-            console.log('✅ Typing complete, calling handler...');
-            // Typing complete - call custom handler BEFORE destroy (destroy nulls it out!)
+            console.log('✓ All text shown, bubble stays (click again to advance)');
+        } else {
+            // Typing already complete - advance to next bubble
+            console.log('✅ Typing complete, calling handler and advancing...');
+            // Call custom handler BEFORE destroy (destroy nulls it out!)
             if (this.clickHandler) {
                 console.log('🎯 Calling clickHandler now!');
                 this.clickHandler();
