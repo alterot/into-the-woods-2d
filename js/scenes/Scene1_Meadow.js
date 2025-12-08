@@ -99,7 +99,7 @@ class Scene1_Meadow extends GameScene {
             this,
             this.player.x,
             this.player.y,
-            'Vad är detta? Verkar som att den vill säga något.',
+            'Vad är det som lyser där borta?',
             null,          // null = ingen auto-destroy, styrs av klick
             this.player    // followTarget → behåller samma placeringslogik + svans mot player
         );
@@ -219,12 +219,11 @@ showChoiceBubble() {
         this,
         this.player.x,
         this.player.y,
-        'Vad ska vi göra?',
         null,
         this.player,
         [
             {
-                text: 'Följa efter wispen',
+                text: 'Vi följer efter!',
                 callback: () => {
                     this.wispConversationCompleted = true;
                     this.currentConversationBubble = null;
@@ -235,7 +234,7 @@ showChoiceBubble() {
                 }
             },
             {
-                text: 'Stanna här',
+                text: 'Vi stannar kvar i gläntan.',
                 callback: () => {
                     this.wispConversationCompleted = true;
                     choiceBubble.destroy();
@@ -366,13 +365,6 @@ update() {
         if (this.wispWalkStarted && playerStopped && followerStopped) {
             this.wispArrivalHandled = true;
 
-            // If already seen full conversation, skip to choice bubble
-            if (this.wispConversationCompleted) {
-                this.showChoiceBubble();
-                return;
-            }
-
-            // First time - show full conversation
             // 1) Stäng första bubblan (på playern)
             if (this.wispIntroBubble) {
                 this.wispIntroBubble.destroy();
@@ -384,7 +376,7 @@ update() {
                 this,
                 this.follower.x,
                 this.follower.y,
-                'Vad vill den tror du?',
+                'Vad är det för något?',
                 null,           // ingen auto-timeout
                 this.follower   // followTarget → följer systern + svans rätt
             );
@@ -397,7 +389,7 @@ update() {
                     this,
                     this.player.x,
                     this.player.y,
-                    'Jag tror den vill att vi följer efter den.',
+                    'Ett Irrbloss tror jag. Verkar som att den vill visa oss något',
                     null,
                     this.player
                 );
@@ -410,7 +402,7 @@ update() {
                         this,
                         this.follower.x,
                         this.follower.y,
-                        'Vågar vi det?',
+                        'Vad ska vi göra tycker du?',
                         null,
                         this.follower
                     );
@@ -418,7 +410,42 @@ update() {
 
                     // Chain to bubble #5 with YES/NO choice
                     bubble4.onClick(() => {
-                        this.showChoiceBubble();
+                        // Single bubble with two choices
+                        const choiceBubble = new SpeechBubble(
+                            this,
+                            this.player.x,
+                            this.player.y,
+                            null,
+                            this.player,
+                            [
+                                {
+                                    text: 'Vi följer efter och ser vad den vill.',
+                                    callback: () => {
+                                        this.currentConversationBubble = null;
+                                        this.cameras.main.fadeOut(500, 0, 0, 0);
+                                        this.time.delayedCall(500, () => {
+                                            this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
+                                        });
+                                    }
+                                },
+                                {
+                                    text: 'Vi stannar kvar i gläntan.',
+                                    callback: () => {
+                                        choiceBubble.destroy(); // Close the bubble first
+
+                                        // Reset flags AFTER current click finishes (next frame)
+                                        this.time.delayedCall(10, () => {
+                                            this.dialogActive = false;
+                                            this.wispConversationActive = false;
+                                            this.currentConversationBubble = null;
+                                        });
+                                    }
+                                }
+                            ]
+                        );
+
+                        // Don't set as currentConversationBubble - choices handle their own clicks
+                        this.currentConversationBubble = null;
                     });
                 });
             });
