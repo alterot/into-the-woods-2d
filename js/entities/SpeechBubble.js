@@ -1,10 +1,11 @@
 // ===== SPEECH BUBBLE ENTITY =====
 // Reusable speech bubble class with typewriter effect and auto-destroy
 class SpeechBubble {
-    constructor(scene, x, y, text, duration = 3000) {
+    constructor(scene, x, y, text, duration = 3000, followTarget = null) {
         this.scene = scene;
         this.text = text;
         this.duration = duration;
+        this.followTarget = followTarget;
 
         // Determine side based on screen position
         const screenCenterX = scene.scale.width / 2;
@@ -35,6 +36,10 @@ class SpeechBubble {
 
         // Start typewriter effect
         this.startTypewriter();
+
+        if (this.followTarget) {
+        this.scene.events.on('update', this.update, this);
+    }
     }
 
     createBubble() {
@@ -133,6 +138,24 @@ class SpeechBubble {
         });
     }
 
+    update() {
+    if (!this.followTarget || !this.container) return;
+
+    // Positionera bubblan baserat på spritens nuvarande position
+    const spriteX = this.followTarget.x;
+    const spriteY = this.followTarget.y;
+
+    const screenCenterX = this.scene.scale.width / 2;
+    this.isLeftSide = spriteX < screenCenterX;
+
+    const bubbleOffsetX = this.isLeftSide ? 60 : -60;
+    const bubbleOffsetY = -50;
+
+    this.container.x = spriteX + bubbleOffsetX;
+    this.container.y = spriteY + bubbleOffsetY;
+}
+
+
     handleClick() {
         if (this.isTyping) {
             // Speed up typewriter drastically (fast forward)
@@ -158,6 +181,10 @@ class SpeechBubble {
     // Clean up and destroy the speech bubble
     destroy() {
         if (!this.container) return;
+
+        if (this.followTarget) {
+            this.scene.events.off('update', this.update, this);
+        }
 
         // Clear timers
         if (this.typingEvent) {

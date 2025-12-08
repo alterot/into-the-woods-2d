@@ -54,7 +54,7 @@ class CharacterSelectScene extends Phaser.Scene {
         const subtitle = this.add.text(
             width / 2,
             height * 0.29,
-            'Välj vilken syster som leder vägen',
+            'Välj vilken syster som leder vägen genom skogen.',
             {
                 fontSize: '20px',
                 fontFamily: 'Georgia',
