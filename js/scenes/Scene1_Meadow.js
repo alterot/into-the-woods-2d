@@ -30,7 +30,9 @@ class Scene1_Meadow extends GameScene {
             // Tillfällig lösning: direkt transition till scen 2
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.time.delayedCall(500, () => {
-                this.scene.start('Scene2_Crossroads');
+                this.scene.start('Scene2_Crossroads', {
+                    entry: 'from_meadow'
+                });
             });
         });
 
