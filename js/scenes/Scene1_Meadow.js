@@ -25,7 +25,9 @@ class Scene1_Meadow extends GameScene {
         this.wispConversationActive = false;
         this.wispIntroBubble = null;
         this.wispArrivalHandled = false;
-        this.wispFollowerBubble = null; 
+        this.wispWalkStarted = false; // Track if they've started walking to wisp
+        this.wispFollowerBubble = null;
+        this.currentConversationBubble = null; // Track current bubble for scene-wide clicks 
     }
 
     createSceneContent() {
@@ -39,6 +41,14 @@ class Scene1_Meadow extends GameScene {
 
         // Hover-effekt över runstenen
         this.setupRunestoneHoverHighlight();
+
+        // Scene-wide click handler for conversation bubbles
+        this.input.on('pointerdown', (pointer) => {
+            // During wisp conversation, any click advances the current bubble
+            if (this.wispConversationActive && this.currentConversationBubble) {
+                this.currentConversationBubble.handleClick();
+            }
+        });
     }
 
     handleWispClick() {
@@ -49,7 +59,8 @@ class Scene1_Meadow extends GameScene {
 
         this.dialogActive = true;
         this.wispConversationActive = true;
-        this.wispArrivalHandled = false;  
+        this.wispArrivalHandled = false;
+        this.wispWalkStarted = false; // Reset - they haven't started walking yet  
 
         // Hitta en gångbar punkt nära wispen (grönt i masken)
         let target = null;
@@ -71,6 +82,7 @@ class Scene1_Meadow extends GameScene {
         }
 
         // Skapa bubbla på playern som följer med när de går
+        console.log('🟢 Creating BUBBLE #1 on player at', this.player.x, this.player.y);
         this.wispIntroBubble = new SpeechBubble(
             this,
             this.player.x,
@@ -79,6 +91,9 @@ class Scene1_Meadow extends GameScene {
             null,          // null = ingen auto-destroy, styrs av klick
             this.player    // followTarget → behåller samma placeringslogik + svans mot player
         );
+        console.log('✅ BUBBLE #1 created:', !!this.wispIntroBubble);
+        // DON'T set currentConversationBubble yet - only after they arrive
+        // This prevents accidental clicks while walking from destroying bubble #1
     }
 
     findNearestWalkable(targetX, targetY, maxRadius = 150) {
@@ -291,19 +306,29 @@ update() {
 
     // WISP-KONVERSATION – när båda har stannat, byt bubbla
     if (this.wispConversationActive && !this.wispArrivalHandled) {
+        // Track when they start walking
+        if (!this.wispWalkStarted && (this.isMoving || this.isFollowerMoving)) {
+            console.log('🚶 Characters started walking to wisp');
+            this.wispWalkStarted = true;
+        }
+
         const playerStopped = !this.isMoving;
         const followerStopped = !this.isFollowerMoving;
 
-        if (playerStopped && followerStopped) {
+        // Only check for arrival AFTER they've started walking
+        if (this.wispWalkStarted && playerStopped && followerStopped) {
+            console.log('🛑 Both characters arrived! Switching from bubble #1 to bubble #2');
             this.wispArrivalHandled = true;
 
             // 1) Stäng första bubblan (på playern)
             if (this.wispIntroBubble) {
+                console.log('🗑️ Destroying BUBBLE #1');
                 this.wispIntroBubble.destroy();
                 this.wispIntroBubble = null;
             }
 
             // 2) Skapa systerns bubbla vid follower (Bubble #2)
+            console.log('🟢 Creating BUBBLE #2 on follower');
             this.wispFollowerBubble = new SpeechBubble(
                 this,
                 this.follower.x,
@@ -312,6 +337,7 @@ update() {
                 null,           // ingen auto-timeout
                 this.follower   // followTarget → följer systern + svans rätt
             );
+            this.currentConversationBubble = this.wispFollowerBubble; // Track for scene-wide clicks
 
             // Chain to bubble #3 - INLINE
             this.wispFollowerBubble.onClick(() => {
@@ -326,6 +352,7 @@ update() {
                     null,
                     this.player
                 );
+                this.currentConversationBubble = bubble3; // Track for scene-wide clicks
 
                 // Chain to bubble #4
                 bubble3.onClick(() => {
@@ -338,6 +365,7 @@ update() {
                         null,
                         this.follower
                     );
+                    this.currentConversationBubble = bubble4; // Track for scene-wide clicks
 
                     // Chain to bubble #5
                     bubble4.onClick(() => {
@@ -350,10 +378,12 @@ update() {
                             null,
                             this.player
                         );
+                        this.currentConversationBubble = bubble5; // Track for scene-wide clicks
 
                         // Clicking bubble #5 transitions to Scene2
                         bubble5.onClick(() => {
                             console.log('🚀 Transitioning to Scene2_Crossroads');
+                            this.currentConversationBubble = null; // Clear before transition
                             this.cameras.main.fadeOut(500, 0, 0, 0);
                             this.time.delayedCall(500, () => {
                                 this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
