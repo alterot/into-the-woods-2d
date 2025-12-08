@@ -285,10 +285,8 @@ class SpeechBubble {
 
                 // Check if we've shown all text
                 if (this.currentIndex >= this.fullText.length) {
-                    console.log('⏹️ Typing completed! Setting isTyping = false');
                     this.isTyping = false;
                     this.typingEvent = null;
-                    console.log('✓ Bubble ready for next click');
                 }
             },
             callbackScope: this
@@ -328,10 +326,7 @@ class SpeechBubble {
 
 
     handleClick() {
-        console.log('💬 handleClick called, isTyping:', this.isTyping, 'clickHandler:', !!this.clickHandler);
-
         if (this.isTyping) {
-            console.log('⚡ Fast-forwarding typing - showing all text immediately');
             // Stop the typing event
             if (this.typingEvent) {
                 this.typingEvent.remove();
@@ -340,16 +335,10 @@ class SpeechBubble {
             // Show all text immediately
             this.textObject.setText(this.fullText);
             this.isTyping = false;
-            console.log('✓ All text shown, bubble stays (click again to advance)');
         } else {
             // Typing already complete - advance to next bubble
-            console.log('✅ Typing complete, calling handler and advancing...');
-            // Call custom handler BEFORE destroy (destroy nulls it out!)
             if (this.clickHandler) {
-                console.log('🎯 Calling clickHandler now!');
                 this.clickHandler();
-            } else {
-                console.log('❌ No clickHandler set!');
             }
             this.destroy();
         }
@@ -357,7 +346,6 @@ class SpeechBubble {
 
     // Set custom click handler
     onClick(callback) {
-        console.log('📌 onClick() called, setting clickHandler');
         this.clickHandler = callback;
     }
 

@@ -87,7 +87,6 @@ class Scene1_Meadow extends GameScene {
         }
 
         // Skapa bubbla på playern som följer med när de går
-        console.log('🟢 Creating BUBBLE #1 on player at', this.player.x, this.player.y);
         this.wispIntroBubble = new SpeechBubble(
             this,
             this.player.x,
@@ -96,7 +95,6 @@ class Scene1_Meadow extends GameScene {
             null,          // null = ingen auto-destroy, styrs av klick
             this.player    // followTarget → behåller samma placeringslogik + svans mot player
         );
-        console.log('✅ BUBBLE #1 created:', !!this.wispIntroBubble);
         // DON'T set currentConversationBubble yet - only after they arrive
         // This prevents accidental clicks while walking from destroying bubble #1
     }
@@ -313,7 +311,6 @@ update() {
     if (this.wispConversationActive && !this.wispArrivalHandled) {
         // Track when they start walking
         if (!this.wispWalkStarted && (this.isMoving || this.isFollowerMoving)) {
-            console.log('🚶 Characters started walking to wisp');
             this.wispWalkStarted = true;
         }
 
@@ -322,18 +319,15 @@ update() {
 
         // Only check for arrival AFTER they've started walking
         if (this.wispWalkStarted && playerStopped && followerStopped) {
-            console.log('🛑 Both characters arrived! Switching from bubble #1 to bubble #2');
             this.wispArrivalHandled = true;
 
             // 1) Stäng första bubblan (på playern)
             if (this.wispIntroBubble) {
-                console.log('🗑️ Destroying BUBBLE #1');
                 this.wispIntroBubble.destroy();
                 this.wispIntroBubble = null;
             }
 
             // 2) Skapa systerns bubbla vid follower (Bubble #2)
-            console.log('🟢 Creating BUBBLE #2 on follower');
             this.wispFollowerBubble = new SpeechBubble(
                 this,
                 this.follower.x,
@@ -346,8 +340,6 @@ update() {
 
             // Chain to bubble #3 - INLINE
             this.wispFollowerBubble.onClick(() => {
-                console.log('🔥 BUBBLE 2 CLICKED - Creating bubble 3');
-
                 // Create bubble #3 on player
                 const bubble3 = new SpeechBubble(
                     this,
@@ -374,8 +366,6 @@ update() {
 
                     // Chain to bubble #5 with YES/NO choice
                     bubble4.onClick(() => {
-                        console.log('🎯 Creating choice bubble with YES/NO options');
-
                         // Single bubble with two choices
                         const choiceBubble = new SpeechBubble(
                             this,
@@ -388,7 +378,6 @@ update() {
                                 {
                                     text: 'Följa efter wispen',
                                     callback: () => {
-                                        console.log('✅ YES chosen - Transitioning to Scene2_Crossroads');
                                         this.currentConversationBubble = null;
                                         this.cameras.main.fadeOut(500, 0, 0, 0);
                                         this.time.delayedCall(500, () => {
@@ -399,7 +388,6 @@ update() {
                                 {
                                     text: 'Stanna här',
                                     callback: () => {
-                                        console.log('❌ NO chosen - Closing conversation');
                                         choiceBubble.destroy(); // Close the bubble first
 
                                         // Reset flags AFTER current click finishes (next frame)
