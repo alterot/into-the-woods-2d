@@ -47,6 +47,7 @@ class Scene1_Meadow extends GameScene {
             return;
         }
 
+        this.dialogActive = true;
         this.wispConversationActive = true;
         this.wispArrivalHandled = false;  
 
