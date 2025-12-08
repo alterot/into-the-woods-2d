@@ -218,8 +218,10 @@ class SpeechBubble {
             },
             callbackScope: this,
             onComplete: () => {
+                console.log('⏹️ Typing completed! Setting isTyping = false');
                 this.isTyping = false;
                 this.typingEvent = null;
+                console.log('✓ Bubble ready for next click');
             }
         });
     }
@@ -257,24 +259,38 @@ class SpeechBubble {
 
 
     handleClick() {
+        console.log('💬 handleClick called, isTyping:', this.isTyping, 'clickHandler:', !!this.clickHandler);
+
         if (this.isTyping) {
-            // Speed up typewriter drastically (fast forward)
+            console.log('⚡ Fast-forwarding typing - showing all text immediately');
+            // Stop the typing event
             if (this.typingEvent) {
-                this.typingEvent.delay = 3;  // Fast forward to 3ms per character
+                this.typingEvent.remove();
+                this.typingEvent = null;
             }
-        } else {
-            // Typing complete - destroy on click
-            this.destroy();
+            // Show all text immediately
+            this.textObject.setText(this.fullText);
+            this.isTyping = false;
+            console.log('✓ All text shown, isTyping set to false');
         }
 
-        // Call custom click handler if set
-        if (this.clickHandler) {
-            this.clickHandler();
+        // Always check if we should call the handler (whether we just fast-forwarded or typing was already done)
+        if (!this.isTyping) {
+            console.log('✅ Typing complete, calling handler...');
+            // Typing complete - call custom handler BEFORE destroy (destroy nulls it out!)
+            if (this.clickHandler) {
+                console.log('🎯 Calling clickHandler now!');
+                this.clickHandler();
+            } else {
+                console.log('❌ No clickHandler set!');
+            }
+            this.destroy();
         }
     }
 
     // Set custom click handler
     onClick(callback) {
+        console.log('📌 onClick() called, setting clickHandler');
         this.clickHandler = callback;
     }
 

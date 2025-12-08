@@ -24,7 +24,7 @@ class Scene1_Meadow extends GameScene {
         //Whisp dialog check
         this.wispConversationActive = false;
         this.wispIntroBubble = null;
-        this.wispArrivalHandled = false;  
+        this.wispArrivalHandled = false;
         this.wispFollowerBubble = null; 
     }
 
@@ -303,7 +303,7 @@ update() {
                 this.wispIntroBubble = null;
             }
 
-            // 2) Skapa systerns bubbla vid follower
+            // 2) Skapa systerns bubbla vid follower (Bubble #2)
             this.wispFollowerBubble = new SpeechBubble(
                 this,
                 this.follower.x,
@@ -312,6 +312,56 @@ update() {
                 null,           // ingen auto-timeout
                 this.follower   // followTarget → följer systern + svans rätt
             );
+
+            // Chain to bubble #3 - INLINE
+            this.wispFollowerBubble.onClick(() => {
+                console.log('🔥 BUBBLE 2 CLICKED - Creating bubble 3');
+
+                // Create bubble #3 on player
+                const bubble3 = new SpeechBubble(
+                    this,
+                    this.player.x,
+                    this.player.y,
+                    'Jag tror den vill att vi följer efter den.',
+                    null,
+                    this.player
+                );
+
+                // Chain to bubble #4
+                bubble3.onClick(() => {
+                    // Create bubble #4 on follower
+                    const bubble4 = new SpeechBubble(
+                        this,
+                        this.follower.x,
+                        this.follower.y,
+                        'Vågar vi det?',
+                        null,
+                        this.follower
+                    );
+
+                    // Chain to bubble #5
+                    bubble4.onClick(() => {
+                        // Create bubble #5 - final question
+                        const bubble5 = new SpeechBubble(
+                            this,
+                            this.player.x,
+                            this.player.y,
+                            'Ska vi följa efter wispen?',
+                            null,
+                            this.player
+                        );
+
+                        // Clicking bubble #5 transitions to Scene2
+                        bubble5.onClick(() => {
+                            console.log('🚀 Transitioning to Scene2_Crossroads');
+                            this.cameras.main.fadeOut(500, 0, 0, 0);
+                            this.time.delayedCall(500, () => {
+                                this.scene.start('Scene2_Crossroads', { entry: 'from_meadow' });
+                            });
+                        });
+                    });
+                });
+            });
         }
     }
 }
