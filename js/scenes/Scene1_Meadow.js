@@ -24,6 +24,8 @@ class Scene1_Meadow extends GameScene {
         //Whisp dialog check
         this.wispConversationActive = false;
         this.wispIntroBubble = null;
+        this.wispArrivalHandled = false;  
+        this.wispFollowerBubble = null; 
     }
 
     createSceneContent() {
@@ -46,6 +48,7 @@ class Scene1_Meadow extends GameScene {
         }
 
         this.wispConversationActive = true;
+        this.wispArrivalHandled = false;  
 
         // Hitta en gångbar punkt nära wispen (grönt i masken)
         let target = null;
@@ -184,8 +187,6 @@ class Scene1_Meadow extends GameScene {
         });
     }
 
-
-
 spawnRunestoneSparkTrail(x, y) {
     const sparkCount = 2; // få, men tydliga glittror
 
@@ -254,40 +255,66 @@ spawnRunestoneSparkTrail(x, y) {
     }
 }
 
-
 update() {
     // Låt GameScene sköta pathfinding och följlogik
-        super.update();
+    super.update();
 
-        if (this.dialogActive && this.runestonePosition) {
-            const playerStopped = !this.isMoving;
-            const followerStopped = !this.isFollowerMoving;
+    // RUNSTEN – vänd systrarna mot stenen när dialog pågår
+    if (this.dialogActive && this.runestonePosition) {
+        const playerStopped = !this.isMoving;
+        const followerStopped = !this.isFollowerMoving;
 
-            // Player vänder sig direkt när hen är framme
-            if (playerStopped && this.player) {
-                const playerLeftOfStone = this.player.x < this.runestonePosition.x;
+        // Player vänder sig direkt när hen är framme
+        if (playerStopped && this.player) {
+            const playerLeftOfStone = this.player.x < this.runestonePosition.x;
 
-                // Är spelaren till vänster om stenen? → titta åt höger (flipX = true)
-                if (playerLeftOfStone) {
-                    this.player.setFlipX(true);
-                } else {
-                    this.player.setFlipX(false);
-                }
+            // Är spelaren till vänster om stenen? → titta åt höger (flipX = true)
+            if (playerLeftOfStone) {
+                this.player.setFlipX(true);
+            } else {
+                this.player.setFlipX(false);
             }
+        }
 
-            // Follower vänder sig när hen är framme
-            if (followerStopped && this.follower) {
-                const followerLeftOfStone = this.follower.x < this.runestonePosition.x;
+        // Follower vänder sig när hen är framme
+        if (followerStopped && this.follower) {
+            const followerLeftOfStone = this.follower.x < this.runestonePosition.x;
 
-                if (followerLeftOfStone) {
-                    this.follower.setFlipX(true);
-                } else {
-                    this.follower.setFlipX(false);
-                }
+            if (followerLeftOfStone) {
+                this.follower.setFlipX(true);
+            } else {
+                this.follower.setFlipX(false);
             }
         }
     }
 
+    // WISP-KONVERSATION – när båda har stannat, byt bubbla
+    if (this.wispConversationActive && !this.wispArrivalHandled) {
+        const playerStopped = !this.isMoving;
+        const followerStopped = !this.isFollowerMoving;
+
+        if (playerStopped && followerStopped) {
+            this.wispArrivalHandled = true;
+
+            // 1) Stäng första bubblan (på playern)
+            if (this.wispIntroBubble) {
+                this.wispIntroBubble.destroy();
+                this.wispIntroBubble = null;
+            }
+
+            // 2) Skapa systerns bubbla vid follower
+            this.wispFollowerBubble = new SpeechBubble(
+                this,
+                this.follower.x,
+                this.follower.y,
+                'Vad vill den tror du?',
+                null,           // ingen auto-timeout
+                this.follower   // followTarget → följer systern + svans rätt
+            );
+        }
+    }
 }
+}
+
 
 export default Scene1_Meadow;
