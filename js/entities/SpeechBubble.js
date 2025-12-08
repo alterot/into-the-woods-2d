@@ -57,6 +57,10 @@ class SpeechBubble {
         const bubbleWidth = Math.max(150, Math.min(300, textBounds.width + padding * 2));
         const bubbleHeight = textBounds.height + padding * 2;
 
+        // 🔹 spara storlek så vi kan använda i update()
+        this.bubbleWidth = bubbleWidth;
+        this.bubbleHeight = bubbleHeight;
+
         // Create container for all bubble components
         this.container = this.scene.add.container(this.x, this.y);
         this.container.setDepth(2000); // Render above everything
@@ -64,16 +68,71 @@ class SpeechBubble {
         // Shadow layer (for depth)
         const shadow = this.scene.add.graphics();
         shadow.fillStyle(0x000000, 0.2);
-        shadow.fillRoundedRect(-bubbleWidth/2 + 2, -bubbleHeight/2 + 2, bubbleWidth, bubbleHeight, 8);
+        shadow.fillRoundedRect(
+            -bubbleWidth/2 + 2,
+            -bubbleHeight/2 + 2,
+            bubbleWidth,
+            bubbleHeight,
+            8
+        );
 
         // Main bubble background (more transparent)
         const background = this.scene.add.graphics();
         background.fillStyle(0xFFFFFF, 0.75);
-        background.fillRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
+        background.fillRoundedRect(
+            -bubbleWidth/2,
+            -bubbleHeight/2,
+            bubbleWidth,
+            bubbleHeight,
+            8
+        );
 
         // Border
         background.lineStyle(2, 0xCCCCCC, 0.75);
-        background.strokeRoundedRect(-bubbleWidth/2, -bubbleHeight/2, bubbleWidth, bubbleHeight, 8);
+        background.strokeRoundedRect(
+            -bubbleWidth/2,
+            -bubbleHeight/2,
+            bubbleWidth,
+            bubbleHeight,
+            8
+        );
+
+        // 🔹 SKAPA SVANS SOM EGNA GRAPHICS (inte inritad i background)
+        const tailWidth = 18;
+        const tailHeight = 10;
+
+        const tailShadow = this.scene.add.graphics();
+        tailShadow.fillStyle(0x000000, 0.2);
+        // rita triangel runt (0,0) lokalt
+        tailShadow.fillTriangle(
+            -tailWidth / 2, 0,
+            tailWidth / 2, 0,
+            0, tailHeight
+        );
+
+        const tailBg = this.scene.add.graphics();
+        tailBg.fillStyle(0xFFFFFF, 0.75);
+        tailBg.fillTriangle(
+            -tailWidth / 2, 0,
+            tailWidth / 2, 0,
+            0, tailHeight
+        );
+
+        // spara referenser för update()
+        this.tailShadow = tailShadow;
+        this.tailBg = tailBg;
+        this.tailHeight = tailHeight;
+
+        // initial position av svansen (baserat på isLeftSide)
+        const bottomY = bubbleHeight / 2;
+        const tailOffsetX = bubbleWidth / 2 - 35;   // hur långt in från kanten
+        const sideFactor = this.isLeftSide ? -1 : 1;
+
+        this.tailBg.x = sideFactor * tailOffsetX;
+        this.tailBg.y = bottomY;
+
+        this.tailShadow.x = this.tailBg.x + 2;
+        this.tailShadow.y = this.tailBg.y + 2;
 
         // Text object
         this.textObject = this.scene.add.text(0, 0, '', {
@@ -85,15 +144,27 @@ class SpeechBubble {
         });
         this.textObject.setOrigin(0.5);
 
-        // Add all components to container (no tail)
-        this.container.add([shadow, background, this.textObject]);
+        // Add all components to container (med svans)
+        this.container.add([
+            shadow,
+            this.tailShadow,
+            background,
+            this.tailBg,
+            this.textObject
+        ]);
 
-        // Make container interactive
+        // Make container interactive (inkl svanshöjd)
         const hitArea = new Phaser.Geom.Rectangle(
-            -bubbleWidth/2, -bubbleHeight/2,
-            bubbleWidth, bubbleHeight
+            -bubbleWidth/2,
+            -bubbleHeight/2,
+            bubbleWidth,
+            bubbleHeight + tailHeight   // 🔹 svansen ingår i klickytan
         );
-        this.container.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains, { useHandCursor: true });
+        this.container.setInteractive(
+            hitArea,
+            Phaser.Geom.Rectangle.Contains,
+            { useHandCursor: true }
+        );
 
         // Set up click behavior
         this.container.on('pointerdown', () => {
@@ -111,6 +182,7 @@ class SpeechBubble {
             ease: 'Cubic.easeOut'
         });
     }
+
 
     startTypewriter() {
         this.isTyping = true;
@@ -153,6 +225,19 @@ class SpeechBubble {
 
     this.container.x = spriteX + bubbleOffsetX;
     this.container.y = spriteY + bubbleOffsetY;
+
+    // Uppdatera svansens sida/position när isLeftSide ändras
+    if (this.tailBg && this.tailShadow && this.bubbleWidth && this.bubbleHeight) {
+        const bottomY = this.bubbleHeight / 2;
+        const tailOffsetX = this.bubbleWidth / 2 - 35;
+        const sideFactor = this.isLeftSide ? -1 : 1;
+
+        this.tailBg.x = sideFactor * tailOffsetX;
+        this.tailBg.y = bottomY;
+
+        this.tailShadow.x = this.tailBg.x + 2;
+        this.tailShadow.y = this.tailBg.y + 2;
+    }
 }
 
 
