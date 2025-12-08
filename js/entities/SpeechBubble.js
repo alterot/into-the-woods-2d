@@ -232,7 +232,10 @@ class SpeechBubble {
         // Set up click behavior
         this.container.on('pointerdown', (pointer) => {
             this.handleClick();
-            pointer.stopPropagation(); // Prevent scene-wide handler from also firing
+            // Stop event from passing through to game world
+            if (pointer.event) {
+                pointer.event.stopImmediatePropagation();
+            }
         });
 
         // Initial alpha 0 for fade in

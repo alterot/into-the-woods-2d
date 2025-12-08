@@ -44,9 +44,14 @@ class Scene1_Meadow extends GameScene {
 
         // Scene-wide click handler for conversation bubbles
         this.input.on('pointerdown', (pointer) => {
-            // During wisp conversation, any click advances the current bubble
-            if (this.wispConversationActive && this.currentConversationBubble) {
-                this.currentConversationBubble.handleClick();
+            // During wisp conversation, block all movement clicks
+            if (this.wispConversationActive) {
+                // If there's a current bubble, advance it
+                if (this.currentConversationBubble) {
+                    this.currentConversationBubble.handleClick();
+                }
+                // Always block the click from reaching game world during conversation
+                return; // Don't process this click for movement
             }
         });
     }
@@ -395,10 +400,14 @@ update() {
                                     text: 'Stanna här',
                                     callback: () => {
                                         console.log('❌ NO chosen - Closing conversation');
-                                        this.dialogActive = false;
-                                        this.wispConversationActive = false;
-                                        this.currentConversationBubble = null;
-                                        choiceBubble.destroy(); // Close the bubble
+                                        choiceBubble.destroy(); // Close the bubble first
+
+                                        // Reset flags AFTER current click finishes (next frame)
+                                        this.time.delayedCall(10, () => {
+                                            this.dialogActive = false;
+                                            this.wispConversationActive = false;
+                                            this.currentConversationBubble = null;
+                                        });
                                     }
                                 }
                             ]
