@@ -17,18 +17,14 @@ class Scene2_Crossroads extends GameScene {
      * x,y är "mitten" mellan systrarna – GameScene flyttar dem åt sidan.
      */
     getSpawnPoint(entryTag) {
-        const { width, height } = this.scale;
-        const bottomY = height * 0.8;
-
-        const center = { x: width * 0.5, y: bottomY };
-
         const spawns = {
-            from_meadow: center, // när vi kommer från scen 1
-            default: center      // fallback om inget entryTag skickas
+            from_meadow: { x: 570, y: 640 },
+            default:     { x: 610, y: 690 }
         };
 
         return spawns[entryTag] || spawns.default;
     }
+
 
     // Här lägger vi scen-specifika saker
     createSceneContent() {
@@ -36,8 +32,8 @@ class Scene2_Crossroads extends GameScene {
         const spawn = this.getSpawnPoint(this.entryTag || 'default');
 
         // Placera wisp lite ovanför/åt höger om systrarna
-        const wispX = spawn.x + 80;
-        const wispY = spawn.y - 70;
+        const wispX = spawn.x + 60;
+        const wispY = spawn.y - 50;
 
         this.wisp = new Wisp(this, wispX, wispY);
 
