@@ -55,9 +55,15 @@ class LoadingScene extends Phaser.Scene {
         // Track actual load progress vs display progress
         let actualProgress = 0;
         let displayProgress = 0;
+        let loadingComplete = false;
 
         this.load.on('progress', (value) => {
             actualProgress = value;
+        });
+
+        this.load.on('complete', () => {
+            loadingComplete = true;
+            console.log('[LoadingScene] All assets loaded and ready');
         });
 
         // Smooth progress animation over 2 seconds
@@ -78,8 +84,8 @@ class LoadingScene extends Phaser.Scene {
                 barFill.width = barWidth * displayProgress;
                 percentText.setText(Math.floor(displayProgress * 100) + '%');
 
-                // Stop when we reach 100%
-                if (displayProgress >= 1) {
+                // Stop when we reach 100% AND loading is complete
+                if (displayProgress >= 1 && loadingComplete) {
                     progressTimer.remove();
 
                     // Small delay at 100%, then transition
