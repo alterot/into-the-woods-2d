@@ -296,8 +296,39 @@ class GameScene extends Phaser.Scene {
             return 'black';
         }
 
-        // Övriga färger – just nu behandlar vi dem som ”övrigt”
+        // Övriga färger – just nu behandlar vi dem som "övrigt"
         return 'other';
+    }
+
+    /**
+     * Find nearest walkable (green) pixel around a target position
+     * Searches in expanding circles until a walkable spot is found
+     * @param {number} targetX - X position to search around
+     * @param {number} targetY - Y position to search around
+     * @param {number} maxRadius - Maximum search radius in pixels (default: 50)
+     * @returns {{ x: number, y: number } | null} Walkable position or null if not found
+     */
+    findNearestWalkable(targetX, targetY, maxRadius = 50) {
+        const step = 10;
+
+        // Search in expanding circles
+        for (let radius = step; radius <= maxRadius; radius += step) {
+            // Calculate how many points to check at this radius
+            const angleStep = (2 * Math.PI) / (radius / 3);
+
+            for (let angle = 0; angle < 2 * Math.PI; angle += angleStep) {
+                const testX = Math.round(targetX + Math.cos(angle) * radius);
+                const testY = Math.round(targetY + Math.sin(angle) * radius);
+
+                const color = this.getPixelColor(testX, testY);
+                if (color === 'green') {
+                    return { x: testX, y: testY };
+                }
+            }
+        }
+
+        console.warn(`[GameScene] No walkable spot found within ${maxRadius}px of (${targetX}, ${targetY})`);
+        return null;
     }
 
 
