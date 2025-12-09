@@ -116,16 +116,26 @@ class LoadingScene extends Phaser.Scene {
                             this.registry.set('audioManager', audioManager);
                             console.log('[LoadingScene] AudioManager initialized for debug mode');
 
-                            // Start music immediately (no user gesture needed in debug mode)
-                            audioManager.startMusic();
-
                             // Also set default character selection (normally done in CharacterSelectScene)
                             if (!window.gameState) {
                                 window.gameState = { selectedCharacter: 'big' };
                                 console.log('[LoadingScene] Default character set to: big');
                             }
 
-                            this.scene.start(debugScene, { entry: 'default' });
+                            // Wait for audio to decode BEFORE starting scene and music
+                            // forest-ambient.mp3 is 7.5MB and needs extra time
+                            this.time.delayedCall(1500, () => {
+                                console.log('[LoadingScene] Starting music in debug mode...');
+                                try {
+                                    audioManager.startMusic();
+                                    console.log('[LoadingScene] Music started successfully');
+                                } catch (error) {
+                                    console.warn('[LoadingScene] Could not start music (audio still decoding?):', error);
+                                }
+
+                                // Start the debug scene AFTER music
+                                this.scene.start(debugScene, { entry: 'default' });
+                            });
                         } else {
                             console.log('[LoadingScene] Transitioning to CharacterSelectScene');
                             this.scene.start('CharacterSelectScene');
