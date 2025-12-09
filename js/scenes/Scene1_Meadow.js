@@ -25,6 +25,28 @@ class Scene1_Meadow extends GameScene {
         this.currentConversationBubble = null;
     }
 
+    init(data) {
+        // Call parent init to handle entry tag
+        super.init(data);
+
+        // CRITICAL: Reset ALL dialog state when scene starts
+        // (Scene might be reused, so constructor isn't always called)
+        this.dialogActive = false;
+        this.wispConversationActive = false;
+        this.wispArrivalHandled = false;
+        this.wispWalkStarted = false;
+        this.isProcessingChoice = false;
+        this.currentConversationBubble = null;
+
+        // Clean up any leftover bubble
+        if (this.wispIntroBubble) {
+            this.wispIntroBubble.destroy();
+            this.wispIntroBubble = null;
+        }
+
+        console.log('[Scene1] init() - all dialog state reset');
+    }
+
     createSceneContent() {
         // ===== WISP =====
         this.wisp = new Wisp(this, 1075, 500);
@@ -411,9 +433,24 @@ class Scene1_Meadow extends GameScene {
 
     getSpawnPoint(entryTag) {
         const spawns = {
-            default: { x: 610, y: 690 }
+            default: { x: 610, y: 690 },
+            from_crossroads: { x: 850, y: 460 }  // Right side, middle Y, facing inward towards stone
         };
         return spawns[entryTag] || spawns.default;
+    }
+
+    applySpawnPoint() {
+        // Call parent implementation to position sprites
+        super.applySpawnPoint();
+
+        // Adjust facing direction based on entry point
+        if (this.entryTag === 'from_crossroads') {
+            // Coming from right side - face left (towards runestone in center)
+            if (this.sister1 && this.sister2) {
+                this.sister1.setFlipX(false);  // Face left
+                this.sister2.setFlipX(false);  // Face left
+            }
+        }
     }
 
     handleTransitionClick(x, y) {

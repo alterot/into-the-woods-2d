@@ -121,6 +121,12 @@ class Scene2_Crossroads extends GameScene {
         this.isProcessingChoice = true;
 
         if (choice === 'go_back') {
+            // Clear conversation state before transitioning
+            this.wispConversationActive = false;
+            this.currentConversationBubble = null;
+            this.dialogActive = false;
+            this.isProcessingChoice = false;
+
             // Transition back to Scene 1 (Meadow)
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.time.delayedCall(500, () => {
