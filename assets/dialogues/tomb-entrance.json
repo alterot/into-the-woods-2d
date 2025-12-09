@@ -1,0 +1,55 @@
+{
+  "sceneId": "kummel_outer",
+  "conversations": [
+    {
+      "id": "entrance",
+      "lines": [
+        {
+          "role": "narrator",
+          "text": "Framför er reser sig ett lågt, gräsbeklätt kummel. I mitten gapar en mörk öppning ner i jorden. Fuktig luft sipprar upp därifrån, kylig och stilla, som om någon andats ut för länge sedan och aldrig in igen."
+        },
+        {
+          "role": "player",
+          "text": "Det ser ut som en gammal grav..."
+        },
+        {
+          "role": "sister",
+          "text": "Jag får kalla kårar när jag tittar. Det luktar jord. Och sten. Och... något mer."
+        },
+        {
+          "role": "player",
+          "text": "Undrar vad som finns där nere."
+        },
+        {
+          "role": "sister",
+          "text": "Tänk om det är något otäckt?"
+        },
+        {
+          "role": "player",
+          "text": "Eller något som kan hjälpa oss att hitta ut ur skogen?"
+        },
+        {
+          "role": "sister",
+          "text": "Det förstår, vad ska vi göra tycker du?"
+        },
+        {
+          "role": "player",
+          "text": "Vi bestämmer tillsammans. Ska vi gå ner, eller försöka hitta en annan väg?"
+        }
+      ],
+      "choice": {
+        "text": "Vill ni gå ner i kummlet?",
+        "options": [
+          {
+            "id": "enter",
+            "label": "GÅ IN"
+          },
+          {
+            "id": "back",
+            "label": "GÅ TILLBAKA"
+          }
+        ]
+      }
+    }
+  ]
+}
