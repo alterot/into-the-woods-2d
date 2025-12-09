@@ -88,8 +88,10 @@ class LoadingScene extends Phaser.Scene {
                 if (displayProgress >= 1 && loadingComplete) {
                     progressTimer.remove();
 
-                    // Small delay at 100%, then transition
-                    this.time.delayedCall(300, () => {
+                    // Longer delay to ensure audio decoding finishes
+                    // Large audio files (like forest-ambient.mp3 @ 7.5MB) need time to decode
+                    this.time.delayedCall(1000, () => {
+                        console.log('[LoadingScene] Transitioning to CharacterSelectScene');
                         this.scene.start('CharacterSelectScene');
                     });
                 }
