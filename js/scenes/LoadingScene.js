@@ -2,6 +2,8 @@
 // Initial loading screen with progress bar
 // Loads all game assets before transitioning to CharacterSelectScene
 
+import AudioManager from '../AudioManager.js';
+
 class LoadingScene extends Phaser.Scene {
     constructor() {
         super({ key: 'LoadingScene' });
@@ -91,8 +93,43 @@ class LoadingScene extends Phaser.Scene {
                     // Longer delay to ensure audio decoding finishes
                     // Large audio files (like forest-ambient.mp3 @ 7.5MB) need time to decode
                     this.time.delayedCall(1000, () => {
-                        console.log('[LoadingScene] Transitioning to CharacterSelectScene');
-                        this.scene.start('CharacterSelectScene');
+                        // ===== DEBUG: URL-based Scene Selection =====
+                        // Check if URL contains ?scene=SceneName parameter
+                        // This allows jumping directly to any scene for debugging
+                        //
+                        // USAGE:
+                        //   Normal flow:  http://localhost:3000/
+                        //   Skip to Scene1: http://localhost:3000/?scene=Scene1_Meadow
+                        //   Skip to Scene2: http://localhost:3000/?scene=Scene2_Crossroads
+                        //   Skip to Scene3: http://localhost:3000/?scene=Scene3_Tomb
+                        //
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const debugScene = urlParams.get('scene');
+
+                        if (debugScene) {
+                            console.log('[LoadingScene] DEBUG MODE - Jumping to scene:', debugScene);
+
+                            // Initialize AudioManager (normally done in CharacterSelectScene)
+                            // This ensures music and sound effects work when skipping scenes
+                            const audioManager = new AudioManager(this);
+                            audioManager.init(this);
+                            this.registry.set('audioManager', audioManager);
+                            console.log('[LoadingScene] AudioManager initialized for debug mode');
+
+                            // Start music immediately (no user gesture needed in debug mode)
+                            audioManager.startMusic();
+
+                            // Also set default character selection (normally done in CharacterSelectScene)
+                            if (!window.gameState) {
+                                window.gameState = { selectedCharacter: 'big' };
+                                console.log('[LoadingScene] Default character set to: big');
+                            }
+
+                            this.scene.start(debugScene, { entry: 'default' });
+                        } else {
+                            console.log('[LoadingScene] Transitioning to CharacterSelectScene');
+                            this.scene.start('CharacterSelectScene');
+                        }
                     });
                 }
             }
