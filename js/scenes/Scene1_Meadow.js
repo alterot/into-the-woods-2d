@@ -118,8 +118,13 @@ class Scene1_Meadow extends GameScene {
             if (this.wispConversationActive) {
                 console.log('[Scene1] Scene-wide click during conversation');
                 if (this.currentConversationBubble) {
-                    console.log('[Scene1] Advancing current bubble');
-                    this.currentConversationBubble.handleClick();
+                    // Don't call handleClick for choice bubbles - they handle their own clicks
+                    if (!this.currentConversationBubble.choices || this.currentConversationBubble.choices.length === 0) {
+                        console.log('[Scene1] Advancing current bubble');
+                        this.currentConversationBubble.handleClick();
+                    } else {
+                        console.log('[Scene1] Choice bubble - ignoring scene-wide click');
+                    }
                 }
                 // CRITICAL: Block this click from reaching GameScene
                 // (returning prevents code below from running, but doesn't stop other handlers)

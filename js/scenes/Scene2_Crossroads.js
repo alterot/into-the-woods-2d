@@ -79,8 +79,13 @@ class Scene2_Crossroads extends GameScene {
             if (this.wispConversationActive) {
                 console.log('[Scene2] Scene-wide click during conversation');
                 if (this.currentConversationBubble) {
-                    console.log('[Scene2] Advancing current bubble');
-                    this.currentConversationBubble.handleClick();
+                    // Don't call handleClick for choice bubbles - they handle their own clicks
+                    if (!this.currentConversationBubble.choices || this.currentConversationBubble.choices.length === 0) {
+                        console.log('[Scene2] Advancing current bubble');
+                        this.currentConversationBubble.handleClick();
+                    } else {
+                        console.log('[Scene2] Choice bubble - ignoring scene-wide click');
+                    }
                 }
                 // CRITICAL: Block this click from reaching GameScene
                 return;

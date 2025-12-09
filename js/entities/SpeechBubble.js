@@ -326,6 +326,13 @@ class SpeechBubble {
 
 
     handleClick() {
+        // If this bubble has choices, ONLY allow clicking on the choices themselves
+        // Do NOT advance/destroy on general clicks
+        if (this.choices && this.choices.length > 0) {
+            console.log('[SpeechBubble] Choice bubble - ignoring handleClick (must click choices)');
+            return;
+        }
+
         if (this.isTyping) {
             // Stop the typing event
             if (this.typingEvent) {
