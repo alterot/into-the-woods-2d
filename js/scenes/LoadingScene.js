@@ -137,6 +137,10 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('background2', 'assets/scenes/scen2-crossroads.png');
         this.load.image('mask2', 'assets/scenes/scen2-mask.png');
 
+        // Game scene assets (Scene3_Tomb)
+        this.load.image('background3', 'assets/scenes/scen3-tomb.png');
+        this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
+
     }
 }
 

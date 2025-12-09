@@ -32,6 +32,7 @@ class Scene2_Crossroads extends GameScene {
     getSpawnPoint(entryTag) {
         const spawns = {
             from_meadow: { x: 570, y: 660 },
+            from_tomb:   { x: 640, y: 480 },  // Spawn near tomb entrance when returning
             default:     { x: 610, y: 690 }
         };
 
@@ -314,8 +315,7 @@ class Scene2_Crossroads extends GameScene {
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.time.delayedCall(500, () => {
                 // Start Scene3 (tomb interior)
-                // TODO: Update scene key to match actual Scene3 name
-                this.scene.start('Scene3_Gravkummel', { entry: 'from_crossroads' });
+                this.scene.start('Scene3_Tomb', { entry: 'from_crossroads' });
             });
         } else if (choice === 'back') {
             // Player chose to stay

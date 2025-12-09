@@ -5,6 +5,7 @@ import CharacterSelectScene from './scenes/CharacterSelectScene.js';
 import IntroScene from './scenes/IntroScene.js';
 import Scene1_Meadow from './scenes/Scene1_Meadow.js';
 import Scene2_Crossroads from './scenes/Scene2_Crossroads.js';
+import Scene3_Tomb from './scenes/Scene3_Tomb.js';
 
 
 // Game configuration
@@ -17,7 +18,7 @@ const config = {
     },
     parent: document.body,
     backgroundColor: '#000000',
-    scene: [LoadingScene, CharacterSelectScene, IntroScene, Scene1_Meadow, Scene2_Crossroads],
+    scene: [LoadingScene, CharacterSelectScene, IntroScene, Scene1_Meadow, Scene2_Crossroads, Scene3_Tomb],
     physics: {
         default: 'arcade',
         arcade: {
