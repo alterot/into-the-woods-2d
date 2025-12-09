@@ -44,8 +44,8 @@ class Scene2_Crossroads extends GameScene {
         const spawn = this.getSpawnPoint(this.entryTag || 'default');
 
         // Placera wisp lite ovanför/åt höger om systrarna
-        const wispX = spawn.x + 60;
-        const wispY = spawn.y - 50;
+        const wispX = spawn.x + 30;
+        const wispY = spawn.y - 40;
 
         // ===== WISP =====
         this.wisp = new Wisp(this, wispX, wispY);

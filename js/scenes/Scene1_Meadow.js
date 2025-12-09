@@ -434,7 +434,7 @@ class Scene1_Meadow extends GameScene {
     getSpawnPoint(entryTag) {
         const spawns = {
             default: { x: 610, y: 690 },
-            from_crossroads: { x: 850, y: 460 }  // Right side, middle Y, facing inward towards stone
+            from_crossroads: { x: 1050, y: 460 }  // Right side, middle Y, facing inward towards stone
         };
         return spawns[entryTag] || spawns.default;
     }
