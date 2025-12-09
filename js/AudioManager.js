@@ -133,6 +133,29 @@ class AudioManager {
     }
 
     /**
+     * Switch to a different background music track
+     * @param {string} trackKey - The audio key to switch to (e.g., 'forest-ambient', 'tomb-ambient')
+     */
+    switchMusic(trackKey) {
+        console.log(`[AudioManager] Switching music to: ${trackKey}`);
+
+        // Stop current music if playing
+        if (this.bgMusic && this.bgMusic.isPlaying) {
+            this.bgMusic.stop();
+        }
+
+        // Create new music track
+        this.bgMusic = this.scene.sound.add(trackKey, {
+            volume: 0.4,
+            loop: true
+        });
+
+        // Start playing
+        this.bgMusic.play();
+        console.log(`[AudioManager] Now playing: ${trackKey}`);
+    }
+
+    /**
      * Pause background music
      */
     pauseMusic() {

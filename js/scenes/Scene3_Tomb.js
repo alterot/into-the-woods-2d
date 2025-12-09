@@ -22,7 +22,13 @@ class Scene3_Tomb extends GameScene {
         // (Scene might be reused, so constructor isn't always called)
         this.dialogActive = false;
 
-        console.log('[Scene3] init() - all dialog state reset');
+        // Switch to tomb ambient music
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            audioManager.switchMusic('tomb-ambient');
+        }
+
+        console.log('[Scene3] init() - all dialog state reset, tomb music started');
     }
 
     /**

@@ -38,6 +38,15 @@ class Scene2_Crossroads extends GameScene {
         this.isProcessingChoice = false;
         this.currentConversationBubble = null;
 
+        // Switch back to forest ambient music (in case we came from tomb)
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            // Only switch if we're not already playing forest-ambient
+            if (audioManager.bgMusic && audioManager.bgMusic.key !== 'forest-ambient') {
+                audioManager.switchMusic('forest-ambient');
+            }
+        }
+
         console.log('[Scene2] init() - all dialog state reset');
     }
 

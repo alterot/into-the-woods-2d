@@ -44,6 +44,15 @@ class Scene1_Meadow extends GameScene {
             this.wispIntroBubble = null;
         }
 
+        // Switch back to forest ambient music (safety check)
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            // Only switch if we're not already playing forest-ambient
+            if (audioManager.bgMusic && audioManager.bgMusic.key !== 'forest-ambient') {
+                audioManager.switchMusic('forest-ambient');
+            }
+        }
+
         console.log('[Scene1] init() - all dialog state reset');
     }
 
