@@ -14,14 +14,29 @@ class Scene3_Tomb extends GameScene {
         this.braziers = []; // TODO: add three brazier InteractiveObjects
     }
 
+    init(data) {
+        // Call parent init to handle entry tag
+        super.init(data);
+
+        // CRITICAL: Reset ALL dialog state when scene starts
+        // (Scene might be reused, so constructor isn't always called)
+        this.dialogActive = false;
+
+        console.log('[Scene3] init() - all dialog state reset');
+    }
+
     /**
      * Return spawn point for sisters based on entry tag
      * x,y is the "center" between sisters - GameScene shifts them apart
+     *
+     * NOTE: If spawn point is in blue (transition) area, pathfinding won't work.
+     * Adjust Y coordinate to spawn on green walkable area inside tomb.
      */
     getSpawnPoint(entryTag) {
         const spawns = {
-            from_crossroads: { x: 640, y: 660 },
-            default:         { x: 640, y: 660 }
+            // Spawn further up/inside tomb to avoid blue entrance area
+            from_crossroads: { x: 640, y: 580 },
+            default:         { x: 640, y: 580 }
         };
 
         return spawns[entryTag] || spawns.default;

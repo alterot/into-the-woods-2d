@@ -25,6 +25,22 @@ class Scene2_Crossroads extends GameScene {
         this.currentConversationBubble = null;
     }
 
+    init(data) {
+        // Call parent init to handle entry tag
+        super.init(data);
+
+        // CRITICAL: Reset ALL dialog state when scene starts
+        // (Scene might be reused, so constructor isn't always called)
+        this.dialogActive = false;
+        this.wispConversationActive = false;
+        this.wispArrivalHandled = false;
+        this.wispWalkStarted = false;
+        this.isProcessingChoice = false;
+        this.currentConversationBubble = null;
+
+        console.log('[Scene2] init() - all dialog state reset');
+    }
+
     /**
      * Returnerar spawn point för systrarna beroende på varifrån vi kom.
      * x,y är "mitten" mellan systrarna – GameScene flyttar dem åt sidan.
