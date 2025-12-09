@@ -5,6 +5,10 @@
       "id": "runestone_read",
       "lines": [
         {
+          "role": "narrator",
+          "text": "Den gamla runstenen står tyst, stilla och täckt av mossa. Men några bleka rader kan ännu läsas i ljuset som sipprar ner genom de omgivande trädens tjocka kronor."
+        },
+        {
           "role": "player",
           "text": "Det står något här på stenen..."
         },

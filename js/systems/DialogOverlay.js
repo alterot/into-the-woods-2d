@@ -80,6 +80,11 @@ class DialogOverlay {
         const textboxWidth = 280;
         const textboxHeight = 150;
 
+        // Narrator textbox (centered)
+        const narratorTextboxX = canvasWidth / 2;
+        const narratorTextboxY = textboxY;
+        const narratorTextboxWidth = 600;
+
         // Create dialog UI
         this.dialogUI = {
             // Portraits at bottom
@@ -116,6 +121,19 @@ class DialogOverlay {
                 color: '#FFFFFF',
                 align: 'center',
                 wordWrap: { width: textboxWidth - 30 }
+            }).setOrigin(0.5).setDepth(2002),
+
+            // Narrator textbox (centered, brown style)
+            narratorTextboxBg: this.scene.add.rectangle(
+                narratorTextboxX, narratorTextboxY, narratorTextboxWidth, textboxHeight, 0x8B6F47, 0.85
+            ).setStrokeStyle(3, 0x5C4A30).setDepth(2001),
+            narratorTextboxText: this.scene.add.text(narratorTextboxX, narratorTextboxY, '', {
+                fontSize: '18px',
+                fontFamily: 'Georgia',
+                fontStyle: 'italic',  // Italic style for narrator
+                color: '#FFFFFF',
+                align: 'center',
+                wordWrap: { width: narratorTextboxWidth - 40 }
             }).setOrigin(0.5).setDepth(2002)
         };
 
@@ -130,6 +148,8 @@ class DialogOverlay {
         this.dialogUI.leftTextboxText.setVisible(false);
         this.dialogUI.rightTextboxBg.setVisible(false);
         this.dialogUI.rightTextboxText.setVisible(false);
+        this.dialogUI.narratorTextboxBg.setVisible(false);
+        this.dialogUI.narratorTextboxText.setVisible(false);
 
         // Setup input handlers
         this.dialogSpaceHandler = () => this.advanceDialog();
@@ -167,12 +187,48 @@ class DialogOverlay {
         this.scene.tweens.killTweensOf(this.dialogUI.rightPortrait);
 
         // Show active speaker's textbox
-        if (line.role === 'player') {
+        if (line.role === 'narrator') {
+            // ===== NARRATOR MODE =====
+            // Both portraits faded, centered textbox, italic text with feather emoji
+
+            // Hide player/sibling textboxes
+            this.dialogUI.leftTextboxBg.setVisible(false);
+            this.dialogUI.leftTextboxText.setVisible(false);
+            this.dialogUI.rightTextboxBg.setVisible(false);
+            this.dialogUI.rightTextboxText.setVisible(false);
+
+            // Show narrator textbox
+            this.dialogUI.narratorTextboxBg.setVisible(true);
+            this.dialogUI.narratorTextboxText.setVisible(true).setText('');
+
+            // Both portraits faded (inactive)
+            this.scene.tweens.add({
+                targets: this.dialogUI.leftPortrait,
+                alpha: 0.7,
+                scale: inactiveScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
+            this.scene.tweens.add({
+                targets: this.dialogUI.rightPortrait,
+                alpha: 0.7,
+                scale: inactiveScale,
+                duration: 200,
+                ease: 'Cubic.easeOut'
+            });
+
+            // Prepend feather emoji to narrator text
+            const narratorText = '🪶 ' + line.text;
+            this.startTypewriter(this.dialogUI.narratorTextboxText, narratorText);
+
+        } else if (line.role === 'player') {
             // Player speaking (left side)
             this.dialogUI.leftTextboxBg.setVisible(true);
             this.dialogUI.leftTextboxText.setVisible(true).setText('');
             this.dialogUI.rightTextboxBg.setVisible(false);
             this.dialogUI.rightTextboxText.setVisible(false);
+            this.dialogUI.narratorTextboxBg.setVisible(false);
+            this.dialogUI.narratorTextboxText.setVisible(false);
 
             // Animate portraits
             this.scene.tweens.add({
@@ -197,6 +253,8 @@ class DialogOverlay {
             this.dialogUI.rightTextboxText.setVisible(true).setText('');
             this.dialogUI.leftTextboxBg.setVisible(false);
             this.dialogUI.leftTextboxText.setVisible(false);
+            this.dialogUI.narratorTextboxBg.setVisible(false);
+            this.dialogUI.narratorTextboxText.setVisible(false);
 
             // Animate portraits
             this.scene.tweens.add({
@@ -308,7 +366,9 @@ class DialogOverlay {
             this.dialogUI.leftTextboxBg,
             this.dialogUI.leftTextboxText,
             this.dialogUI.rightTextboxBg,
-            this.dialogUI.rightTextboxText
+            this.dialogUI.rightTextboxText,
+            this.dialogUI.narratorTextboxBg,
+            this.dialogUI.narratorTextboxText
         ];
 
         if (this.backgroundOverlay) {
@@ -336,6 +396,8 @@ class DialogOverlay {
             this.dialogUI.leftTextboxText.destroy();
             this.dialogUI.rightTextboxBg.destroy();
             this.dialogUI.rightTextboxText.destroy();
+            this.dialogUI.narratorTextboxBg.destroy();
+            this.dialogUI.narratorTextboxText.destroy();
             this.dialogUI = null;
         }
 
