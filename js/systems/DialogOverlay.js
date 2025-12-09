@@ -8,6 +8,7 @@ class DialogOverlay {
 
         // Configuration with defaults
         this.dialogueData = config.dialogueData || [];
+        this.choiceData = config.choiceData || null;  // NEW: Choice configuration
         this.spritesVisible = config.spritesVisible ?? false;
         this.backgroundDim = config.backgroundDim ?? 0.6;
         this.portraitScale = config.portraitScale ?? 1;
@@ -26,6 +27,7 @@ class DialogOverlay {
         // I constructor, lägg till:
         this.currentTextObject = null;
         this.currentFullText = '';
+        this.selectedChoice = null;  // NEW: Store selected choice
 
     }
 
@@ -151,6 +153,58 @@ class DialogOverlay {
         this.dialogUI.narratorTextboxBg.setVisible(false);
         this.dialogUI.narratorTextboxText.setVisible(false);
 
+        // NEW: Create choice UI elements (initially hidden)
+        this.dialogUI.choiceContainer = [];
+        if (this.choiceData && this.choiceData.options) {
+            const choiceY = narratorTextboxY;
+            const buttonSpacing = 180;
+            const buttonWidth = 160;
+            const buttonHeight = 60;
+
+            // Calculate starting X to center buttons
+            const totalWidth = (this.choiceData.options.length * buttonWidth) +
+                              ((this.choiceData.options.length - 1) * (buttonSpacing - buttonWidth));
+            let startX = (canvasWidth - totalWidth) / 2 + buttonWidth / 2;
+
+            this.choiceData.options.forEach((option, index) => {
+                const x = startX + (index * buttonSpacing);
+
+                // Button background
+                const buttonBg = this.scene.add.rectangle(
+                    x, choiceY, buttonWidth, buttonHeight, 0x8B6F47, 0.95
+                ).setStrokeStyle(4, 0x5C4A30).setDepth(2001).setVisible(false);
+
+                // Button text
+                const buttonText = this.scene.add.text(x, choiceY, option.label, {
+                    fontSize: '16px',
+                    fontFamily: 'Georgia',
+                    fontStyle: 'bold',
+                    color: '#FFFFFF',
+                    align: 'center'
+                }).setOrigin(0.5).setDepth(2002).setVisible(false);
+
+                // Make interactive
+                buttonBg.setInteractive({ useHandCursor: true });
+
+                // Hover effect
+                buttonBg.on('pointerover', () => {
+                    buttonBg.setFillStyle(0xA08060);
+                    buttonBg.setScale(1.05);
+                });
+                buttonBg.on('pointerout', () => {
+                    buttonBg.setFillStyle(0x8B6F47);
+                    buttonBg.setScale(1.0);
+                });
+
+                // Click handler
+                buttonBg.on('pointerdown', () => {
+                    this.handleChoiceClick(option.id);
+                });
+
+                this.dialogUI.choiceContainer.push({ bg: buttonBg, text: buttonText });
+            });
+        }
+
         // Setup input handlers
         this.dialogSpaceHandler = () => this.advanceDialog();
         this.dialogClickHandler = () => this.advanceDialog();
@@ -162,9 +216,15 @@ class DialogOverlay {
     }
 
     showDialogLine() {
+        // NEW: Check if we should show choices instead
         if (this.currentLine >= this.dialogueData.length) {
-            this.endDialog();
-            return;
+            if (this.choiceData && this.choiceData.options && this.choiceData.options.length > 0) {
+                this.showChoices();
+                return;
+            } else {
+                this.endDialog();
+                return;
+            }
         }
 
         // Stop any active typing
@@ -345,6 +405,65 @@ class DialogOverlay {
         this.showDialogLine();
     }
 
+    // NEW: Show choice UI
+    showChoices() {
+        console.log('[DialogOverlay] Showing choices');
+
+        // Hide all textboxes
+        this.dialogUI.leftTextboxBg.setVisible(false);
+        this.dialogUI.leftTextboxText.setVisible(false);
+        this.dialogUI.rightTextboxBg.setVisible(false);
+        this.dialogUI.rightTextboxText.setVisible(false);
+        this.dialogUI.narratorTextboxBg.setVisible(false);
+        this.dialogUI.narratorTextboxText.setVisible(false);
+
+        // Fade both portraits to inactive
+        const inactiveScale = this.portraitScale * 0.95;
+        this.scene.tweens.add({
+            targets: [this.dialogUI.leftPortrait, this.dialogUI.rightPortrait],
+            alpha: 0.7,
+            scale: inactiveScale,
+            duration: 200,
+            ease: 'Cubic.easeOut'
+        });
+
+        // Show choice buttons
+        this.dialogUI.choiceContainer.forEach(choice => {
+            choice.bg.setVisible(true);
+            choice.text.setVisible(true);
+
+            // Fade in animation
+            choice.bg.setAlpha(0);
+            choice.text.setAlpha(0);
+            this.scene.tweens.add({
+                targets: [choice.bg, choice.text],
+                alpha: 1,
+                duration: 300,
+                ease: 'Cubic.easeOut'
+            });
+        });
+
+        // Remove normal dialog handlers (choices have their own click handlers)
+        this.scene.input.keyboard.off('keydown-SPACE', this.dialogSpaceHandler);
+        this.scene.input.off('pointerdown', this.dialogClickHandler);
+    }
+
+    // NEW: Handle choice click
+    handleChoiceClick(choiceId) {
+        console.log('[DialogOverlay] Choice selected:', choiceId);
+
+        // Play click sound
+        const audioManager = this.scene.registry.get('audioManager');
+        if (audioManager) {
+            audioManager.playClick();
+        }
+
+        // Store selected choice
+        this.selectedChoice = choiceId;
+
+        // End dialog (will call onComplete with choice)
+        this.endDialog();
+    }
 
     endDialog() {
         if (!this.dialogUI) return;
@@ -371,6 +490,13 @@ class DialogOverlay {
             this.dialogUI.narratorTextboxText
         ];
 
+        // NEW: Add choice elements to fade targets
+        if (this.dialogUI.choiceContainer) {
+            this.dialogUI.choiceContainer.forEach(choice => {
+                fadeTargets.push(choice.bg, choice.text);
+            });
+        }
+
         if (this.backgroundOverlay) {
             fadeTargets.push(this.backgroundOverlay);
         }
@@ -382,7 +508,8 @@ class DialogOverlay {
             duration: 500,
             onComplete: () => {
                 this.destroy();
-                this.onComplete();
+                // NEW: Pass selected choice to onComplete callback
+                this.onComplete(this.selectedChoice);
             }
         });
     }
@@ -398,6 +525,16 @@ class DialogOverlay {
             this.dialogUI.rightTextboxText.destroy();
             this.dialogUI.narratorTextboxBg.destroy();
             this.dialogUI.narratorTextboxText.destroy();
+
+            // NEW: Destroy choice elements
+            if (this.dialogUI.choiceContainer) {
+                this.dialogUI.choiceContainer.forEach(choice => {
+                    choice.bg.destroy();
+                    choice.text.destroy();
+                });
+                this.dialogUI.choiceContainer = null;
+            }
+
             this.dialogUI = null;
         }
 

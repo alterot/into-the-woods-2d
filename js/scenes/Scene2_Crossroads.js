@@ -5,6 +5,7 @@ import GameScene from './GameScene.js';
 import Wisp from '../entities/Wisp.js';
 import ConversationManager from '../systems/ConversationManager.js';
 import SpeechBubble from '../entities/SpeechBubble.js';
+import DialogOverlay from '../systems/DialogOverlay.js';
 
 class Scene2_Crossroads extends GameScene {
     constructor() {
@@ -182,6 +183,151 @@ class Scene2_Crossroads extends GameScene {
     handleInteractiveClick(x, y) {
         this.showNoPathIndicator(x, y);
         this.showFeedbackBubble("Vi vågar inte gå ner än, Max verkar inte klar med detta område…");
+    }
+
+    // Override handleTransitionClick to handle two blue zones
+    handleTransitionClick(x, y) {
+        console.log('[Scene2] Transition click at', x, y);
+
+        // Block if dialog is already active
+        if (this.dialogActive) {
+            console.log('[Scene2] Transition click blocked - dialog active');
+            return;
+        }
+
+        // BLUE ZONE 1: Left exit back to Scene1_Meadow
+        // x between 150 and 400, y between 250 and 550
+        if (x >= 150 && x <= 400 && y >= 250 && y <= 550) {
+            console.log('[Scene2] Left blue zone clicked - returning to Scene1');
+
+            // Play click sound
+            const audioManager = this.registry.get('audioManager');
+            if (audioManager) {
+                audioManager.playClick();
+            }
+
+            this.showValidClickIndicator(x, y);
+
+            // Transition back to Scene1_Meadow
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.time.delayedCall(500, () => {
+                this.scene.start('Scene1_Meadow', { entry: 'from_crossroads' });
+            });
+            return;
+        }
+
+        // BLUE ZONE 2: Middle zone at tomb entrance
+        // x between 500 and 780, y between 260 and 530
+        if (x >= 500 && x <= 780 && y >= 260 && y <= 530) {
+            console.log('[Scene2] Tomb entrance zone clicked - starting tomb sequence');
+
+            // Play click sound
+            const audioManager = this.registry.get('audioManager');
+            if (audioManager) {
+                audioManager.playClick();
+            }
+
+            this.showValidClickIndicator(x, y);
+
+            // Start tomb entrance sequence
+            this.startTombEntranceSequence(x, y);
+            return;
+        }
+
+        // Blue zone but not matching any defined zone - fallback
+        console.log('[Scene2] Blue zone clicked but no match - showing feedback');
+        this.showNoPathIndicator(x, y);
+        this.showFeedbackBubble("Det verkar inte finnas någon väg där.");
+    }
+
+    // Start tomb entrance sequence (similar to runestone in Scene1)
+    startTombEntranceSequence(x, y) {
+        console.log('[Scene2] Starting tomb entrance sequence');
+
+        // Block input
+        this.dialogActive = true;
+
+        // Find walkable spot in front of tomb entrance
+        // Hardcoded position in front of the hole (adjust as needed)
+        const target = { x: 640, y: 520 };
+
+        // Alternative: Find nearest walkable dynamically
+        // const target = this.findNearestWalkable(x, y, 60);
+
+        if (target) {
+            // Start pathfinding to tomb entrance
+            this.findPath(this.player.x, this.player.y, target.x, target.y);
+        } else {
+            console.warn('[Scene2_Crossroads] No walkable spot found near tomb entrance');
+        }
+
+        // Load tomb entrance dialog data with error handling
+        try {
+            const tombData = this.cache.json.get('tomb-entrance');
+            if (!tombData) {
+                console.error('[Scene2] tomb-entrance JSON not found in cache!');
+                this.dialogActive = false;
+                return;
+            }
+
+            const conversation = tombData.conversations[0];
+            const dialogData = conversation.lines;
+            const choiceData = conversation.choice;
+
+            console.log('[Scene2] Loaded tomb data - lines:', dialogData.length, 'choices:', choiceData?.options?.length);
+
+            // Create DialogOverlay (starts immediately while player walks)
+            const overlay = new DialogOverlay(this, {
+                dialogueData: dialogData,
+                choiceData: choiceData,
+                spritesVisible: true,
+                backgroundDim: 0.6,
+                onComplete: (selectedChoice) => {
+                    console.log('[Scene2] Tomb dialog completed with choice:', selectedChoice);
+                    this.handleTombChoice(selectedChoice);
+                }
+            });
+
+            console.log('[Scene2] DialogOverlay created, starting...');
+            overlay.start();
+            console.log('[Scene2] DialogOverlay.start() called');
+        } catch (error) {
+            console.error('[Scene2] Error creating tomb entrance dialog:', error);
+            this.dialogActive = false;
+        }
+    }
+
+    // Handle choice from tomb entrance dialog
+    handleTombChoice(choice) {
+        console.log('[Scene2] handleTombChoice called with:', choice);
+
+        if (choice === 'enter') {
+            // Player chose to enter the tomb
+            console.log('[Scene2] Entering tomb - transitioning to Scene3');
+
+            // Fade out camera
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.time.delayedCall(500, () => {
+                // Start Scene3 (tomb interior)
+                // TODO: Update scene key to match actual Scene3 name
+                this.scene.start('Scene3_Gravkummel', { entry: 'from_crossroads' });
+            });
+        } else if (choice === 'back') {
+            // Player chose to stay
+            console.log('[Scene2] Staying in Scene2 - clearing dialog state');
+
+            // Just clear dialog state and continue in Scene2
+            this.time.delayedCall(200, () => {
+                console.log('[Scene2] Clearing dialogActive');
+                this.dialogActive = false;
+            });
+        } else {
+            // No choice was made (user just advanced through dialog without choices)
+            console.log('[Scene2] No choice made - clearing dialog state');
+            this.time.delayedCall(200, () => {
+                this.dialogActive = false;
+            });
+        }
     }
 }
 
