@@ -84,7 +84,7 @@ class Scene3_Tomb extends GameScene {
             if (!this.anims.exists(key)) {
                 this.anims.create({
                     key,
-                    frames: this.anims.generateFrameNumbers(spriteKey, { start: 0, end: 5 }),
+                    frames: this.anims.generateFrameNumbers(spriteKey, { start: 0, end: 7 }),
                     frameRate: 10,
                     repeat: -1
                 });
