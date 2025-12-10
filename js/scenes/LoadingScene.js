@@ -189,6 +189,9 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('background3', 'assets/scenes/scen3-tomb.png');
         this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
 
+        // Fire glow sprite (used for all braziers)
+        this.load.image('fire-glow', 'assets/objects/fire/fire-glow.png');
+
         // Flame sprites. TODO: justera frameWidth/frameHeight om dina sheets har annan storlek
         this.load.spritesheet('fire-yellow', 'assets/objects/fire/orange/fire-yellow.png', {
             frameWidth: 24,

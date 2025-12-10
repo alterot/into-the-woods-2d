@@ -58,24 +58,27 @@ class Scene3_Tomb extends GameScene {
         const brazierConfigs = [
             {
                 id: 'left',
-                x: 302,
-                y: 201,
+                x: 303,
+                y: 190,
                 spriteKey: 'fire-yellow',
-                animKey: 'fire-yellow-loop'
+                animKey: 'fire-yellow-loop',
+                glowColor: 0xffc46b
             },
             {
                 id: 'middle',
                 x: 586,
-                y: 159,
+                y: 150,
                 spriteKey: 'fire-green',
-                animKey: 'fire-green-loop'
+                animKey: 'fire-green-loop',
+                glowColor: 0xa8ff9b
             },
             {
                 id: 'right',
-                x: 869,
-                y: 201,
+                x: 867,
+                y: 194,
                 spriteKey: 'fire-blue',
-                animKey: 'fire-blue-loop'
+                animKey: 'fire-blue-loop',
+                glowColor: 0x7cc9ff
             }
         ];
 
@@ -95,21 +98,48 @@ class Scene3_Tomb extends GameScene {
         createFireAnim('fire-green-loop', 'fire-green');
         createFireAnim('fire-blue-loop', 'fire-blue');
 
-        // Skapa själva eld-spritesen
+        // Skapa själva eld-spritesen + glow
         this.braziers = brazierConfigs.map(cfg => {
+            // Själva flammans sprite
             const sprite = this.add.sprite(cfg.x, cfg.y, cfg.spriteKey);
-            sprite.setDepth(900);        // ovanför golvet, under UI
-            sprite.setScale(2);          // tweaka tills det ser bra ut
+            sprite.setDepth(900);          // ovanför golvet, under UI
+            sprite.setScale(2);            // tweaka vid behov
             sprite.play(cfg.animKey);
 
+            // === Nivå 0-glow med sprite istället för cirkel ===
+            const glow = this.add.image(cfg.x, cfg.y + 10, 'fire-glow');
+            glow.setTint(cfg.glowColor);                         // färga efter eldtyp
+            glow.setBlendMode(Phaser.BlendModes.ADD);
+
+            // MYCKET mindre ljus i nivå 0
+            glow.setAlpha(0.12);                                 // svag bas
+            glow.setDepth(sprite.depth - 1);
+
+            // Liten bas-scale – detta löser ditt “täcker hela rummet”-problem
+            const baseScale = 0.35;                              // var 1.1 → enorm skillnad
+            glow.setScale(baseScale);
+
+            // Andning: subtil variation
+            this.tweens.add({
+                targets: glow,
+                alpha: { from: 0.10, to: 0.17 },                  // liten ändring
+                scale: { from: baseScale * 0.95, to: baseScale * 1.05 },
+                duration: 1800,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+
+                // Vi sparar state för framtida pussel-logik
             return {
                 id: cfg.id,
                 sprite,
+                glow,
+                state: 0,
                 config: cfg
-            };
+                };
         });
     }
-
 
     // Red pixels in mask (interactive objects) - placeholder for now
     handleInteractiveClick(x, y) {
