@@ -50,13 +50,66 @@ class Scene3_Tomb extends GameScene {
 
     // Scene-specific content (braziers, skeleton mage, etc.)
     createSceneContent() {
-        // TODO: add three brazier InteractiveObjects here
-        // TODO: add skeleton mage encounter
-        // TODO: add puzzle mechanics (light all braziers to unlock exit?)
-
         // Custom feedback message for this scene
         this.feedbackMessages.cannotWalk = "The tomb walls are too close here, we can't go that way.";
+
+        // === BRAZIER CONFIG ===
+        // Gul (vänster), Grön (mitten), Blå (höger)
+        const brazierConfigs = [
+            {
+                id: 'left',
+                x: 302,
+                y: 201,
+                spriteKey: 'fire-yellow',
+                animKey: 'fire-yellow-loop'
+            },
+            {
+                id: 'middle',
+                x: 586,
+                y: 159,
+                spriteKey: 'fire-green',
+                animKey: 'fire-green-loop'
+            },
+            {
+                id: 'right',
+                x: 869,
+                y: 201,
+                spriteKey: 'fire-blue',
+                animKey: 'fire-blue-loop'
+            }
+        ];
+
+        // Skapa animationer EN gång per spriteKey
+        const createFireAnim = (key, spriteKey) => {
+            if (!this.anims.exists(key)) {
+                this.anims.create({
+                    key,
+                    frames: this.anims.generateFrameNumbers(spriteKey, { start: 0, end: 5 }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+            }
+        };
+
+        createFireAnim('fire-yellow-loop', 'fire-yellow');
+        createFireAnim('fire-green-loop', 'fire-green');
+        createFireAnim('fire-blue-loop', 'fire-blue');
+
+        // Skapa själva eld-spritesen
+        this.braziers = brazierConfigs.map(cfg => {
+            const sprite = this.add.sprite(cfg.x, cfg.y, cfg.spriteKey);
+            sprite.setDepth(900);        // ovanför golvet, under UI
+            sprite.setScale(2);          // tweaka tills det ser bra ut
+            sprite.play(cfg.animKey);
+
+            return {
+                id: cfg.id,
+                sprite,
+                config: cfg
+            };
+        });
     }
+
 
     // Red pixels in mask (interactive objects) - placeholder for now
     handleInteractiveClick(x, y) {

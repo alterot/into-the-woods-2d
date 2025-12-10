@@ -189,6 +189,27 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('background3', 'assets/scenes/scen3-tomb.png');
         this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
 
+        // Flame sprites. TODO: justera frameWidth/frameHeight om dina sheets har annan storlek
+        this.load.spritesheet('fire-yellow', 'assets/objects/fire/orange/fire-yellow.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        });
+
+        this.load.spritesheet('fire-green', 'assets/objects/fire/green/fire-green.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        });
+
+        this.load.spritesheet('fire-blue', 'assets/objects/fire/blue/fire-blue.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        });
+
+        this.load.spritesheet('fire-purple', 'assets/objects/fire/purple/fire-purple.png', {
+            frameWidth: 32,
+            frameHeight: 32
+        });
+
     }
 }
 
