@@ -313,12 +313,8 @@ class Scene2_Crossroads extends GameScene {
         // Block input
         this.dialogActive = true;
 
-        // Find walkable spot in front of tomb entrance
-        // Hardcoded position in front of the hole (adjust as needed)
-        const target = { x: 640, y: 420 };
-
-        // Alternative: Find nearest walkable dynamically
-        // const target = this.findNearestWalkable(x, y, 60);
+        // Find nearest walkable spot around the tomb entrance (larger radius for bigger entrance area)
+        const target = this.findNearestWalkable(x, y, 100);
 
         if (target) {
             // Start pathfinding to tomb entrance
