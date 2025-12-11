@@ -213,6 +213,7 @@ class AudioManager {
 
         /**
          * Play stone footstep (for tomb scene). Alternates between left and right.
+         * NOTE: Order is reversed compared to grass footsteps
          */
         playStoneFootstep() {
             if (!this.stoneFootstepLeft || !this.stoneFootstepRight) {
@@ -221,10 +222,11 @@ class AudioManager {
                 return;
             }
 
-            const sound = this.stepToggle ? this.stoneFootstepRight : this.stoneFootstepLeft;
+            // Reversed order compared to grass: left when toggle is true, right when false
+            const sound = this.stepToggle ? this.stoneFootstepLeft : this.stoneFootstepRight;
             this.stepToggle = !this.stepToggle;
 
-            console.log('[AudioManager] Playing stone footstep:', this.stepToggle ? 'right' : 'left');
+            console.log('[AudioManager] Playing stone footstep:', this.stepToggle ? 'left' : 'right');
             sound.play();
         }
 

@@ -617,7 +617,7 @@ class Scene3_Tomb extends GameScene {
 
                 this.stepDistanceAccum += frameDist;
 
-                const STEP_DISTANCE = 24;
+                const STEP_DISTANCE = 36;  // 50% slower than grass (24 * 1.5)
 
                 if (this.stepDistanceAccum >= STEP_DISTANCE) {
                     console.log('[Scene3] Playing stone footstep');
