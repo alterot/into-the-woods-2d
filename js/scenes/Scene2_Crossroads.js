@@ -54,7 +54,6 @@ class Scene2_Crossroads extends GameScene {
             }
         }
 
-        console.log('[Scene2] init() - all dialog state reset');
     }
 
     /**
@@ -110,14 +109,11 @@ class Scene2_Crossroads extends GameScene {
         this.input.on('pointerdown', (pointer) => {
             // During wisp conversation, advance current bubble
             if (this.wispConversationActive) {
-                console.log('[Scene2] Scene-wide click during conversation');
                 if (this.currentConversationBubble) {
                     // Don't call handleClick for choice bubbles - they handle their own clicks
                     if (!this.currentConversationBubble.choices || this.currentConversationBubble.choices.length === 0) {
-                        console.log('[Scene2] Advancing current bubble');
                         this.currentConversationBubble.handleClick();
                     } else {
-                        console.log('[Scene2] Choice bubble - ignoring scene-wide click');
                     }
                 }
                 // CRITICAL: Block this click from reaching GameScene
@@ -132,7 +128,6 @@ class Scene2_Crossroads extends GameScene {
     handleWispClick() {
         // Block if dialog is already active
         if (this.dialogActive || this.wispConversationActive) {
-            console.log('[Scene2] Click blocked - dialog already active');
             return;
         }
 
@@ -142,7 +137,6 @@ class Scene2_Crossroads extends GameScene {
             this.feedbackBubble = null;
         }
 
-        console.log('[Scene2] Starting wisp conversation - setting dialogActive = true');
         this.dialogActive = true;
         this.wispConversationActive = true;
         this.wispArrivalHandled = false;
@@ -164,14 +158,12 @@ class Scene2_Crossroads extends GameScene {
         if (target) {
             // Start pathfinding to position near wisp (not ON wisp)
             this.findPath(this.player.x, this.player.y, target.x, target.y);
-            console.log('[Scene2] Walking to position 60px from wisp:', target);
         } else {
             console.warn('[Scene2_Crossroads] No walkable spot found near wisp');
         }
     }
 
     handleWispChoice(choice) {
-        console.log('[Scene2] handleWispChoice called with:', choice);
 
         // Set flag to block all clicks during choice processing
         this.isProcessingChoice = true;
@@ -190,7 +182,6 @@ class Scene2_Crossroads extends GameScene {
             });
         } else if (choice === 'stay') {
             // Stay in Scene2 - end conversation
-            console.log('[Scene2] Stay choice - clearing conversation state');
 
             // Clear conversation state immediately
             this.wispConversationActive = false;
@@ -199,7 +190,6 @@ class Scene2_Crossroads extends GameScene {
             // Wait a moment before clearing dialogActive
             // This prevents clicks from leaking through
             this.time.delayedCall(200, () => {
-                console.log('[Scene2] Clearing dialogActive and isProcessingChoice');
                 this.dialogActive = false;
                 this.isProcessingChoice = false;
             });
@@ -223,11 +213,9 @@ class Scene2_Crossroads extends GameScene {
             if (this.wispWalkStarted && playerStopped && followerStopped) {
                 this.wispArrivalHandled = true;
 
-                console.log('[Scene2] Starting wisp conversation');
 
                 // Start conversation
                 this.wispConversation.start(() => {
-                    console.log('[Scene2] Conversation completed, choice:', this.wispConversation.getChoice());
                     this.handleWispChoice(this.wispConversation.getChoice());
                 });
             }
@@ -242,18 +230,15 @@ class Scene2_Crossroads extends GameScene {
 
     // Override handleTransitionClick to handle two blue zones
     handleTransitionClick(x, y) {
-        console.log('[Scene2] Transition click at', x, y);
 
         // Block if dialog is already active
         if (this.dialogActive) {
-            console.log('[Scene2] Transition click blocked - dialog active');
             return;
         }
 
         // BLUE ZONE 1: Left area - placeholder message
         // x between 150 and 400, y between 250 and 550
         if (x >= 150 && x <= 400 && y >= 250 && y <= 550) {
-            console.log('[Scene2] Left blue zone clicked - showing placeholder message');
 
             // Play click sound
             const audioManager = this.registry.get('audioManager');
@@ -279,7 +264,6 @@ class Scene2_Crossroads extends GameScene {
         // BLUE ZONE 2: Middle zone at tomb entrance
         // x between 500 and 780, y between 260 and 530
         if (x >= 500 && x <= 780 && y >= 260 && y <= 530) {
-            console.log('[Scene2] Tomb entrance zone clicked - starting tomb sequence');
 
             // Play click sound
             const audioManager = this.registry.get('audioManager');
@@ -295,14 +279,12 @@ class Scene2_Crossroads extends GameScene {
         }
 
         // Blue zone but not matching any defined zone - fallback
-        console.log('[Scene2] Blue zone clicked but no match - showing feedback');
         this.showNoPathIndicator(x, y);
         this.showFeedbackBubble("Det verkar inte finnas någon väg där.");
     }
 
     // Start tomb entrance sequence (similar to runestone in Scene1)
     startTombEntranceSequence(x, y) {
-        console.log('[Scene2] Starting tomb entrance sequence');
 
         // Destroy any existing feedback bubble
         if (this.feedbackBubble) {
@@ -339,12 +321,9 @@ class Scene2_Crossroads extends GameScene {
             // On repeat visits, skip all dialogue and go straight to choice
             if (this.tombEntranceVisited) {
                 dialogData = [];  // Empty array = skip directly to choice
-                console.log('[Scene2] Tomb entrance repeat visit - going straight to choice');
             } else {
-                console.log('[Scene2] Tomb entrance first visit - showing full dialogue');
             }
 
-            console.log('[Scene2] Loaded tomb data - lines:', dialogData.length, 'choices:', choiceData?.options?.length);
 
             // Create DialogOverlay (starts immediately while player walks)
             const overlay = new DialogOverlay(this, {
@@ -353,16 +332,13 @@ class Scene2_Crossroads extends GameScene {
                 spritesVisible: true,
                 backgroundDim: 0.6,
                 onComplete: (selectedChoice) => {
-                    console.log('[Scene2] Tomb dialog completed with choice:', selectedChoice);
                     this.handleTombChoice(selectedChoice);
                     // Mark tomb entrance as visited after first interaction
                     this.tombEntranceVisited = true;
                 }
             });
 
-            console.log('[Scene2] DialogOverlay created, starting...');
             overlay.start();
-            console.log('[Scene2] DialogOverlay.start() called');
         } catch (error) {
             console.error('[Scene2] Error creating tomb entrance dialog:', error);
             this.dialogActive = false;
@@ -371,11 +347,9 @@ class Scene2_Crossroads extends GameScene {
 
     // Handle choice from tomb entrance dialog
     handleTombChoice(choice) {
-        console.log('[Scene2] handleTombChoice called with:', choice);
 
         if (choice === 'enter') {
             // Player chose to enter the tomb
-            console.log('[Scene2] Entering tomb - transitioning to Scene3');
 
             // Fade out camera
             this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -385,16 +359,13 @@ class Scene2_Crossroads extends GameScene {
             });
         } else if (choice === 'back') {
             // Player chose to stay
-            console.log('[Scene2] Staying in Scene2 - clearing dialog state');
 
             // Just clear dialog state and continue in Scene2
             this.time.delayedCall(200, () => {
-                console.log('[Scene2] Clearing dialogActive');
                 this.dialogActive = false;
             });
         } else {
             // No choice was made (user just advanced through dialog without choices)
-            console.log('[Scene2] No choice made - clearing dialog state');
             this.time.delayedCall(200, () => {
                 this.dialogActive = false;
             });

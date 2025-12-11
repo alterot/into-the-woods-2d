@@ -87,16 +87,12 @@ class Brazier {
 
         // Apply initial state visuals and audio
         this.applyStateVisuals(this.state, false); // false = no animation, instant
-
-        console.log(`[Brazier] Created ${this.color} brazier '${this.id}' at (${this.x}, ${this.y}) in state ${this.state}`);
     }
 
     /**
      * Initialize fire sound with random pitch and volume variations
      */
     initializeFireSound() {
-        console.log(`[Brazier] ${this.id} - Initializing fire sound`);
-
         // Random pitch variation (0.9 to 1.1) for unique sound per brazier
         this.soundPitchRate = 0.9 + Math.random() * 0.2;
 
@@ -106,26 +102,15 @@ class Brazier {
         // Random start delay (0-300ms) so sounds don't sync perfectly
         const startDelay = Math.random() * 300;
 
-        console.log(`[Brazier] ${this.id} - Pitch: ${this.soundPitchRate.toFixed(2)}, Volume mult: ${this.soundVolumeMultiplier.toFixed(2)}, Delay: ${startDelay.toFixed(0)}ms`);
-
         this.scene.time.delayedCall(startDelay, () => {
-            console.log(`[Brazier] ${this.id} - Creating sound... scene.sound exists:`, !!this.scene.sound);
-
             if (this.scene.sound) {
-                const fireAudio = this.scene.sound.get('fire');
-                console.log(`[Brazier] ${this.id} - Fire audio exists:`, !!fireAudio);
-
                 this.fireSound = this.scene.sound.add('fire', {
                     loop: true,
                     volume: 0  // Will be set by updateSoundVolume
                 });
 
-                console.log(`[Brazier] ${this.id} - Fire sound created:`, !!this.fireSound);
-
                 this.fireSound.setRate(this.soundPitchRate);
                 this.fireSound.play();
-
-                console.log(`[Brazier] ${this.id} - Sound playing, state: ${this.state}`);
 
                 // Update volume based on current state
                 this.updateSoundVolume();
@@ -140,7 +125,6 @@ class Brazier {
      */
     updateSoundVolume() {
         if (!this.fireSound) {
-            console.log(`[Brazier] ${this.id} - Cannot update volume, fireSound is null`);
             return;
         }
 
@@ -161,8 +145,6 @@ class Brazier {
         // Apply volume multiplier for variation between braziers
         const finalVolume = baseVolume * this.soundVolumeMultiplier;
         this.fireSound.setVolume(finalVolume);
-
-        console.log(`[Brazier] ${this.id} - Volume updated for state ${this.state}: ${finalVolume.toFixed(2)} (base: ${baseVolume}, mult: ${this.soundVolumeMultiplier.toFixed(2)})`);
     }
 
     /**
@@ -346,7 +328,6 @@ class Brazier {
      * Activate this brazier (transition to state 1)
      */
     activate() {
-        console.log(`[Brazier] Activating ${this.color} brazier '${this.id}'`);
         this.state = 1;
         this.applyStateVisuals(1, true);
     }
@@ -355,7 +336,6 @@ class Brazier {
      * Reset this brazier to base state (0)
      */
     reset() {
-        console.log(`[Brazier] Resetting ${this.color} brazier '${this.id}'`);
         this.state = 0;
         this.applyStateVisuals(0, true);
     }
@@ -364,7 +344,6 @@ class Brazier {
      * Mark this brazier as completed (transition to state 2)
      */
     setCompleted() {
-        console.log(`[Brazier] Completing ${this.color} brazier '${this.id}'`);
         this.state = 2;
         this.applyStateVisuals(2, true);
     }
@@ -379,7 +358,6 @@ class Brazier {
             return; // Already in this state
         }
 
-        console.log(`[Brazier] Setting ${this.color} brazier '${this.id}' to state ${newState}`);
         this.state = newState;
         this.applyStateVisuals(newState, animate);
     }
@@ -397,7 +375,6 @@ class Brazier {
      * @param {string} newColor - New color: 'yellow', 'green', 'blue', 'purple'
      */
     changeColor(newColor) {
-        console.log(`[Brazier] Changing ${this.id} from ${this.color} to ${newColor}`);
 
         this.color = newColor;
         this.spriteKey = `fire-${newColor}`;
@@ -465,8 +442,6 @@ class Brazier {
             this.fireSound.destroy();
             this.fireSound = null;
         }
-
-        console.log(`[Brazier] Destroyed ${this.color} brazier '${this.id}'`);
     }
 
     // ==========================================
@@ -487,7 +462,6 @@ class Brazier {
      * ], { initialState: 0, depth: 900 });
      */
     static createGroup(scene, configs, defaults = {}) {
-        console.log(`[Brazier] Creating group of ${configs.length} braziers with defaults:`, defaults);
 
         return configs.map(config =>
             new Brazier(scene, {
@@ -544,11 +518,9 @@ class Brazier {
 
         if (!preset) {
             console.error(`[Brazier] Unknown preset: ${presetName}`);
-            console.log('[Brazier] Available presets:', Object.keys(Brazier.PRESETS));
             return [];
         }
 
-        console.log(`[Brazier] Creating braziers from preset '${presetName}'`);
 
         // If colors array provided, map them to braziers
         const colors = overrides.colors || [];
@@ -587,7 +559,6 @@ class Brazier {
         }
 
         Brazier.PRESETS[name] = configs;
-        console.log(`[Brazier] Added custom preset '${name}' with ${configs.length} braziers`);
     }
 }
 

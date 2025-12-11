@@ -38,7 +38,6 @@ class ConversationManager {
             return;
         }
 
-        console.log('[ConversationManager] Starting conversation with', this.steps.length, 'steps');
         this.isActive = true;
         this.currentStep = 0;
         this.selectedChoice = null;
@@ -56,17 +55,14 @@ class ConversationManager {
      * Show a specific conversation step
      */
     showStep(stepIndex) {
-        console.log('[ConversationManager] showStep:', stepIndex, '/', this.steps.length);
 
         if (stepIndex >= this.steps.length) {
-            console.log('[ConversationManager] Reached end of steps, calling end()');
             this.end();
             return;
         }
 
         const step = this.steps[stepIndex];
         this.currentStep = stepIndex;
-        console.log('[ConversationManager] Step', stepIndex, '- speaker:', step.speaker, 'has choices:', !!step.choices);
 
         // Determine which character is speaking
         const speaker = this.getSpeaker(step.speaker);
@@ -79,7 +75,6 @@ class ConversationManager {
         // Create speech bubble
         if (step.choices && step.choices.length > 0) {
             // Choice bubble
-            console.log('[ConversationManager] Creating choice bubble with', step.choices.length, 'choices');
             this.currentBubble = new SpeechBubble(
                 this.scene,
                 speaker.x,
@@ -90,7 +85,6 @@ class ConversationManager {
                 step.choices.map(choice => ({
                     text: choice.text,
                     callback: () => {
-                        console.log('[ConversationManager] Choice clicked:', choice.action);
                         this.selectedChoice = choice.action;
                         this.showStep(stepIndex + 1);
                     }
@@ -116,7 +110,6 @@ class ConversationManager {
         // Store reference so scene-wide clicks can interact
         if (this.scene.currentConversationBubble !== undefined) {
             this.scene.currentConversationBubble = this.currentBubble;
-            console.log('[ConversationManager] Set scene.currentConversationBubble');
         }
     }
 
@@ -143,7 +136,6 @@ class ConversationManager {
      * End the conversation
      */
     end() {
-        console.log('[ConversationManager] end() called, selected choice:', this.selectedChoice);
         this.isActive = false;
 
         // IMPORTANT: Don't clear dialogActive here!
@@ -157,13 +149,11 @@ class ConversationManager {
 
         // Call completion callback
         if (this.onCompleteCallback) {
-            console.log('[ConversationManager] Calling onCompleteCallback');
             this.onCompleteCallback();
         }
 
         // Destroy the bubble AFTER callback
         if (this.currentBubble) {
-            console.log('[ConversationManager] Destroying current bubble');
             this.currentBubble.destroy();
             this.currentBubble = null;
         }

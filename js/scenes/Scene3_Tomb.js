@@ -33,10 +33,8 @@ class Scene3_Tomb extends GameScene {
         // Check if puzzle was already completed in a previous visit
         if (SceneStateManager.getScene('Scene3_Tomb', 'puzzleCompleted', false)) {
             this.puzzleSolved = true;
-            console.log('[Scene3] Puzzle already completed - loading completed state');
         } else {
             this.puzzleSolved = false;
-            console.log('[Scene3] Puzzle not yet completed - loading initial state');
         }
 
         // Switch to tomb ambient music with reduced volume (51% quieter for fire sounds)
@@ -47,7 +45,6 @@ class Scene3_Tomb extends GameScene {
             audioManager.setMusicVolume(0.196);
         }
 
-        console.log('[Scene3] init() - all dialog state reset, tomb music started at reduced volume');
     }
 
     /**
@@ -90,7 +87,6 @@ class Scene3_Tomb extends GameScene {
      * Create the initial version of the scene (before puzzle is solved)
      */
     createInitialScene() {
-        console.log('[Scene3] Creating initial scene with colored braziers');
 
         // Create braziers from preset with colors: yellow (left), green (middle), blue (right)
         this.braziers = Brazier.fromPreset(this, 'tomb-braziers', {
@@ -105,7 +101,6 @@ class Scene3_Tomb extends GameScene {
             resetOnWrong: false,  // We'll manually reset with delay for better UX
 
             onCorrectStep: (step, color) => {
-                console.log(`[Scene3] Correct! Activated ${color} brazier (step ${step + 1}/${this.puzzleManager.sequence.length})`);
 
                 // Find and activate the brazier with this color
                 const brazier = this.braziers.find(b => b.color === color);
@@ -120,14 +115,12 @@ class Scene3_Tomb extends GameScene {
             },
 
             onWrongStep: (expectedColor, attemptedColor) => {
-                console.log(`[Scene3] Wrong! Tried ${attemptedColor}, expected ${expectedColor}`);
 
                 // Show feedback
                 this.showFeedbackBubble(`The ${attemptedColor} flame flickers and dies. Something's not right...`);
             },
 
             onReset: () => {
-                console.log('[Scene3] Puzzle reset - returning braziers to base state');
 
                 // Reset all braziers to base state
                 this.braziers.forEach(brazier => {
@@ -136,7 +129,6 @@ class Scene3_Tomb extends GameScene {
             },
 
             onComplete: () => {
-                console.log('[Scene3] Puzzle completed! Starting reveal sequence...');
 
                 // Delay before starting the dramatic reveal
                 this.time.delayedCall(800, () => {
@@ -145,14 +137,12 @@ class Scene3_Tomb extends GameScene {
             }
         });
 
-        console.log('[Scene3] PuzzleManager initialized with sequence:', this.puzzleManager.sequence);
     }
 
     /**
      * Create the completed version of the scene (after puzzle is solved)
      */
     createCompletedScene() {
-        console.log('[Scene3] Creating completed version of scene');
 
         // Load opened tomb background
         const bgKeys = ['background3-open', 'scene3-tomb-open', 'scen3-tomb-open'];
@@ -162,7 +152,6 @@ class Scene3_Tomb extends GameScene {
             if (this.textures.exists(key)) {
                 const newBg = this.add.image(640, 360, key);
                 newBg.setDepth(0);  // Behind everything
-                console.log(`[Scene3] Loaded opened background: ${key}`);
                 bgLoaded = true;
                 break;
             }
@@ -188,7 +177,6 @@ class Scene3_Tomb extends GameScene {
                 morte.setDepth(850);
                 morte.setScale(0.4);
                 this.morteSprite = morte;
-                console.log(`[Scene3] Loaded Morte sprite: ${key}`);
                 morteLoaded = true;
                 break;
             }
@@ -210,7 +198,6 @@ class Scene3_Tomb extends GameScene {
     handleInteractiveClick(x, y) {
         // Block if dialog is active
         if (this.dialogActive) {
-            console.log('[Scene3] Interactive click blocked - dialog active');
             return;
         }
 
@@ -229,7 +216,6 @@ class Scene3_Tomb extends GameScene {
             return;
         }
 
-        console.log('[Scene3] Brazier clicked:', clickedBrazier.id, clickedBrazier.color);
 
         // Play click sound
         const audioManager = this.registry.get('audioManager');
@@ -304,13 +290,11 @@ class Scene3_Tomb extends GameScene {
      * Includes placeholder hooks for future features
      */
     onPuzzleSolved() {
-        console.log('[Scene3] ✓ PUZZLE SOLVED!');
 
         this.puzzleSolved = true;
 
         // Save completion state using SceneStateManager
         SceneStateManager.setScene('Scene3_Tomb', 'puzzleCompleted', true);
-        console.log('[Scene3] Puzzle completion saved to SceneStateManager');
 
         // Set all braziers to completed state (2) using Brazier's setCompleted method
         this.braziers.forEach(brazier => {
@@ -323,7 +307,6 @@ class Scene3_Tomb extends GameScene {
         // === DRAMATIC REVEAL SEQUENCE ===
         // Wait 5000ms to let the completion message fully display before starting reveal
         this.time.delayedCall(5000, () => {
-            console.log('[Scene3] Starting reveal sequence...');
 
             // 1. Camera shake effect (earthquake/rumble)
             this.cameras.main.shake(800, 0.005);  // 800ms duration, subtle shake
@@ -333,7 +316,6 @@ class Scene3_Tomb extends GameScene {
 
             // 3. After fade completes, swap background and add Morte sprite
             this.time.delayedCall(1650, () => {
-                console.log('[Scene3] Scene is dark - swapping background and adding Morte');
 
                 // Change background to opened tomb
                 // Try multiple possible texture keys
@@ -344,7 +326,6 @@ class Scene3_Tomb extends GameScene {
                     if (this.textures.exists(key)) {
                         const newBg = this.add.image(640, 360, key);
                         newBg.setDepth(0);  // Behind everything
-                        console.log(`[Scene3] Loaded new background: ${key}`);
                         bgLoaded = true;
                         break;
                     }
@@ -364,7 +345,6 @@ class Scene3_Tomb extends GameScene {
                         morte.setDepth(850);  // Above background, below UI
                         morte.setScale(0.4);    // 40% size (reduced 20% more)
                         this.morteSprite = morte;  // Store for later use
-                        console.log(`[Scene3] Loaded Morte sprite: ${key}`);
                         morteLoaded = true;
                         break;
                     }
@@ -378,7 +358,6 @@ class Scene3_Tomb extends GameScene {
                 this.braziers.forEach(brazier => {
                     brazier.changeColor('purple');
                 });
-                console.log('[Scene3] All flames changed to purple');
 
                 // Stop any ongoing movement/pathfinding
                 this.isMoving = false;
@@ -405,7 +384,6 @@ class Scene3_Tomb extends GameScene {
                     this.follower.setDepth(bottomThirdY);  // Ensure visible
                 }
 
-                console.log('[Scene3] Sisters positioned at', centerX, bottomThirdY, 'facing right');
 
                 // 4. Reset camera alpha but keep screen visually black with DialogOverlay
                 // This allows UI elements to be visible while screen appears black
@@ -426,7 +404,6 @@ class Scene3_Tomb extends GameScene {
                 const narratorLines = fullDialogueData.slice(0, 3);
                 const conversationLines = fullDialogueData.slice(3);
 
-                console.log('[Scene3] Starting narrator dialogue while screen is black');
 
                 // Start narrator dialogue with fully opaque black background
                 const narratorOverlay = new DialogOverlay(this, {
@@ -435,14 +412,12 @@ class Scene3_Tomb extends GameScene {
                     backgroundDim: 1.0,     // Fully opaque black background (keeps screen black)
                     portraitScale: 1,
                     onComplete: () => {
-                        console.log('[Scene3] Narrator dialogue complete - revealing scene');
 
                         // 5. DialogOverlay will fade out automatically (500ms), revealing the scene
                         // Wait for fade to complete before starting conversation
 
                         // 6. After narrator overlay fades out, start conversation dialogue
                         this.time.delayedCall(500, () => {
-                            console.log('[Scene3] Starting Morte conversation dialogue');
 
                             // Determine portraits based on selected character
                             const isPlayingBig = SceneStateManager.getGlobal('selectedCharacter') === 'big';
@@ -479,7 +454,6 @@ class Scene3_Tomb extends GameScene {
                                 },
 
                                 onComplete: () => {
-                                    console.log('[Scene3] Morte dialogue complete');
                                     this.dialogActive = false;
                                 }
                             });
@@ -493,20 +467,16 @@ class Scene3_Tomb extends GameScene {
             });
         });
 
-        console.log('[Scene3] Puzzle completion sequence initiated');
     }
 
     // Blue pixels in mask (exit back to crossroads)
     handleTransitionClick(x, y) {
-        console.log('[Scene3] Transition click at', x, y);
 
         // Block if dialog is already active
         if (this.dialogActive) {
-            console.log('[Scene3] Transition click blocked - dialog active');
             return;
         }
 
-        console.log('[Scene3] Exiting tomb - returning to Scene2');
 
         // Play click sound
         const audioManager = this.registry.get('audioManager');

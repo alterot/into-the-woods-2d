@@ -60,7 +60,6 @@ class Scene1_Meadow extends GameScene {
             }
         }
 
-        console.log('[Scene1] init() - all dialog state reset');
     }
 
     createSceneContent() {
@@ -132,14 +131,11 @@ class Scene1_Meadow extends GameScene {
         this.input.on('pointerdown', (pointer) => {
             // During wisp conversation, advance current bubble
             if (this.wispConversationActive) {
-                console.log('[Scene1] Scene-wide click during conversation');
                 if (this.currentConversationBubble) {
                     // Don't call handleClick for choice bubbles - they handle their own clicks
                     if (!this.currentConversationBubble.choices || this.currentConversationBubble.choices.length === 0) {
-                        console.log('[Scene1] Advancing current bubble');
                         this.currentConversationBubble.handleClick();
                     } else {
-                        console.log('[Scene1] Choice bubble - ignoring scene-wide click');
                     }
                 }
                 // CRITICAL: Block this click from reaching GameScene
@@ -152,7 +148,6 @@ class Scene1_Meadow extends GameScene {
     handleWispClick() {
         // Block if dialog is already active
         if (this.dialogActive || this.wispConversationActive) {
-            console.log('[Scene1] Click blocked - dialog already active');
             return;
         }
 
@@ -162,7 +157,6 @@ class Scene1_Meadow extends GameScene {
             this.feedbackBubble = null;
         }
 
-        console.log('[Scene1] Starting wisp conversation - setting dialogActive = true');
         this.dialogActive = true;
         this.wispConversationActive = true;
         this.wispArrivalHandled = false;
@@ -200,8 +194,6 @@ class Scene1_Meadow extends GameScene {
     }
 
     handleWispChoice(choice) {
-        console.log('[Scene1] handleWispChoice called with:', choice);
-        console.log('[Scene1] dialogActive BEFORE:', this.dialogActive);
 
         // Set flag to block all clicks during choice processing
         this.isProcessingChoice = true;
@@ -215,7 +207,6 @@ class Scene1_Meadow extends GameScene {
             });
         } else if (choice === 'stay') {
             // Stay in meadow - end conversation
-            console.log('[Scene1] Stay choice - clearing conversation state');
 
             // Note: ConversationManager.end() already destroyed the bubble
             // Just clear our conversation state
@@ -227,7 +218,6 @@ class Scene1_Meadow extends GameScene {
             // Wait a moment before clearing dialogActive
             // This prevents clicks from leaking through
             this.time.delayedCall(200, () => {
-                console.log('[Scene1] Clearing dialogActive and isProcessingChoice');
                 this.dialogActive = false;
                 this.isProcessingChoice = false;
             });
@@ -256,9 +246,7 @@ class Scene1_Meadow extends GameScene {
         // On repeat visits, show only lines 5-8 (the three color clues + sister's reaction)
         if (this.runestoneVisited) {
             dialogData = dialogData.slice(4, 8);  // Lines 5, 6, 7, 8
-            console.log('[Scene1] Runestone repeat visit - showing lines 5-8 (color clues)');
         } else {
-            console.log('[Scene1] Runestone first visit - showing full dialogue');
         }
 
         // Find nearest walkable spot around the runestone
@@ -462,12 +450,9 @@ class Scene1_Meadow extends GameScene {
                     ? this.wispRepeatConvo
                     : this.wispFirstTimeConvo;
 
-                console.log('[Scene1] Starting conversation:', this.wispConversationCompleted ? 'REPEAT' : 'FIRST TIME');
-                console.log('[Scene1] dialogActive:', this.dialogActive);
 
                 // Start conversation (bubbles #2-5)
                 conversation.start(() => {
-                    console.log('[Scene1] Conversation completed, choice:', conversation.getChoice());
                     this.handleWispChoice(conversation.getChoice());
                 });
             }

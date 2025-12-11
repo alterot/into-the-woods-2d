@@ -41,7 +41,6 @@ class PuzzleManager {
         this.attempts = 0;          // Track number of attempts
         this.wrongAttempts = 0;     // Track number of wrong attempts
 
-        console.log('[PuzzleManager] Created with sequence:', this.sequence);
     }
 
     /**
@@ -59,7 +58,6 @@ class PuzzleManager {
         const expectedValue = this.sequence[this.currentStep];
         const isCorrect = (value === expectedValue);
 
-        console.log(`[PuzzleManager] Attempt #${this.attempts}: ${value}, expected ${expectedValue}, correct: ${isCorrect}`);
 
         if (isCorrect) {
             // CORRECT STEP
@@ -100,7 +98,6 @@ class PuzzleManager {
      * @param {boolean} silent - If true, don't trigger onReset callback (default: false)
      */
     reset(silent = false) {
-        console.log('[PuzzleManager] Resetting puzzle');
 
         this.currentStep = 0;
 
@@ -113,8 +110,6 @@ class PuzzleManager {
      * Mark puzzle as complete and trigger callback
      */
     complete() {
-        console.log('[PuzzleManager] ✓ PUZZLE COMPLETE!');
-        console.log(`[PuzzleManager] Stats: ${this.attempts} total attempts, ${this.wrongAttempts} wrong attempts`);
 
         this.isComplete = true;
 
@@ -185,7 +180,6 @@ class PuzzleManager {
      * Useful for loading saved game state
      */
     setSolved() {
-        console.log('[PuzzleManager] Setting puzzle as solved (no callbacks)');
         this.isComplete = true;
         this.currentStep = this.sequence.length;
     }
@@ -219,7 +213,6 @@ class PuzzleManager {
      * Restart the puzzle (reset + clear completion state)
      */
     restart() {
-        console.log('[PuzzleManager] Restarting puzzle from scratch');
         this.currentStep = 0;
         this.isComplete = false;
         this.attempts = 0;
