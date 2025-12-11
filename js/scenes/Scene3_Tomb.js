@@ -58,11 +58,12 @@ class Scene3_Tomb extends GameScene {
         const brazierConfigs = [
             {
                 id: 'left',
-                x: 303,
+                x: 298,
                 y: 190,
                 spriteKey: 'fire-yellow',
                 animKey: 'fire-yellow-loop',
-                glowColor: 0xffc46b
+                glowColor: 0xffc46b,
+                angle: -14       // ← luta lite åt vänster
             },
             {
                 id: 'middle',
@@ -70,15 +71,17 @@ class Scene3_Tomb extends GameScene {
                 y: 150,
                 spriteKey: 'fire-green',
                 animKey: 'fire-green-loop',
-                glowColor: 0xa8ff9b
+                glowColor: 0xa8ff9b,
+                angle: 0         // ← rak
             },
             {
                 id: 'right',
-                x: 867,
-                y: 194,
+                x: 870,
+                y: 192,
                 spriteKey: 'fire-blue',
                 animKey: 'fire-blue-loop',
-                glowColor: 0x7cc9ff
+                glowColor: 0x7cc9ff,
+                angle: 8         // ← luta lite åt höger
             }
         ];
 
@@ -106,6 +109,10 @@ class Scene3_Tomb extends GameScene {
             sprite.setScale(2);            // tweaka vid behov
             sprite.play(cfg.animKey);
 
+            if (cfg.angle !== undefined) {
+                sprite.setAngle(cfg.angle);
+            }
+
             // === Nivå 0-glow med sprite istället för cirkel ===
             const glow = this.add.image(cfg.x, cfg.y + 10, 'fire-glow');
             glow.setTint(cfg.glowColor);                         // färga efter eldtyp
@@ -116,7 +123,7 @@ class Scene3_Tomb extends GameScene {
             glow.setDepth(sprite.depth - 1);
 
             // Liten bas-scale – detta löser ditt “täcker hela rummet”-problem
-            const baseScale = 0.35;                              // var 1.1 → enorm skillnad
+            const baseScale = 0.25;                              
             glow.setScale(baseScale);
 
             // Andning: subtil variation
