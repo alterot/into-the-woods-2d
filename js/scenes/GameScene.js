@@ -3,6 +3,7 @@
 // Handles movement, pathfinding, follower AI, mask detection, depth sorting
 import AudioManager from '../AudioManager.js';
 import SpeechBubble from '../entities/SpeechBubble.js';
+import SceneStateManager from '../systems/SceneStateManager.js';
 
 class GameScene extends Phaser.Scene {
     constructor(sceneKey, backgroundKey, maskKey) {
@@ -154,7 +155,7 @@ class GameScene extends Phaser.Scene {
 
     setupCharacters() {
         // Determine player character based on selection
-        const isPlayingBig = window.gameState?.selectedCharacter === 'big';
+        const isPlayingBig = SceneStateManager.getGlobal('selectedCharacter') === 'big';
 
         // Position sprites - player always on the right
         if (isPlayingBig) {

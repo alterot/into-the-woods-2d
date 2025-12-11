@@ -15,9 +15,3 @@ Lägg till ljud fär eld (som blir högre när aktv)
 ev. Öka styrka på aktiv halo
 UPPDATERA OVERLAY (ska inkudea vägg + tomb)
 Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
-
-  1. Brazier Entity (#1) - Immediate 50% reduction in Scene3 complexity
-  2. PuzzleManager (#2) - Clean puzzle logic extraction
-  3. BrazierFactory (#6) - Quick win, works with #1
-  4. SceneStateManager (#3) - Before adding Scene4+
-  5. CutsceneManager (#4) - When you have 2-3 cutscenes (not just one)i ag

@@ -1,6 +1,7 @@
 // ===== CHARACTER SELECT SCENE =====
 import Wisp from '../entities/Wisp.js';
 import AudioManager from '../AudioManager.js';
+import SceneStateManager from '../systems/SceneStateManager.js';
 
 class CharacterSelectScene extends Phaser.Scene {
     constructor() {
@@ -176,12 +177,12 @@ class CharacterSelectScene extends Phaser.Scene {
 
         // --- Skapa knapparna ---
         const bigBtn = makeWoodButton(height / 2 - 40, 'Storasyster', () => {
-            window.gameState = { selectedCharacter: 'big' };
+            SceneStateManager.setGlobal('selectedCharacter', 'big');
             this.scene.start('IntroScene');
         });
 
         const littleBtn = makeWoodButton(height / 2 + 80, 'Lillasyster', () => {
-            window.gameState = { selectedCharacter: 'little' };
+            SceneStateManager.setGlobal('selectedCharacter', 'little');
             this.scene.start('IntroScene');
         });
 

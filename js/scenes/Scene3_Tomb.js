@@ -5,6 +5,7 @@ import GameScene from './GameScene.js';
 import DialogOverlay from '../systems/DialogOverlay.js';
 import Brazier from '../entities/Brazier.js';
 import PuzzleManager from '../systems/PuzzleManager.js';
+import SceneStateManager from '../systems/SceneStateManager.js';
 
 class Scene3_Tomb extends GameScene {
     constructor() {
@@ -30,7 +31,7 @@ class Scene3_Tomb extends GameScene {
         this.dialogActive = false;
 
         // Check if puzzle was already completed in a previous visit
-        if (window.gameState?.scene3PuzzleCompleted) {
+        if (SceneStateManager.getScene('Scene3_Tomb', 'puzzleCompleted', false)) {
             this.puzzleSolved = true;
             console.log('[Scene3] Puzzle already completed - loading completed state');
         } else {
@@ -303,12 +304,9 @@ class Scene3_Tomb extends GameScene {
 
         this.puzzleSolved = true;
 
-        // Save completion state to global gameState
-        if (!window.gameState) {
-            window.gameState = {};
-        }
-        window.gameState.scene3PuzzleCompleted = true;
-        console.log('[Scene3] Puzzle completion saved to gameState');
+        // Save completion state using SceneStateManager
+        SceneStateManager.setScene('Scene3_Tomb', 'puzzleCompleted', true);
+        console.log('[Scene3] Puzzle completion saved to SceneStateManager');
 
         // Set all braziers to completed state (2) using Brazier's setCompleted method
         this.braziers.forEach(brazier => {
@@ -436,7 +434,7 @@ class Scene3_Tomb extends GameScene {
                             console.log('[Scene3] Starting Morte conversation dialogue');
 
                             // Determine portraits based on selected character
-                            const isPlayingBig = window.gameState?.selectedCharacter === 'big';
+                            const isPlayingBig = SceneStateManager.getGlobal('selectedCharacter') === 'big';
 
                             // Start conversation with flexible layout
                             const conversationOverlay = new DialogOverlay(this, {

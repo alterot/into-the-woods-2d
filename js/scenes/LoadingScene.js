@@ -3,6 +3,7 @@
 // Loads all game assets before transitioning to CharacterSelectScene
 
 import AudioManager from '../AudioManager.js';
+import SceneStateManager from '../systems/SceneStateManager.js';
 
 class LoadingScene extends Phaser.Scene {
     constructor() {
@@ -117,8 +118,8 @@ class LoadingScene extends Phaser.Scene {
                             console.log('[LoadingScene] AudioManager initialized for debug mode');
 
                             // Also set default character selection (normally done in CharacterSelectScene)
-                            if (!window.gameState) {
-                                window.gameState = { selectedCharacter: 'big' };
+                            if (!SceneStateManager.hasGlobal('selectedCharacter')) {
+                                SceneStateManager.setGlobal('selectedCharacter', 'big');
                                 console.log('[LoadingScene] Default character set to: big');
                             }
 

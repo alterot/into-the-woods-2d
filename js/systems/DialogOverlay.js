@@ -2,6 +2,8 @@
 // Reusable dialog system with portraits and typewriter effect
 // Used in IntroScene and gameplay dialog sequences
 
+import SceneStateManager from './SceneStateManager.js';
+
 class DialogOverlay {
     constructor(scene, config) {
         this.scene = scene;
@@ -68,7 +70,7 @@ class DialogOverlay {
 
     createDialogUI() {
         // Determine player and sibling based on selection
-        const isPlayingBig = window.gameState?.selectedCharacter === 'big';
+        const isPlayingBig = SceneStateManager.getGlobal('selectedCharacter') === 'big';
         const playerPortrait = isPlayingBig ? 'portrait1' : 'portrait2';
         const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
 
