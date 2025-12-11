@@ -406,6 +406,12 @@ class Scene3_Tomb extends GameScene {
                 // This allows UI elements to be visible while screen appears black
                 this.cameras.main.resetFX();  // Clear the fade effect
 
+                // Destroy any existing feedback bubble
+                if (this.feedbackBubble) {
+                    this.feedbackBubble.destroy();
+                    this.feedbackBubble = null;
+                }
+
                 this.dialogActive = true;
 
                 // Load full dialogue data

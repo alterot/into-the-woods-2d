@@ -1,5 +1,6 @@
 GENERELLT:
 Döda pratbubblor när en ny initieras (t.ex kan ej gå här fyns samtidigt som whisp dialt)
+Move AudioManager to /systems and (oly imported by loading scene?)
 
 SCEN 2
 player ska komma närmare ingång till tomb innan den stannar
@@ -15,3 +16,4 @@ Lägg till ljud fär eld (som blir högre när aktv)
 ev. Öka styrka på aktiv halo
 UPPDATERA OVERLAY (ska inkudea vägg + tomb)
 Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
+rensa upp alla (debug( konsollogs))

@@ -136,6 +136,12 @@ class Scene2_Crossroads extends GameScene {
             return;
         }
 
+        // Destroy any existing feedback bubble
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+            this.feedbackBubble = null;
+        }
+
         console.log('[Scene2] Starting wisp conversation - setting dialogActive = true');
         this.dialogActive = true;
         this.wispConversationActive = true;
@@ -297,6 +303,12 @@ class Scene2_Crossroads extends GameScene {
     // Start tomb entrance sequence (similar to runestone in Scene1)
     startTombEntranceSequence(x, y) {
         console.log('[Scene2] Starting tomb entrance sequence');
+
+        // Destroy any existing feedback bubble
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+            this.feedbackBubble = null;
+        }
 
         // Block input
         this.dialogActive = true;

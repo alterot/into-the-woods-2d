@@ -156,6 +156,12 @@ class Scene1_Meadow extends GameScene {
             return;
         }
 
+        // Destroy any existing feedback bubble
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+            this.feedbackBubble = null;
+        }
+
         console.log('[Scene1] Starting wisp conversation - setting dialogActive = true');
         this.dialogActive = true;
         this.wispConversationActive = true;
@@ -262,6 +268,12 @@ class Scene1_Meadow extends GameScene {
             this.findPath(this.player.x, this.player.y, walkableSpot.x, walkableSpot.y);
         } else {
             console.warn('[Scene1_Meadow] No walkable spot found near runestone');
+        }
+
+        // Destroy any existing feedback bubble
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+            this.feedbackBubble = null;
         }
 
         // Start dialog overlay (immediately)
