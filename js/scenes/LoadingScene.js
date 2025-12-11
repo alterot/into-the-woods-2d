@@ -188,6 +188,7 @@ class LoadingScene extends Phaser.Scene {
         // Game scene assets (Scene3_Tomb)
         this.load.image('background3', 'assets/scenes/scen3-tomb.png');
         this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
+        this.load.image('tomb-overlay', 'assets/scenes/scen3-tomb-overlay.png');
 
         // Fire glow sprite (used for all braziers)
         this.load.image('fire-glow', 'assets/objects/fire/fire-glow.png');

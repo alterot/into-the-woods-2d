@@ -146,6 +146,11 @@ class Scene3_Tomb extends GameScene {
                 config: cfg
                 };
         });
+
+        const overlay = this.add.image(640, 360, 'tomb-overlay');
+
+        // Lägg den över systrarna
+        overlay.setDepth(2000);
     }
 
     // Red pixels in mask (interactive objects) - placeholder for now
