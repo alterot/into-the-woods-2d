@@ -198,9 +198,9 @@ class Scene3_Tomb extends GameScene {
             audioManager.playClick();
         }
 
-        // Find walkable position near brazier
+        // Find walkable position near brazier (keep player further back)
         const brazierX = clickedBrazier.sprite.x;
-        const brazierY = clickedBrazier.sprite.y + 80; // Slightly below the brazier
+        const brazierY = clickedBrazier.sprite.y + 130; // Further below the brazier to avoid getting too close to flames
         const walkablePos = this.findNearestWalkable(brazierX, brazierY, 80);
 
         if (!walkablePos) {
@@ -272,13 +272,39 @@ class Scene3_Tomb extends GameScene {
             // CORRECT BRAZIER
             brazier.state = 1; // Mark as correctly activated
 
-            // Enhance glow for activated brazier
+            // Kill existing breathing animation so it stays in activated state
+            this.tweens.killTweensOf(brazier.glow);
+            this.tweens.killTweensOf(brazier.sprite);
+
+            // Enhance flame sprite (make it larger and brighter)
             this.tweens.add({
-                targets: brazier.glow,
-                alpha: 0.35,      // Brighter than base
-                scale: 0.35,      // Slightly larger
+                targets: brazier.sprite,
+                scale: 2.2,       // Slightly larger flame
+                alpha: 1.0,       // Full brightness
                 duration: 400,
                 ease: 'Cubic.easeOut'
+            });
+
+            // Enhance glow for activated brazier (slightly smaller than before)
+            const activatedGlowScale = 0.30;
+            this.tweens.add({
+                targets: brazier.glow,
+                alpha: 0.30,      // Brighter than base
+                scale: activatedGlowScale,
+                duration: 400,
+                ease: 'Cubic.easeOut',
+                onComplete: () => {
+                    // Add gentle breathing animation for activated state
+                    this.tweens.add({
+                        targets: brazier.glow,
+                        alpha: { from: 0.28, to: 0.35 },
+                        scale: { from: activatedGlowScale * 0.95, to: activatedGlowScale * 1.05 },
+                        duration: 1800,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut'
+                    });
+                }
             });
 
             // Advance puzzle step
@@ -317,12 +343,17 @@ class Scene3_Tomb extends GameScene {
 
         this.currentPuzzleStep = 0;
 
-        // Reset all braziers to state 0 and restore base glow
+        // Reset all braziers to state 0 and restore base glow and sprite
         this.braziers.forEach(brazier => {
             brazier.state = 0;
 
-            // Kill existing tweens
+            // Kill existing tweens (both glow and sprite)
             this.tweens.killTweensOf(brazier.glow);
+            this.tweens.killTweensOf(brazier.sprite);
+
+            // Restore base flame sprite values
+            brazier.sprite.setScale(2);
+            brazier.sprite.setAlpha(1.0);
 
             // Restore base glow values
             const baseScale = 0.25;
@@ -357,12 +388,22 @@ class Scene3_Tomb extends GameScene {
 
             // Kill existing tweens
             this.tweens.killTweensOf(brazier.glow);
+            this.tweens.killTweensOf(brazier.sprite);
 
-            // Enhance glow for completed puzzle
+            // Enhance flame sprite for completion (even larger than activated)
+            this.tweens.add({
+                targets: brazier.sprite,
+                scale: 2.4,       // Larger than activated state
+                alpha: 1.0,
+                duration: 600,
+                ease: 'Cubic.easeOut'
+            });
+
+            // Enhance glow for completed puzzle (reduced size as requested)
             this.tweens.add({
                 targets: brazier.glow,
-                alpha: 0.45,      // Stronger glow
-                scale: 0.40,      // Larger
+                alpha: 0.40,      // Strong glow
+                scale: 0.35,      // Reduced from 0.40
                 duration: 600,
                 ease: 'Cubic.easeOut'
             });
@@ -370,8 +411,8 @@ class Scene3_Tomb extends GameScene {
             // Add gentle breathing animation for completed state
             this.tweens.add({
                 targets: brazier.glow,
-                alpha: { from: 0.40, to: 0.50 },
-                scale: { from: 0.38, to: 0.42 },
+                alpha: { from: 0.38, to: 0.45 },
+                scale: { from: 0.33, to: 0.37 },
                 duration: 2000,
                 yoyo: true,
                 repeat: -1,
