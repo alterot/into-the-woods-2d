@@ -4,6 +4,7 @@
 import GameScene from './GameScene.js';
 import DialogOverlay from '../systems/DialogOverlay.js';
 import Brazier from '../entities/Brazier.js';
+import PuzzleManager from '../systems/PuzzleManager.js';
 
 class Scene3_Tomb extends GameScene {
     constructor() {
@@ -15,11 +16,9 @@ class Scene3_Tomb extends GameScene {
         // Braziers storage
         this.braziers = [];
 
-        // === PUZZLE STATE ===
-        // Correct activation sequence: GREEN → BLUE → YELLOW
-        this.puzzleOrder = ['green', 'blue', 'yellow'];
-        this.currentPuzzleStep = 0;
-        this.puzzleSolved = false;
+        // Puzzle manager (created in createInitialScene if puzzle not solved)
+        this.puzzleManager = null;
+        this.puzzleSolved = false;  // Loaded from gameState in init()
     }
 
     init(data) {
@@ -36,7 +35,6 @@ class Scene3_Tomb extends GameScene {
             console.log('[Scene3] Puzzle already completed - loading completed state');
         } else {
             this.puzzleSolved = false;
-            this.currentPuzzleStep = 0;
             console.log('[Scene3] Puzzle not yet completed - loading initial state');
         }
 
@@ -128,6 +126,53 @@ class Scene3_Tomb extends GameScene {
                 initialState: 0
             })
         );
+
+        // === PUZZLE MANAGER ===
+        // Correct activation sequence: GREEN → BLUE → YELLOW
+        this.puzzleManager = new PuzzleManager(this, {
+            sequence: ['green', 'blue', 'yellow'],
+            resetOnWrong: false,  // We'll manually reset with delay for better UX
+
+            onCorrectStep: (step, color) => {
+                console.log(`[Scene3] Correct! Activated ${color} brazier (step ${step + 1}/${this.puzzleManager.sequence.length})`);
+
+                // Find and activate the brazier with this color
+                const brazier = this.braziers.find(b => b.color === color);
+                if (brazier) {
+                    brazier.activate();
+                }
+
+                // Show feedback
+                this.showFeedbackBubble(`The ${color} brazier flares to life!`);
+            },
+
+            onWrongStep: (expectedColor, attemptedColor) => {
+                console.log(`[Scene3] Wrong! Tried ${attemptedColor}, expected ${expectedColor}`);
+
+                // Show feedback
+                this.showFeedbackBubble(`The ${attemptedColor} flame flickers and dies. Something's not right...`);
+            },
+
+            onReset: () => {
+                console.log('[Scene3] Puzzle reset - returning braziers to base state');
+
+                // Reset all braziers to base state
+                this.braziers.forEach(brazier => {
+                    brazier.reset();
+                });
+            },
+
+            onComplete: () => {
+                console.log('[Scene3] Puzzle completed! Starting reveal sequence...');
+
+                // Delay before starting the dramatic reveal
+                this.time.delayedCall(800, () => {
+                    this.onPuzzleSolved();
+                });
+            }
+        });
+
+        console.log('[Scene3] PuzzleManager initialized with sequence:', this.puzzleManager.sequence);
     }
 
     /**
@@ -297,56 +342,16 @@ class Scene3_Tomb extends GameScene {
      * Apply puzzle logic when a brazier is activated
      */
     activateBrazier(brazier) {
-        // Check if this is the correct next brazier in sequence
-        const expectedColor = this.puzzleOrder[this.currentPuzzleStep];
-        const isCorrect = (brazier.color === expectedColor);
+        // Delegate to PuzzleManager - it handles all validation and callbacks
+        const result = this.puzzleManager.attempt(brazier.color);
 
-        console.log(`[Scene3] Activating ${brazier.color}, expected ${expectedColor}, correct: ${isCorrect}`);
-
-        if (isCorrect) {
-            // CORRECT BRAZIER - Use Brazier's activate method
-            brazier.activate();
-
-            // Advance puzzle step
-            this.currentPuzzleStep++;
-
-            // Show positive feedback
-            this.showFeedbackBubble(`The ${brazier.color} brazier flares to life!`);
-
-            // Check if puzzle is complete
-            if (this.currentPuzzleStep >= this.puzzleOrder.length) {
-                // Puzzle solved!
-                this.time.delayedCall(800, () => {
-                    this.onPuzzleSolved();
-                });
-            } else {
-                // Show hint about next step
-                const nextColor = this.puzzleOrder[this.currentPuzzleStep];
-                console.log(`[Scene3] Next step: activate ${nextColor} brazier`);
-            }
-        } else {
-            // WRONG BRAZIER - reset puzzle
-            this.showFeedbackBubble(`The ${brazier.color} flame flickers and dies. Something's not right...`);
-
-            // Reset after short delay
+        // If wrong, delay the reset for better UX
+        if (!result.success && !result.isComplete) {
             this.time.delayedCall(1500, () => {
-                this.resetPuzzle();
+                // Manually trigger reset (PuzzleManager will call onReset callback)
+                this.puzzleManager.reset();
             });
         }
-    }
-
-    /**
-     * Reset puzzle to initial state (wrong sequence)
-     */
-    resetPuzzle() {
-        console.log('[Scene3] Resetting puzzle');
-
-        this.currentPuzzleStep = 0;
-
-        // Reset all braziers to state 0 using Brazier's reset method
-        this.braziers.forEach(brazier => {
-            brazier.reset();
-        });
     }
 
     /**
