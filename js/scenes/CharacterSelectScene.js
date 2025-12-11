@@ -1,6 +1,6 @@
 // ===== CHARACTER SELECT SCENE =====
 import Wisp from '../entities/Wisp.js';
-import AudioManager from '../AudioManager.js';
+import AudioManager from '../systems/AudioManager.js';
 import SceneStateManager from '../systems/SceneStateManager.js';
 
 class CharacterSelectScene extends Phaser.Scene {

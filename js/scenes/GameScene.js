@@ -1,7 +1,6 @@
 // ===== GAME SCENE (BASE CLASS) =====
 // Abstract base class for all gameplay scenes
 // Handles movement, pathfinding, follower AI, mask detection, depth sorting
-import AudioManager from '../AudioManager.js';
 import SpeechBubble from '../entities/SpeechBubble.js';
 import SceneStateManager from '../systems/SceneStateManager.js';
 

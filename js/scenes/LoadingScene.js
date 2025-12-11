@@ -2,7 +2,7 @@
 // Initial loading screen with progress bar
 // Loads all game assets before transitioning to CharacterSelectScene
 
-import AudioManager from '../AudioManager.js';
+import AudioManager from '../systems/AudioManager.js';
 import SceneStateManager from '../systems/SceneStateManager.js';
 
 class LoadingScene extends Phaser.Scene {
