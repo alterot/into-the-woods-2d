@@ -467,7 +467,7 @@ class Scene3_Tomb extends GameScene {
                     if (this.textures.exists(key)) {
                         const morte = this.add.sprite(900, 360, key);
                         morte.setDepth(850);  // Above background, below UI
-                        morte.setScale(0.5);    // 50% size
+                        morte.setScale(0.4);    // 40% size (reduced 20% more)
                         this.morteSprite = morte;  // Store for later use
                         console.log(`[Scene3] Loaded Morte sprite: ${key}`);
                         morteLoaded = true;
@@ -489,6 +489,33 @@ class Scene3_Tomb extends GameScene {
                     brazier.glow.setTint(purpleGlowColor);
                 });
                 console.log('[Scene3] All flames changed to purple');
+
+                // Stop any ongoing movement/pathfinding
+                this.isMoving = false;
+                this.isFollowerMoving = false;
+                if (this.easystar) {
+                    this.easystar.cancelPath();
+                }
+
+                // Position sisters center X, bottom third Y, facing right (towards Morte)
+                const centerX = 640;  // Canvas width / 2
+                const bottomThirdY = 480;  // Canvas height * 2/3 (720 * 2/3)
+
+                if (this.player) {
+                    this.player.x = centerX - 25;  // Slightly left of center
+                    this.player.y = bottomThirdY;
+                    this.player.setFlipX(false);  // Face right
+                    this.player.setDepth(bottomThirdY);  // Ensure visible
+                }
+
+                if (this.follower) {
+                    this.follower.x = centerX + 25;  // Slightly right of center
+                    this.follower.y = bottomThirdY;
+                    this.follower.setFlipX(false);  // Face right
+                    this.follower.setDepth(bottomThirdY);  // Ensure visible
+                }
+
+                console.log('[Scene3] Sisters positioned at', centerX, bottomThirdY, 'facing right');
 
                 // 4. Reset camera alpha but keep screen visually black with DialogOverlay
                 // This allows UI elements to be visible while screen appears black
@@ -545,6 +572,15 @@ class Scene3_Tomb extends GameScene {
                                 spritesVisible: true,
                                 backgroundDim: 0.7,
                                 portraitScale: 1,
+
+                                // Fix portrait facing on every line change
+                                onLineChange: (line) => {
+                                    // Ensure portraits face each other after texture swaps
+                                    if (conversationOverlay.dialogUI) {
+                                        conversationOverlay.dialogUI.leftPortrait.setFlipX(true);   // Sisters face right
+                                        conversationOverlay.dialogUI.rightPortrait.setFlipX(true);  // Morte faces left
+                                    }
+                                },
 
                                 onComplete: () => {
                                     console.log('[Scene3] Morte dialogue complete');

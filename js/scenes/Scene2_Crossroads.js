@@ -226,10 +226,10 @@ class Scene2_Crossroads extends GameScene {
             return;
         }
 
-        // BLUE ZONE 1: Left exit back to Scene1_Meadow
+        // BLUE ZONE 1: Left area - placeholder message
         // x between 150 and 400, y between 250 and 550
         if (x >= 150 && x <= 400 && y >= 250 && y <= 550) {
-            console.log('[Scene2] Left blue zone clicked - returning to Scene1');
+            console.log('[Scene2] Left blue zone clicked - showing placeholder message');
 
             // Play click sound
             const audioManager = this.registry.get('audioManager');
@@ -239,11 +239,16 @@ class Scene2_Crossroads extends GameScene {
 
             this.showValidClickIndicator(x, y);
 
-            // Transition back to Scene1_Meadow
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.time.delayedCall(500, () => {
-                this.scene.start('Scene1_Meadow', { entry: 'from_crossroads' });
-            });
+            // Show speech bubble over player with placeholder message
+            const bubble = new SpeechBubble(
+                this,
+                this.player.x,
+                this.player.y,
+                'Finns inget här än, hoppas det kommer en uppdatering så vi ej är fast här',
+                3000,  // Auto-destroy after 3 seconds
+                this.player  // Follow the player
+            );
+
             return;
         }
 

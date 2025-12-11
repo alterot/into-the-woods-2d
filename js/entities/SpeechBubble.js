@@ -255,18 +255,13 @@ class SpeechBubble {
         this.isTyping = true;
         this.currentIndex = 0;
 
-        // 🔹 Starta auto-destroy omedelbart (räknar från att bubblan dykt upp)
-        if (this.duration !== null && this.duration > 0) {
-            this.destroyTimeout = this.scene.time.delayedCall(this.duration, () => {
-                this.destroy();
-            });
-        }
-
         // 🔹 Safety: ingen text
         if (!this.fullText || this.fullText.length === 0) {
             this.textObject.setText('');
             this.isTyping = false;
             this.typingEvent = null;
+            // Start destroy timer even for empty text
+            this.startDestroyTimer();
             return;
         }
 
@@ -287,10 +282,22 @@ class SpeechBubble {
                 if (this.currentIndex >= this.fullText.length) {
                     this.isTyping = false;
                     this.typingEvent = null;
+
+                    // 🔹 Start auto-destroy timer AFTER typing completes
+                    this.startDestroyTimer();
                 }
             },
             callbackScope: this
         });
+    }
+
+    // Start auto-destroy timer (called after typing completes)
+    startDestroyTimer() {
+        if (this.duration !== null && this.duration > 0) {
+            this.destroyTimeout = this.scene.time.delayedCall(this.duration, () => {
+                this.destroy();
+            });
+        }
     }
 
 
