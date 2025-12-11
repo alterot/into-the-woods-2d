@@ -522,9 +522,113 @@ class Scene3_Tomb extends GameScene {
     }
 
     update() {
-        super.update();
+        // COPY of GameScene.update() but with stone footsteps instead of grass
+        // (We can't call super.update() because it plays grass footsteps)
 
-        // TODO: scene-specific update logic (braziers, puzzles, etc.)
+        // Handle player movement along path
+        if (this.isMoving && this.path && this.currentWaypoint < this.path.length) {
+            const waypoint = this.path[this.currentWaypoint];
+            const dx = waypoint.x - this.player.x;
+            const dy = waypoint.y - this.player.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < this.moveSpeed * 2) {
+                this.currentWaypoint++;
+                if (this.currentWaypoint >= this.path.length) {
+                    this.isMoving = false;
+                    this.playerBobTime = 0;
+                    this.path = null;
+                }
+            } else {
+                if (dx < 0) {
+                    this.player.flipX = false;
+                } else if (dx > 0) {
+                    this.player.flipX = true;
+                }
+
+                const angle = Math.atan2(dy, dx);
+                this.player.x += Math.cos(angle) * this.moveSpeed;
+                this.playerBobTime += 0.15;
+                const bobOffset = Math.sin(this.playerBobTime) * 3;
+                this.playerBaseY += Math.sin(angle) * this.moveSpeed;
+                this.player.y = this.playerBaseY + bobOffset;
+            }
+        }
+
+        // Handle follower following player
+        const dx2 = this.player.x - this.follower.x;
+        const dy2 = this.player.y - this.follower.y;
+        const angle2 = Math.atan2(dy2, dx2);
+        const targetX2 = this.player.x - Math.cos(angle2) * 50;
+        const targetY2 = this.player.y - Math.sin(angle2) * 50;
+        const distToTarget = Math.sqrt(
+            (targetX2 - this.follower.x) ** 2 +
+            (targetY2 - this.follower.y) ** 2
+        );
+
+        if (distToTarget > 5) {
+            this.isFollowerMoving = true;
+            const lerpFactor = 0.03;
+            const newX = this.follower.x + (targetX2 - this.follower.x) * lerpFactor;
+            const newY = this.follower.y + (targetY2 - this.follower.y) * lerpFactor;
+
+            const moveDx = newX - this.follower.x;
+            if (moveDx < 0) {
+                this.follower.flipX = false;
+            } else if (moveDx > 0) {
+                this.follower.flipX = true;
+            }
+
+            this.followerBobTime += 0.15;
+            const bobOffset2 = Math.sin(this.followerBobTime) * 3;
+            this.followerBaseY += (newY - this.follower.y);
+            this.follower.x = newX;
+            this.follower.y = this.followerBaseY + bobOffset2;
+        } else {
+            this.isFollowerMoving = false;
+            this.followerBobTime = 0;
+            this.follower.y = this.followerBaseY;
+        }
+
+        // Depth sorting
+        this.sister1.setDepth(this.sister1.y);
+        this.sister2.setDepth(this.sister2.y);
+
+        // Stone footsteps (instead of grass)
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            const anyMoving = this.isMoving || this.isFollowerMoving;
+            const centerX = (this.player.x + this.follower.x) / 2;
+            const centerY = (this.player.y + this.follower.y) / 2;
+
+            if (!anyMoving) {
+                this.lastStepX = null;
+                this.lastStepY = null;
+                this.stepDistanceAccum = 0;
+            } else {
+                if (this.lastStepX == null || this.lastStepY == null) {
+                    this.lastStepX = centerX;
+                    this.lastStepY = centerY;
+                }
+
+                const dxCenter = centerX - this.lastStepX;
+                const dyCenter = centerY - this.lastStepY;
+                const frameDist = Math.sqrt(dxCenter * dxCenter + dyCenter * dyCenter);
+
+                this.stepDistanceAccum += frameDist;
+
+                const STEP_DISTANCE = 24;
+
+                if (this.stepDistanceAccum >= STEP_DISTANCE) {
+                    console.log('[Scene3] Playing stone footstep');
+                    audioManager.playStoneFootstep();
+                    this.stepDistanceAccum = 0;
+                }
+
+                this.lastStepX = centerX;
+                this.lastStepY = centerY;
+            }
+        }
     }
 }
 

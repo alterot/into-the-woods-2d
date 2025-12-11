@@ -19,6 +19,8 @@ class AudioManager {
         // Footstep state
         this.footstepLeft = null;
         this.footstepRight = null;
+        this.stoneFootstepLeft = null;
+        this.stoneFootstepRight = null;
         this.stepToggle = false; 
     }
 
@@ -49,13 +51,23 @@ class AudioManager {
             loop: true
         });
 
-        // Setup footstep sounds (om de finns laddade)
+        // Setup footstep sounds (grass)
         this.footstepLeft = this.scene.sound.add('step-left', {
             volume: 0.4
         });
         this.footstepRight = this.scene.sound.add('step-right', {
             volume: 0.4
         });
+
+        // Setup stone footstep sounds (for tomb)
+        this.stoneFootstepLeft = this.scene.sound.add('stone-step-left', {
+            volume: 0.4
+        });
+        this.stoneFootstepRight = this.scene.sound.add('stone-step-right', {
+            volume: 0.4
+        });
+        console.log('[AudioManager] Stone footsteps initialized:', this.stoneFootstepLeft, this.stoneFootstepRight);
+
         this.stepToggle = false;
 
 
@@ -183,7 +195,7 @@ class AudioManager {
         }
     }
 
-    
+
         /**
          * Spela ett fotsteg. Växlar mellan vänster och höger.
          */
@@ -196,6 +208,23 @@ class AudioManager {
             const sound = this.stepToggle ? this.footstepRight : this.footstepLeft;
             this.stepToggle = !this.stepToggle;
 
+            sound.play();
+        }
+
+        /**
+         * Play stone footstep (for tomb scene). Alternates between left and right.
+         */
+        playStoneFootstep() {
+            if (!this.stoneFootstepLeft || !this.stoneFootstepRight) {
+                // Sounds not initialized
+                console.warn('[AudioManager] Stone footstep sounds not initialized!');
+                return;
+            }
+
+            const sound = this.stepToggle ? this.stoneFootstepRight : this.stoneFootstepLeft;
+            this.stepToggle = !this.stepToggle;
+
+            console.log('[AudioManager] Playing stone footstep:', this.stepToggle ? 'right' : 'left');
             sound.play();
         }
 

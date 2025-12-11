@@ -1,9 +1,6 @@
 GENERELLT:
 Move AudioManager to /systems and (oly imported by loading scene?)
 
-SCEN 2
-player ska komma närmare ingång till tomb innan den stannar
-
 SCEN 3
 
 Se till att overlay är bakom det svarta!
