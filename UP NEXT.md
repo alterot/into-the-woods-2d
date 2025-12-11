@@ -9,11 +9,15 @@ Se till att pratbubbla om flammor försvinner när det blir svart
 Se till att overlay är bakom det svarta!
 Fixa att sister är rättänd i vänstra dialoger
 Uppdatera player plavering efter fade in/out
-add click sound on fires
 Se till att player avatar är vänd åt häger
 Lägg till stegljud  STEN
 Lägg till ljud fär eld (som blir högre när aktv)
 ev. Öka styrka på aktiv halo
 UPPDATERA OVERLAY (ska inkudea vägg + tomb)
 Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
-Lägg till flagga att vid efter pussel, overley, etc. så är tomb kvar så
+
+  1. Brazier Entity (#1) - Immediate 50% reduction in Scene3 complexity
+  2. PuzzleManager (#2) - Clean puzzle logic extraction
+  3. BrazierFactory (#6) - Quick win, works with #1
+  4. SceneStateManager (#3) - Before adding Scene4+
+  5. CutsceneManager (#4) - When you have 2-3 cutscenes (not just one)i ag

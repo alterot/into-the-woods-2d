@@ -3,6 +3,7 @@
 
 import GameScene from './GameScene.js';
 import DialogOverlay from '../systems/DialogOverlay.js';
+import Brazier from '../entities/Brazier.js';
 
 class Scene3_Tomb extends GameScene {
     constructor() {
@@ -28,6 +29,16 @@ class Scene3_Tomb extends GameScene {
         // CRITICAL: Reset ALL dialog state when scene starts
         // (Scene might be reused, so constructor isn't always called)
         this.dialogActive = false;
+
+        // Check if puzzle was already completed in a previous visit
+        if (window.gameState?.scene3PuzzleCompleted) {
+            this.puzzleSolved = true;
+            console.log('[Scene3] Puzzle already completed - loading completed state');
+        } else {
+            this.puzzleSolved = false;
+            this.currentPuzzleStep = 0;
+            console.log('[Scene3] Puzzle not yet completed - loading initial state');
+        }
 
         // Switch to tomb ambient music
         const audioManager = this.registry.get('audioManager');
@@ -60,6 +71,26 @@ class Scene3_Tomb extends GameScene {
         // Custom feedback message for this scene
         this.feedbackMessages.cannotWalk = "The tomb walls are too close here, we can't go that way.";
 
+        // Check if puzzle is already completed
+        if (this.puzzleSolved) {
+            // Create COMPLETED version of the scene
+            this.createCompletedScene();
+        } else {
+            // Create INITIAL version of the scene
+            this.createInitialScene();
+        }
+
+        // Add tomb overlay (same for both versions)
+        const overlay = this.add.image(640, 360, 'tomb-overlay');
+        overlay.setDepth(2000);
+    }
+
+    /**
+     * Create the initial version of the scene (before puzzle is solved)
+     */
+    createInitialScene() {
+        console.log('[Scene3] Creating initial scene with colored braziers');
+
         // === BRAZIER CONFIG ===
         // Gul (vänster), Grön (mitten), Blå (höger)
         const brazierConfigs = [
@@ -67,99 +98,115 @@ class Scene3_Tomb extends GameScene {
                 id: 'left',
                 x: 298,
                 y: 190,
-                spriteKey: 'fire-yellow',
-                animKey: 'fire-yellow-loop',
-                glowColor: 0xffc46b,
-                angle: -14       // ← luta lite åt vänster
+                color: 'yellow',
+                angle: -14
             },
             {
                 id: 'middle',
                 x: 586,
                 y: 150,
-                spriteKey: 'fire-green',
-                animKey: 'fire-green-loop',
-                glowColor: 0xa8ff9b,
-                angle: 0         // ← rak
+                color: 'green',
+                angle: 0
             },
             {
                 id: 'right',
                 x: 870,
                 y: 192,
-                spriteKey: 'fire-blue',
-                animKey: 'fire-blue-loop',
-                glowColor: 0x7cc9ff,
-                angle: 8         // ← luta lite åt höger
+                color: 'blue',
+                angle: 8
             }
         ];
 
-        // Skapa animationer EN gång per spriteKey
-        const createFireAnim = (key, spriteKey) => {
-            if (!this.anims.exists(key)) {
-                this.anims.create({
-                    key,
-                    frames: this.anims.generateFrameNumbers(spriteKey, { start: 0, end: 7 }),
-                    frameRate: 10,
-                    repeat: -1
-                });
-            }
-        };
-
-        createFireAnim('fire-yellow-loop', 'fire-yellow');
-        createFireAnim('fire-green-loop', 'fire-green');
-        createFireAnim('fire-blue-loop', 'fire-blue');
-        createFireAnim('fire-purple-loop', 'fire-purple');
-
-        // Skapa själva eld-spritesen + glow
-        this.braziers = brazierConfigs.map(cfg => {
-            // Själva flammans sprite
-            const sprite = this.add.sprite(cfg.x, cfg.y, cfg.spriteKey);
-            sprite.setDepth(900);          // ovanför golvet, under UI
-            sprite.setScale(2);            // tweaka vid behov
-            sprite.play(cfg.animKey);
-
-            if (cfg.angle !== undefined) {
-                sprite.setAngle(cfg.angle);
-            }
-
-            // === Nivå 0-glow med sprite istället för cirkel ===
-            const glow = this.add.image(cfg.x, cfg.y + 10, 'fire-glow');
-            glow.setTint(cfg.glowColor);                         // färga efter eldtyp
-            glow.setBlendMode(Phaser.BlendModes.ADD);
-
-            // MYCKET mindre ljus i nivå 0
-            glow.setAlpha(0.12);                                 // svag bas
-            glow.setDepth(sprite.depth - 1);
-
-            // Liten bas-scale – detta löser ditt “täcker hela rummet”-problem
-            const baseScale = 0.25;                              
-            glow.setScale(baseScale);
-
-            // Andning: subtil variation
-            this.tweens.add({
-                targets: glow,
-                alpha: { from: 0.10, to: 0.17 },                  // liten ändring
-                scale: { from: baseScale * 0.95, to: baseScale * 1.05 },
-                duration: 1800,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut'
-            });
-
-            // Store state for puzzle logic + map color
-            return {
+        // Create braziers using the Brazier entity class
+        this.braziers = brazierConfigs.map(cfg =>
+            new Brazier(this, {
                 id: cfg.id,
-                sprite,
-                glow,
-                state: 0,
-                config: cfg,
-                color: this.getBrazierColor(cfg.id)  // Map ID to color
-            };
-        });
+                x: cfg.x,
+                y: cfg.y,
+                color: cfg.color,
+                angle: cfg.angle,
+                initialState: 0
+            })
+        );
+    }
 
-        const overlay = this.add.image(640, 360, 'tomb-overlay');
+    /**
+     * Create the completed version of the scene (after puzzle is solved)
+     */
+    createCompletedScene() {
+        console.log('[Scene3] Creating completed version of scene');
 
-        // Lägg den över systrarna
-        overlay.setDepth(2000);
+        // Load opened tomb background
+        const bgKeys = ['background3-open', 'scene3-tomb-open', 'scen3-tomb-open'];
+        let bgLoaded = false;
+
+        for (const key of bgKeys) {
+            if (this.textures.exists(key)) {
+                const newBg = this.add.image(640, 360, key);
+                newBg.setDepth(0);  // Behind everything
+                console.log(`[Scene3] Loaded opened background: ${key}`);
+                bgLoaded = true;
+                break;
+            }
+        }
+
+        if (!bgLoaded) {
+            console.warn('[Scene3] Opened background texture not found. Using default background.');
+        }
+
+        // === BRAZIER CONFIG (same positions but purple flames) ===
+        const brazierConfigs = [
+            {
+                id: 'left',
+                x: 298,
+                y: 190,
+                angle: -14
+            },
+            {
+                id: 'middle',
+                x: 586,
+                y: 150,
+                angle: 0
+            },
+            {
+                id: 'right',
+                x: 870,
+                y: 192,
+                angle: 8
+            }
+        ];
+
+        // Create purple braziers in completed state using Brazier class
+        this.braziers = brazierConfigs.map(cfg =>
+            new Brazier(this, {
+                id: cfg.id,
+                x: cfg.x,
+                y: cfg.y,
+                color: 'purple',
+                angle: cfg.angle,
+                initialState: 2  // Start in completed state
+            })
+        );
+
+        // Add Morte sprite
+        const morteKeys = ['morte-idle', 'Morte-idle'];
+        let morteLoaded = false;
+
+        for (const key of morteKeys) {
+            if (this.textures.exists(key)) {
+                const morte = this.add.sprite(900, 360, key);
+                morte.setDepth(850);
+                morte.setScale(0.4);
+                this.morteSprite = morte;
+                console.log(`[Scene3] Loaded Morte sprite: ${key}`);
+                morteLoaded = true;
+                break;
+            }
+        }
+
+        if (!morteLoaded) {
+            console.warn('[Scene3] Morte sprite texture not found.');
+        }
     }
 
     // ==========================================
@@ -201,8 +248,8 @@ class Scene3_Tomb extends GameScene {
         }
 
         // Find walkable position near brazier (keep player further back)
-        const brazierX = clickedBrazier.sprite.x;
-        const brazierY = clickedBrazier.sprite.y + 130; // Further below the brazier to avoid getting too close to flames
+        const brazierX = clickedBrazier.x;
+        const brazierY = clickedBrazier.y + 130; // Further below the brazier to avoid getting too close to flames
         const walkablePos = this.findNearestWalkable(brazierX, brazierY, 80);
 
         if (!walkablePos) {
@@ -235,9 +282,7 @@ class Scene3_Tomb extends GameScene {
         let closestDist = Infinity;
 
         this.braziers.forEach(brazier => {
-            const dx = brazier.sprite.x - x;
-            const dy = brazier.sprite.y - y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const dist = brazier.distanceTo(x, y);
 
             if (dist < closestDist) {
                 closestDist = dist;
@@ -246,18 +291,6 @@ class Scene3_Tomb extends GameScene {
         });
 
         return closest;
-    }
-
-    /**
-     * Map brazier ID to color name
-     */
-    getBrazierColor(id) {
-        const colorMap = {
-            'left': 'yellow',    // fire-yellow
-            'middle': 'green',   // fire-green
-            'right': 'blue'      // fire-blue
-        };
-        return colorMap[id] || 'unknown';
     }
 
     /**
@@ -271,43 +304,8 @@ class Scene3_Tomb extends GameScene {
         console.log(`[Scene3] Activating ${brazier.color}, expected ${expectedColor}, correct: ${isCorrect}`);
 
         if (isCorrect) {
-            // CORRECT BRAZIER
-            brazier.state = 1; // Mark as correctly activated
-
-            // Kill existing breathing animation so it stays in activated state
-            this.tweens.killTweensOf(brazier.glow);
-            this.tweens.killTweensOf(brazier.sprite);
-
-            // Enhance flame sprite (make it larger and brighter)
-            this.tweens.add({
-                targets: brazier.sprite,
-                scale: 2.2,       // Slightly larger flame
-                alpha: 1.0,       // Full brightness
-                duration: 400,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Enhance glow for activated brazier (slightly smaller than before)
-            const activatedGlowScale = 0.30;
-            this.tweens.add({
-                targets: brazier.glow,
-                alpha: 0.30,      // Brighter than base
-                scale: activatedGlowScale,
-                duration: 400,
-                ease: 'Cubic.easeOut',
-                onComplete: () => {
-                    // Add gentle breathing animation for activated state
-                    this.tweens.add({
-                        targets: brazier.glow,
-                        alpha: { from: 0.28, to: 0.35 },
-                        scale: { from: activatedGlowScale * 0.95, to: activatedGlowScale * 1.05 },
-                        duration: 1800,
-                        yoyo: true,
-                        repeat: -1,
-                        ease: 'Sine.easeInOut'
-                    });
-                }
-            });
+            // CORRECT BRAZIER - Use Brazier's activate method
+            brazier.activate();
 
             // Advance puzzle step
             this.currentPuzzleStep++;
@@ -345,33 +343,9 @@ class Scene3_Tomb extends GameScene {
 
         this.currentPuzzleStep = 0;
 
-        // Reset all braziers to state 0 and restore base glow and sprite
+        // Reset all braziers to state 0 using Brazier's reset method
         this.braziers.forEach(brazier => {
-            brazier.state = 0;
-
-            // Kill existing tweens (both glow and sprite)
-            this.tweens.killTweensOf(brazier.glow);
-            this.tweens.killTweensOf(brazier.sprite);
-
-            // Restore base flame sprite values
-            brazier.sprite.setScale(2);
-            brazier.sprite.setAlpha(1.0);
-
-            // Restore base glow values
-            const baseScale = 0.25;
-            brazier.glow.setAlpha(0.12);
-            brazier.glow.setScale(baseScale);
-
-            // Restart breathing animation
-            this.tweens.add({
-                targets: brazier.glow,
-                alpha: { from: 0.10, to: 0.17 },
-                scale: { from: baseScale * 0.95, to: baseScale * 1.05 },
-                duration: 1800,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut'
-            });
+            brazier.reset();
         });
     }
 
@@ -384,43 +358,16 @@ class Scene3_Tomb extends GameScene {
 
         this.puzzleSolved = true;
 
-        // Set all braziers to completed state (2)
+        // Save completion state to global gameState
+        if (!window.gameState) {
+            window.gameState = {};
+        }
+        window.gameState.scene3PuzzleCompleted = true;
+        console.log('[Scene3] Puzzle completion saved to gameState');
+
+        // Set all braziers to completed state (2) using Brazier's setCompleted method
         this.braziers.forEach(brazier => {
-            brazier.state = 2;
-
-            // Kill existing tweens
-            this.tweens.killTweensOf(brazier.glow);
-            this.tweens.killTweensOf(brazier.sprite);
-
-            // Enhance flame sprite for completion (even larger than activated)
-            this.tweens.add({
-                targets: brazier.sprite,
-                scale: 2.4,       // Larger than activated state
-                alpha: 1.0,
-                duration: 600,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Enhance glow for completed puzzle (reduced size as requested)
-            this.tweens.add({
-                targets: brazier.glow,
-                alpha: 0.40,      // Strong glow
-                scale: 0.35,      // Reduced from 0.40
-                duration: 600,
-                ease: 'Cubic.easeOut'
-            });
-
-            // Add gentle breathing animation for completed state
-            this.tweens.add({
-                targets: brazier.glow,
-                alpha: { from: 0.38, to: 0.45 },
-                scale: { from: 0.33, to: 0.37 },
-                duration: 2000,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut',
-                delay: 600  // Start after initial enhancement
-            });
+            brazier.setCompleted();
         });
 
         // Show completion feedback
@@ -479,14 +426,9 @@ class Scene3_Tomb extends GameScene {
                     console.warn('[Scene3] Morte sprite texture not found. Tried:', morteKeys);
                 }
 
-                // Change all flames to purple
-                const purpleGlowColor = 0xb89bff;  // Purple-ish glow
+                // Change all flames to purple using Brazier's changeColor method
                 this.braziers.forEach(brazier => {
-                    // Change flame animation to purple
-                    brazier.sprite.play('fire-purple-loop');
-
-                    // Change glow tint to purple
-                    brazier.glow.setTint(purpleGlowColor);
+                    brazier.changeColor('purple');
                 });
                 console.log('[Scene3] All flames changed to purple');
 

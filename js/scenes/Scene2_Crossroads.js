@@ -23,6 +23,9 @@ class Scene2_Crossroads extends GameScene {
         // ConversationManager instance
         this.wispConversation = null;
         this.currentConversationBubble = null;
+
+        // Tomb entrance state
+        this.tombEntranceVisited = false;  // Track if tomb entrance has been visited
     }
 
     init(data) {
@@ -318,8 +321,16 @@ class Scene2_Crossroads extends GameScene {
             }
 
             const conversation = tombData.conversations[0];
-            const dialogData = conversation.lines;
+            let dialogData = conversation.lines;
             const choiceData = conversation.choice;
+
+            // On repeat visits, skip all dialogue and go straight to choice
+            if (this.tombEntranceVisited) {
+                dialogData = [];  // Empty array = skip directly to choice
+                console.log('[Scene2] Tomb entrance repeat visit - going straight to choice');
+            } else {
+                console.log('[Scene2] Tomb entrance first visit - showing full dialogue');
+            }
 
             console.log('[Scene2] Loaded tomb data - lines:', dialogData.length, 'choices:', choiceData?.options?.length);
 
@@ -332,6 +343,8 @@ class Scene2_Crossroads extends GameScene {
                 onComplete: (selectedChoice) => {
                     console.log('[Scene2] Tomb dialog completed with choice:', selectedChoice);
                     this.handleTombChoice(selectedChoice);
+                    // Mark tomb entrance as visited after first interaction
+                    this.tombEntranceVisited = true;
                 }
             });
 
