@@ -516,6 +516,15 @@ class Scene3_Tomb extends GameScene {
 
         this.showValidClickIndicator(x, y);
 
+        // Stop all fire sounds from braziers
+        if (this.braziers) {
+            this.braziers.forEach(brazier => {
+                if (brazier.fireSound) {
+                    brazier.fireSound.stop();
+                }
+            });
+        }
+
         // Restore normal music volume before leaving
         if (audioManager) {
             audioManager.setMusicVolume(0.4);  // Restore to normal volume
