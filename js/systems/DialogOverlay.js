@@ -16,6 +16,12 @@ class DialogOverlay {
         this.onComplete = config.onComplete || (() => {});
         this.onLineChange = config.onLineChange || null;
 
+        // NEW: Flexible character layout configuration
+        // Maps dialogue roles to screen sides ('left', 'right', 'narrator')
+        this.roleSideMap = config.roleSideMap || null;
+        // Maps dialogue roles to portrait texture keys
+        this.rolePortraitMap = config.rolePortraitMap || null;
+
         // State
         this.currentLine = 0;
         this.isTyping = false;
@@ -66,6 +72,35 @@ class DialogOverlay {
         const playerPortrait = isPlayingBig ? 'portrait1' : 'portrait2';
         const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
 
+        // Create default maps if none were provided (backward compatibility)
+        if (!this.roleSideMap) {
+            this.roleSideMap = {
+                narrator: 'narrator',
+                player: 'left',
+                sibling: 'right'
+            };
+        }
+        if (!this.rolePortraitMap) {
+            this.rolePortraitMap = {
+                player: playerPortrait,
+                sibling: siblingPortrait
+            };
+        }
+
+        // Determine initial portrait textures for left/right slots
+        // Find which roles use left/right sides and get their portraits
+        let leftPortraitTexture = playerPortrait;   // Default
+        let rightPortraitTexture = siblingPortrait; // Default
+
+        // Scan roleSideMap to find what portraits should be in each slot initially
+        for (const [role, side] of Object.entries(this.roleSideMap)) {
+            if (side === 'left' && this.rolePortraitMap[role]) {
+                leftPortraitTexture = this.rolePortraitMap[role];
+            } else if (side === 'right' && this.rolePortraitMap[role]) {
+                rightPortraitTexture = this.rolePortraitMap[role];
+            }
+        }
+
         // Canvas dimensions
         const canvasWidth = 1280;
         const canvasHeight = 720;
@@ -90,12 +125,12 @@ class DialogOverlay {
         // Create dialog UI
         this.dialogUI = {
             // Portraits at bottom
-            leftPortrait: this.scene.add.image(leftX, portraitY, playerPortrait)
+            leftPortrait: this.scene.add.image(leftX, portraitY, leftPortraitTexture)
                 .setScale(this.portraitScale)
                 .setAlpha(0.7)
                 .setOrigin(0.5, 0.5)
                 .setDepth(2000),
-            rightPortrait: this.scene.add.image(rightX, portraitY, siblingPortrait)
+            rightPortrait: this.scene.add.image(rightX, portraitY, rightPortraitTexture)
                 .setScale(this.portraitScale)
                 .setAlpha(0.7)
                 .setOrigin(0.5, 0.5)
@@ -246,8 +281,29 @@ class DialogOverlay {
         this.scene.tweens.killTweensOf(this.dialogUI.leftPortrait);
         this.scene.tweens.killTweensOf(this.dialogUI.rightPortrait);
 
-        // Show active speaker's textbox
-        if (line.role === 'narrator') {
+        // ===== NEW: FLEXIBLE CHARACTER LAYOUT =====
+        // Use roleSideMap to determine which side this role appears on
+        // Use rolePortraitMap to determine which portrait texture to use
+
+        const role = line.role;
+        const side = this.roleSideMap[role] || 'right';  // Default to right if not found
+        const portraitTexture = this.rolePortraitMap[role] || null;
+
+        // Swap portrait texture on the appropriate side if needed
+        if (portraitTexture && side === 'left') {
+            // Check if texture needs to be swapped
+            if (this.dialogUI.leftPortrait.texture.key !== portraitTexture) {
+                this.dialogUI.leftPortrait.setTexture(portraitTexture);
+            }
+        } else if (portraitTexture && side === 'right') {
+            // Check if texture needs to be swapped
+            if (this.dialogUI.rightPortrait.texture.key !== portraitTexture) {
+                this.dialogUI.rightPortrait.setTexture(portraitTexture);
+            }
+        }
+
+        // Show active speaker's textbox based on side
+        if (side === 'narrator') {
             // ===== NARRATOR MODE =====
             // Both portraits faded, centered textbox, italic text with feather emoji
 
@@ -281,8 +337,9 @@ class DialogOverlay {
             const narratorText = '🪶 ' + line.text;
             this.startTypewriter(this.dialogUI.narratorTextboxText, narratorText);
 
-        } else if (line.role === 'player') {
-            // Player speaking (left side)
+        } else if (side === 'left') {
+            // ===== LEFT SIDE SPEAKER =====
+            // Show left textbox, hide others
             this.dialogUI.leftTextboxBg.setVisible(true);
             this.dialogUI.leftTextboxText.setVisible(true).setText('');
             this.dialogUI.rightTextboxBg.setVisible(false);
@@ -290,7 +347,7 @@ class DialogOverlay {
             this.dialogUI.narratorTextboxBg.setVisible(false);
             this.dialogUI.narratorTextboxText.setVisible(false);
 
-            // Animate portraits
+            // Animate portraits - left active, right inactive
             this.scene.tweens.add({
                 targets: this.dialogUI.leftPortrait,
                 alpha: 1,
@@ -307,8 +364,10 @@ class DialogOverlay {
             });
 
             this.startTypewriter(this.dialogUI.leftTextboxText, line.text);
-        } else {
-            // Sibling speaking (right side)
+
+        } else if (side === 'right') {
+            // ===== RIGHT SIDE SPEAKER =====
+            // Show right textbox, hide others
             this.dialogUI.rightTextboxBg.setVisible(true);
             this.dialogUI.rightTextboxText.setVisible(true).setText('');
             this.dialogUI.leftTextboxBg.setVisible(false);
@@ -316,7 +375,7 @@ class DialogOverlay {
             this.dialogUI.narratorTextboxBg.setVisible(false);
             this.dialogUI.narratorTextboxText.setVisible(false);
 
-            // Animate portraits
+            // Animate portraits - right active, left inactive
             this.scene.tweens.add({
                 targets: this.dialogUI.rightPortrait,
                 alpha: 1,

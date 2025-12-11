@@ -171,9 +171,11 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('intro-background', 'assets/scenes/scen1-meadow.png');
         this.load.image('portrait1', 'assets/portraits/sister1-portrait-S.png');
         this.load.image('portrait2', 'assets/portraits/sister2-portrait-S.png');
+        this.load.image('Morte-portrait', 'assets/portraits/Morte-portrait-S.png');
         this.load.json('introDialogue', 'assets/dialogues/intro-dialogue.json');
         this.load.json('runeDialogue', 'assets/dialogues/rune-dialogue.json');
         this.load.json('tomb-entrance', 'assets/dialogues/tomb-entrance.json');
+        this.load.json('tomb-morte-dialogue1', 'assets/dialogues/tomb-morte-dialogue1.json');
 
         // Game scene assets (Scene1_Meadow)
         this.load.image('background', 'assets/scenes/scen1-meadow.png');

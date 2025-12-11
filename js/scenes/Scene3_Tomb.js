@@ -2,6 +2,7 @@
 // Third gameplay scene - ancient burial chamber with braziers
 
 import GameScene from './GameScene.js';
+import DialogOverlay from '../systems/DialogOverlay.js';
 
 class Scene3_Tomb extends GameScene {
     constructor() {
@@ -489,29 +490,73 @@ class Scene3_Tomb extends GameScene {
                 });
                 console.log('[Scene3] All flames changed to purple');
 
-                // 4. Fade back in to reveal the changes
-                this.cameras.main.fadeIn(1000, 0, 0, 0);
+                // 4. Start narrator dialogue while screen is still black
+                this.dialogActive = true;
 
-                console.log('[Scene3] Reveal sequence complete - fading back in');
+                // Load full dialogue data
+                const fullDialogueData = this.cache.json.get('tomb-morte-dialogue1').conversations[0].lines;
+
+                // Split into narrator part (first 3 lines) and conversation part (rest)
+                const narratorLines = fullDialogueData.slice(0, 3);
+                const conversationLines = fullDialogueData.slice(3);
+
+                console.log('[Scene3] Starting narrator dialogue while screen is black');
+
+                // Start narrator dialogue (screen still black, no dim, no portraits visible)
+                const narratorOverlay = new DialogOverlay(this, {
+                    dialogueData: narratorLines,
+                    spritesVisible: false,  // Don't show game sprites
+                    backgroundDim: 0,       // No dim overlay (screen already black from fade)
+                    portraitScale: 1,
+                    onComplete: () => {
+                        console.log('[Scene3] Narrator dialogue complete - fading in');
+
+                        // 5. Fade back in to reveal the changes
+                        this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+                        // 6. After fade in completes, start conversation dialogue
+                        this.time.delayedCall(1000, () => {
+                            console.log('[Scene3] Starting Morte conversation dialogue');
+
+                            // Determine portraits based on selected character
+                            const isPlayingBig = window.gameState?.selectedCharacter === 'big';
+
+                            // Start conversation with flexible layout
+                            const conversationOverlay = new DialogOverlay(this, {
+                                dialogueData: conversationLines,
+
+                                // Flexible character layout: both sisters on left, Morte on right
+                                roleSideMap: {
+                                    narrator: 'narrator',
+                                    player: 'left',
+                                    sister: 'left',
+                                    morte: 'right'
+                                },
+
+                                rolePortraitMap: {
+                                    player: isPlayingBig ? 'portrait1' : 'portrait2',
+                                    sister: isPlayingBig ? 'portrait2' : 'portrait1',
+                                    morte: 'Morte-portrait'
+                                },
+
+                                spritesVisible: true,
+                                backgroundDim: 0.7,
+                                portraitScale: 1,
+
+                                onComplete: () => {
+                                    console.log('[Scene3] Morte dialogue complete');
+                                    this.dialogActive = false;
+                                }
+                            });
+
+                            conversationOverlay.start();
+                        });
+                    }
+                });
+
+                narratorOverlay.start();
             });
         });
-
-        // === PLACEHOLDER HOOKS FOR FUTURE FEATURES ===
-        // TODO: Add dialog overlay after reveal sequence completes (around 3350ms total)
-        // this.time.delayedCall(3350, () => {
-        //     this.dialogActive = true;
-        //     const DialogOverlay = this.cache.custom.DialogOverlay;
-        //     if (DialogOverlay) {
-        //         const dialog = new DialogOverlay(this, {
-        //             dialogueData: [ /* dialog data */ ],
-        //             spritesVisible: true,
-        //             onComplete: () => {
-        //                 this.dialogActive = false;
-        //             }
-        //         });
-        //         dialog.start();
-        //     }
-        // });
 
         console.log('[Scene3] Puzzle completion sequence initiated');
     }

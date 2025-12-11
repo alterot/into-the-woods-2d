@@ -1,0 +1,70 @@
+{
+  "sceneId": "tomb",
+  "conversations": [
+    {
+      "id": "morte_awaken",
+      "lines": [
+        {
+          "role": "narrator",
+          "text": "🪶 Marken skälver under era fötter. Damm rasar från taket när facklorna flämtar till och slocknar. I mörkret försvinner alla ljud – som om själva luften håller andan."
+        },
+        {
+          "role": "narrator",
+          "text": "🪶 Ni famlar efter varandras händer. Ett djupt raspande ljud skär genom stillheten – tung sten som släpas mot sten. Ett lock… som skjuts åt sidan. Ett dovt dån ekar genom kammaren."
+        },
+        {
+          "role": "narrator",
+          "text": "🪶 Något rör sig. Ett långsamt, skrapande andetag. Steg som släpar över golvet. Och plötsligt – WHOOSH! – tänds facklorna igen."
+        },
+        {
+          "role": "morte",
+          "text": "…Vilka… har väckt mig från min slummer?"
+        },
+        {
+          "role": "player",
+          "text": "Vi… det var vi. Vi menade inget illa!"
+        },
+        {
+          "role": "sister",
+          "text": "Vi försöker bara hitta en väg ut ur skogen!"
+        },
+        {
+          "role": "morte",
+          "text": "En väg ut…? Det var länge sedan någon ställde den frågan."
+        },
+        {
+          "role": "morte",
+          "text": "Jag var en magiker en gång. Denna skog var mitt hem. Men något förändrades. Skogen förlorade sin själ… och jag förlorade mig själv."
+        },
+        {
+          "role": "player",
+          "text": "Skogens själ…? Vad betyder det?"
+        },
+        {
+          "role": "morte",
+          "text": "Tre fragment. Tre känslor som höll allt levande och helt: mod, nyfikenhet… och det milda vemod som gör plats för hopp."
+        },
+        {
+          "role": "sister",
+          "text": "Och om vi hittar dem?"
+        },
+        {
+          "role": "morte",
+          "text": "Då kan skogen vakna igen. Då kan den släppa er fria… och kanske även mig."
+        },
+        {
+          "role": "morte",
+          "text": "Men vägen är farlig. Fragmenten gömmer sig i mörker, vatten och hjärtan som slutits för länge sedan."
+        },
+        {
+          "role": "player",
+          "text": "Vi kan försöka. Vi kan hjälpa dig."
+        },
+        {
+          "role": "morte",
+          "text": "Då börjar er prövning här. Fortsätt genom skogen, låt Irrbloset vara er guide om ni känner er vilsna…"
+        }
+      ]
+    }
+  ]
+}
