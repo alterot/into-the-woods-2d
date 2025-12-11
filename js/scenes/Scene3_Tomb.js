@@ -89,43 +89,11 @@ class Scene3_Tomb extends GameScene {
     createInitialScene() {
         console.log('[Scene3] Creating initial scene with colored braziers');
 
-        // === BRAZIER CONFIG ===
-        // Gul (vänster), Grön (mitten), Blå (höger)
-        const brazierConfigs = [
-            {
-                id: 'left',
-                x: 298,
-                y: 190,
-                color: 'yellow',
-                angle: -14
-            },
-            {
-                id: 'middle',
-                x: 586,
-                y: 150,
-                color: 'green',
-                angle: 0
-            },
-            {
-                id: 'right',
-                x: 870,
-                y: 192,
-                color: 'blue',
-                angle: 8
-            }
-        ];
-
-        // Create braziers using the Brazier entity class
-        this.braziers = brazierConfigs.map(cfg =>
-            new Brazier(this, {
-                id: cfg.id,
-                x: cfg.x,
-                y: cfg.y,
-                color: cfg.color,
-                angle: cfg.angle,
-                initialState: 0
-            })
-        );
+        // Create braziers from preset with colors: yellow (left), green (middle), blue (right)
+        this.braziers = Brazier.fromPreset(this, 'tomb-braziers', {
+            colors: ['yellow', 'green', 'blue'],
+            initialState: 0
+        });
 
         // === PUZZLE MANAGER ===
         // Correct activation sequence: GREEN → BLUE → YELLOW
@@ -199,39 +167,11 @@ class Scene3_Tomb extends GameScene {
             console.warn('[Scene3] Opened background texture not found. Using default background.');
         }
 
-        // === BRAZIER CONFIG (same positions but purple flames) ===
-        const brazierConfigs = [
-            {
-                id: 'left',
-                x: 298,
-                y: 190,
-                angle: -14
-            },
-            {
-                id: 'middle',
-                x: 586,
-                y: 150,
-                angle: 0
-            },
-            {
-                id: 'right',
-                x: 870,
-                y: 192,
-                angle: 8
-            }
-        ];
-
-        // Create purple braziers in completed state using Brazier class
-        this.braziers = brazierConfigs.map(cfg =>
-            new Brazier(this, {
-                id: cfg.id,
-                x: cfg.x,
-                y: cfg.y,
-                color: 'purple',
-                angle: cfg.angle,
-                initialState: 2  // Start in completed state
-            })
-        );
+        // Create purple braziers in completed state from preset
+        this.braziers = Brazier.fromPreset(this, 'tomb-braziers', {
+            colors: ['purple', 'purple', 'purple'],
+            initialState: 2  // Start in completed state
+        });
 
         // Add Morte sprite
         const morteKeys = ['morte-idle', 'Morte-idle'];

@@ -370,6 +370,127 @@ class Brazier {
 
         console.log(`[Brazier] Destroyed ${this.color} brazier '${this.id}'`);
     }
+
+    // ==========================================
+    // STATIC FACTORY METHODS
+    // ==========================================
+
+    /**
+     * Create multiple braziers from a config array
+     * @param {Phaser.Scene} scene - The scene to create braziers in
+     * @param {Array} configs - Array of brazier configs (without defaults)
+     * @param {Object} defaults - Default values to apply to all braziers
+     * @returns {Array<Brazier>} Array of created Brazier instances
+     *
+     * Example:
+     * const braziers = Brazier.createGroup(this, [
+     *   { id: 'left', x: 100, y: 200, color: 'yellow' },
+     *   { id: 'right', x: 300, y: 200, color: 'blue' }
+     * ], { initialState: 0, depth: 900 });
+     */
+    static createGroup(scene, configs, defaults = {}) {
+        console.log(`[Brazier] Creating group of ${configs.length} braziers with defaults:`, defaults);
+
+        return configs.map(config =>
+            new Brazier(scene, {
+                ...defaults,
+                ...config  // Config overrides defaults
+            })
+        );
+    }
+
+    /**
+     * Predefined brazier layouts for common scenes
+     * Can be extended with custom presets for your game
+     */
+    static PRESETS = {
+        // Scene 3 tomb layout - three braziers in arc formation
+        'tomb-braziers': [
+            { id: 'left', x: 298, y: 190, angle: -14 },
+            { id: 'middle', x: 586, y: 150, angle: 0 },
+            { id: 'right', x: 870, y: 192, angle: 8 }
+        ],
+
+        // Example: Simple horizontal line of 3 braziers
+        'horizontal-3': [
+            { id: 'left', x: 200, y: 300, angle: 0 },
+            { id: 'middle', x: 400, y: 300, angle: 0 },
+            { id: 'right', x: 600, y: 300, angle: 0 }
+        ],
+
+        // Example: Circle formation of 4 braziers
+        'circle-4': [
+            { id: 'north', x: 400, y: 200, angle: 0 },
+            { id: 'east', x: 500, y: 300, angle: 0 },
+            { id: 'south', x: 400, y: 400, angle: 0 },
+            { id: 'west', x: 300, y: 300, angle: 0 }
+        ]
+    };
+
+    /**
+     * Create braziers from a named preset layout
+     * @param {Phaser.Scene} scene - The scene to create braziers in
+     * @param {string} presetName - Name of the preset layout
+     * @param {Object} overrides - Values to override in the preset (e.g., colors, initialState)
+     * @returns {Array<Brazier>} Array of created Brazier instances
+     *
+     * Example:
+     * // Create tomb braziers with yellow/green/blue colors
+     * const braziers = Brazier.fromPreset(this, 'tomb-braziers', {
+     *   colors: ['yellow', 'green', 'blue'],
+     *   initialState: 0
+     * });
+     */
+    static fromPreset(scene, presetName, overrides = {}) {
+        const preset = Brazier.PRESETS[presetName];
+
+        if (!preset) {
+            console.error(`[Brazier] Unknown preset: ${presetName}`);
+            console.log('[Brazier] Available presets:', Object.keys(Brazier.PRESETS));
+            return [];
+        }
+
+        console.log(`[Brazier] Creating braziers from preset '${presetName}'`);
+
+        // If colors array provided, map them to braziers
+        const colors = overrides.colors || [];
+        delete overrides.colors;  // Remove from overrides so it doesn't get applied to config
+
+        return preset.map((config, index) => {
+            const brazierConfig = {
+                ...config,
+                ...overrides  // Apply overrides
+            };
+
+            // Apply color from colors array if provided
+            if (colors[index]) {
+                brazierConfig.color = colors[index];
+            }
+
+            return new Brazier(scene, brazierConfig);
+        });
+    }
+
+    /**
+     * Add a custom preset layout
+     * Useful for defining scene-specific layouts without modifying Brazier.js
+     * @param {string} name - Name for the preset
+     * @param {Array} configs - Array of brazier configs
+     *
+     * Example:
+     * Brazier.addPreset('my-scene-layout', [
+     *   { id: 'torch1', x: 100, y: 200 },
+     *   { id: 'torch2', x: 200, y: 200 }
+     * ]);
+     */
+    static addPreset(name, configs) {
+        if (Brazier.PRESETS[name]) {
+            console.warn(`[Brazier] Overwriting existing preset: ${name}`);
+        }
+
+        Brazier.PRESETS[name] = configs;
+        console.log(`[Brazier] Added custom preset '${name}' with ${configs.length} braziers`);
+    }
 }
 
 export default Brazier;
