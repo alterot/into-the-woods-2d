@@ -424,51 +424,74 @@ class Scene3_Tomb extends GameScene {
         // Show completion feedback
         this.showFeedbackBubble("The ancient flames burn brightly. The tomb's secrets are revealed!");
 
+        // === DRAMATIC REVEAL SEQUENCE ===
+        this.time.delayedCall(1500, () => {
+            console.log('[Scene3] Starting reveal sequence...');
+
+            // 1. Camera shake effect (earthquake/rumble)
+            this.cameras.main.shake(800, 0.005);  // 800ms duration, subtle shake
+
+            // 2. Fade out to black
+            this.cameras.main.fadeOut(800, 0, 0, 0);
+
+            // 3. After fade completes, swap background and add Morte sprite
+            this.time.delayedCall(850, () => {
+                console.log('[Scene3] Scene is dark - swapping background and adding Morte');
+
+                // Change background to opened tomb
+                // Try multiple possible texture keys
+                const bgKeys = ['background3-open', 'scene3-tomb-open', 'scen3-tomb-open'];
+                let bgLoaded = false;
+
+                for (const key of bgKeys) {
+                    if (this.textures.exists(key)) {
+                        const newBg = this.add.image(640, 360, key);
+                        newBg.setDepth(0);  // Behind everything
+                        console.log(`[Scene3] Loaded new background: ${key}`);
+                        bgLoaded = true;
+                        break;
+                    }
+                }
+
+                if (!bgLoaded) {
+                    console.warn('[Scene3] New background texture not found. Tried:', bgKeys);
+                }
+
+                // Add Morte sprite (middle-right position, centered vertically)
+                const morteKeys = ['morte-idle', 'Morte-idle'];
+                let morteLoaded = false;
+
+                for (const key of morteKeys) {
+                    if (this.textures.exists(key)) {
+                        const morte = this.add.sprite(900, 360, key);
+                        morte.setDepth(850);  // Above background, below UI
+                        morte.setScale(1);    // Adjust as needed
+                        this.morteSprite = morte;  // Store for later use
+                        console.log(`[Scene3] Loaded Morte sprite: ${key}`);
+                        morteLoaded = true;
+                        break;
+                    }
+                }
+
+                if (!morteLoaded) {
+                    console.warn('[Scene3] Morte sprite texture not found. Tried:', morteKeys);
+                }
+
+                // 4. Fade back in to reveal the changes
+                this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+                console.log('[Scene3] Reveal sequence complete - fading back in');
+            });
+        });
+
         // === PLACEHOLDER HOOKS FOR FUTURE FEATURES ===
-        // TODO: Add these features after puzzle completion
-
-        // 1. Background swap (brighter tomb interior)
-        // Example implementation:
-        // if (this.textures.exists('background3-lit')) {
-        //     const litBg = this.add.image(640, 360, 'background3-lit');
-        //     litBg.setDepth(0);  // Behind everything
-        //     litBg.setAlpha(0);
-        //     this.tweens.add({
-        //         targets: litBg,
-        //         alpha: 1,
-        //         duration: 2000,
-        //         ease: 'Cubic.easeInOut'
-        //     });
-        // }
-
-        // 2. Spawn reward object (treasure chest, relic, etc.)
-        // Example implementation:
-        // this.time.delayedCall(2000, () => {
-        //     if (this.textures.exists('relic-sprite')) {
-        //         const relic = this.add.sprite(640, 300, 'relic-sprite');
-        //         relic.setDepth(800);
-        //         relic.setAlpha(0);
-        //         this.tweens.add({
-        //             targets: relic,
-        //             alpha: 1,
-        //             y: relic.y - 20,
-        //             duration: 1500,
-        //             ease: 'Cubic.easeOut'
-        //         });
-        //     }
-        // });
-
-        // 3. Trigger dialog sequence
-        // Example implementation:
-        // this.time.delayedCall(3000, () => {
+        // TODO: Add dialog overlay after reveal sequence completes (around 3350ms total)
+        // this.time.delayedCall(3350, () => {
         //     this.dialogActive = true;
         //     const DialogOverlay = this.cache.custom.DialogOverlay;
         //     if (DialogOverlay) {
         //         const dialog = new DialogOverlay(this, {
-        //             dialogueData: [
-        //                 { role: 'player', text: 'Look! The flames reveal something...' },
-        //                 { role: 'sibling', text: 'Ancient runes! What do they say?' }
-        //             ],
+        //             dialogueData: [ /* dialog data */ ],
         //             spritesVisible: true,
         //             onComplete: () => {
         //                 this.dialogActive = false;
@@ -478,7 +501,7 @@ class Scene3_Tomb extends GameScene {
         //     }
         // });
 
-        console.log('[Scene3] Puzzle solved hooks ready for future expansion');
+        console.log('[Scene3] Puzzle completion sequence initiated');
     }
 
     // Blue pixels in mask (exit back to crossroads)
