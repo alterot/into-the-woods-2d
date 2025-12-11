@@ -36,9 +36,29 @@ All sound effects from [Freesound.org](https://freesound.org)
   License: [Attribution 4.0]  
   https://freesound.org/people/spycrah/sounds/535222/
 
+- **stone-step-right.wav**  
+  Author: [GlennM]  
+  License: [Attribution 3.0]  
+  https://freesound.org/people/GlennM/sounds/386525/
+
+- **stone-step-left.wav**  
+  Author: [GlennM]  
+  License: [Attribution 3.0]  
+  https://freesound.org/people/GlennM/sounds/386519/
+  
+  - **fire.wav**  
+  Author: [Glaneur de sons]  
+  License: [Attribution 4.0]  
+  https://freesound.org/people/Glaneur%20de%20sons/sounds/104957/
+
 ## Visuals
 
 All images generated using AI (DALL-E via ChatGPT) - original creations.
+
+- **Fire Animation - Pixel Art FX Sprites**  
+Author: [Brullov]  
+License: -
+https://brullov.itch.io/fire-animation?download#google_vignette
 
 ## Code
 
