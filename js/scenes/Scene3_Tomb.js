@@ -490,7 +490,10 @@ class Scene3_Tomb extends GameScene {
                 });
                 console.log('[Scene3] All flames changed to purple');
 
-                // 4. Start narrator dialogue while screen is still black
+                // 4. Reset camera alpha but keep screen visually black with DialogOverlay
+                // This allows UI elements to be visible while screen appears black
+                this.cameras.main.resetFX();  // Clear the fade effect
+
                 this.dialogActive = true;
 
                 // Load full dialogue data
@@ -502,20 +505,20 @@ class Scene3_Tomb extends GameScene {
 
                 console.log('[Scene3] Starting narrator dialogue while screen is black');
 
-                // Start narrator dialogue (screen still black, no dim, no portraits visible)
+                // Start narrator dialogue with fully opaque black background
                 const narratorOverlay = new DialogOverlay(this, {
                     dialogueData: narratorLines,
-                    spritesVisible: false,  // Don't show game sprites
-                    backgroundDim: 0,       // No dim overlay (screen already black from fade)
+                    spritesVisible: false,  // Don't show game sprites behind
+                    backgroundDim: 1.0,     // Fully opaque black background (keeps screen black)
                     portraitScale: 1,
                     onComplete: () => {
-                        console.log('[Scene3] Narrator dialogue complete - fading in');
+                        console.log('[Scene3] Narrator dialogue complete - revealing scene');
 
-                        // 5. Fade back in to reveal the changes
-                        this.cameras.main.fadeIn(1000, 0, 0, 0);
+                        // 5. DialogOverlay will fade out automatically (500ms), revealing the scene
+                        // Wait for fade to complete before starting conversation
 
-                        // 6. After fade in completes, start conversation dialogue
-                        this.time.delayedCall(1000, () => {
+                        // 6. After narrator overlay fades out, start conversation dialogue
+                        this.time.delayedCall(500, () => {
                             console.log('[Scene3] Starting Morte conversation dialogue');
 
                             // Determine portraits based on selected character

@@ -124,15 +124,15 @@ class DialogOverlay {
 
         // Create dialog UI
         this.dialogUI = {
-            // Portraits at bottom
+            // Portraits at bottom (start hidden, showDialogLine will reveal as needed)
             leftPortrait: this.scene.add.image(leftX, portraitY, leftPortraitTexture)
                 .setScale(this.portraitScale)
-                .setAlpha(0.7)
+                .setAlpha(0)  // Start invisible to prevent flash
                 .setOrigin(0.5, 0.5)
                 .setDepth(2000),
             rightPortrait: this.scene.add.image(rightX, portraitY, rightPortraitTexture)
                 .setScale(this.portraitScale)
-                .setAlpha(0.7)
+                .setAlpha(0)  // Start invisible to prevent flash
                 .setOrigin(0.5, 0.5)
                 .setDepth(2000),
 
@@ -317,17 +317,17 @@ class DialogOverlay {
             this.dialogUI.narratorTextboxBg.setVisible(true);
             this.dialogUI.narratorTextboxText.setVisible(true).setText('');
 
-            // Both portraits faded (inactive)
+            // Hide both portraits completely during narrator dialogue
             this.scene.tweens.add({
                 targets: this.dialogUI.leftPortrait,
-                alpha: 0.7,
+                alpha: 0,  // Completely invisible
                 scale: inactiveScale,
                 duration: 200,
                 ease: 'Cubic.easeOut'
             });
             this.scene.tweens.add({
                 targets: this.dialogUI.rightPortrait,
-                alpha: 0.7,
+                alpha: 0,  // Completely invisible
                 scale: inactiveScale,
                 duration: 200,
                 ease: 'Cubic.easeOut'
