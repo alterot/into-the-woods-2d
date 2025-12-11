@@ -39,12 +39,12 @@ class Scene3_Tomb extends GameScene {
             console.log('[Scene3] Puzzle not yet completed - loading initial state');
         }
 
-        // Switch to tomb ambient music with reduced volume (30% quieter for fire sounds)
+        // Switch to tomb ambient music with reduced volume (51% quieter for fire sounds)
         const audioManager = this.registry.get('audioManager');
         if (audioManager) {
             audioManager.switchMusic('tomb-ambient');
-            // Reduce background music volume by 30% (0.4 * 0.7 = 0.28)
-            audioManager.setMusicVolume(0.28);
+            // Reduce background music volume by 51% total (0.4 * 0.7 * 0.7 = 0.196)
+            audioManager.setMusicVolume(0.196);
         }
 
         console.log('[Scene3] init() - all dialog state reset, tomb music started at reduced volume');
