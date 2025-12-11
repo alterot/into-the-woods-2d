@@ -23,6 +23,9 @@ class Scene1_Meadow extends GameScene {
         this.wispFirstTimeConvo = null;
         this.wispRepeatConvo = null;
         this.currentConversationBubble = null;
+
+        // Runestone state
+        this.runestoneVisited = false;  // Track if runestone has been read before
     }
 
     init(data) {
@@ -238,7 +241,15 @@ class Scene1_Meadow extends GameScene {
 
         // Get runestone dialogue data
         const runeData = this.cache.json.get('runeDialogue');
-        const dialogData = runeData.conversations[0].lines;
+        let dialogData = runeData.conversations[0].lines;
+
+        // On repeat visits, show only lines 5-8 (the three color clues + sister's reaction)
+        if (this.runestoneVisited) {
+            dialogData = dialogData.slice(4, 8);  // Lines 5, 6, 7, 8
+            console.log('[Scene1] Runestone repeat visit - showing lines 5-8 (color clues)');
+        } else {
+            console.log('[Scene1] Runestone first visit - showing full dialogue');
+        }
 
         // Find nearest walkable spot around the runestone
         const walkableSpot = this.findNearestWalkable(x, y, 50);
@@ -259,6 +270,8 @@ class Scene1_Meadow extends GameScene {
             onComplete: () => {
                 this.dialogActive = false;
                 this.runestonePosition = null;
+                // Mark runestone as visited after first interaction
+                this.runestoneVisited = true;
             },
             onLineChange: (line) => {
                 // This callback is called for each line change
