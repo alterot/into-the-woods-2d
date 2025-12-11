@@ -106,6 +106,7 @@ class Scene3_Tomb extends GameScene {
         createFireAnim('fire-yellow-loop', 'fire-yellow');
         createFireAnim('fire-green-loop', 'fire-green');
         createFireAnim('fire-blue-loop', 'fire-blue');
+        createFireAnim('fire-purple-loop', 'fire-purple');
 
         // Skapa själva eld-spritesen + glow
         this.braziers = brazierConfigs.map(cfg => {
@@ -432,10 +433,10 @@ class Scene3_Tomb extends GameScene {
             this.cameras.main.shake(800, 0.005);  // 800ms duration, subtle shake
 
             // 2. Fade out to black
-            this.cameras.main.fadeOut(800, 0, 0, 0);
+            this.cameras.main.fadeOut(1600, 0, 0, 0);
 
             // 3. After fade completes, swap background and add Morte sprite
-            this.time.delayedCall(850, () => {
+            this.time.delayedCall(1650, () => {
                 console.log('[Scene3] Scene is dark - swapping background and adding Morte');
 
                 // Change background to opened tomb
@@ -465,7 +466,7 @@ class Scene3_Tomb extends GameScene {
                     if (this.textures.exists(key)) {
                         const morte = this.add.sprite(900, 360, key);
                         morte.setDepth(850);  // Above background, below UI
-                        morte.setScale(1);    // Adjust as needed
+                        morte.setScale(0.5);    // 50% size
                         this.morteSprite = morte;  // Store for later use
                         console.log(`[Scene3] Loaded Morte sprite: ${key}`);
                         morteLoaded = true;
@@ -476,6 +477,17 @@ class Scene3_Tomb extends GameScene {
                 if (!morteLoaded) {
                     console.warn('[Scene3] Morte sprite texture not found. Tried:', morteKeys);
                 }
+
+                // Change all flames to purple
+                const purpleGlowColor = 0xb89bff;  // Purple-ish glow
+                this.braziers.forEach(brazier => {
+                    // Change flame animation to purple
+                    brazier.sprite.play('fire-purple-loop');
+
+                    // Change glow tint to purple
+                    brazier.glow.setTint(purpleGlowColor);
+                });
+                console.log('[Scene3] All flames changed to purple');
 
                 // 4. Fade back in to reveal the changes
                 this.cameras.main.fadeIn(1000, 0, 0, 0);

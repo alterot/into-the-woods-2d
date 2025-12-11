@@ -190,7 +190,7 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('background3-open', 'assets/scenes/scen3-tomb-open.png');
         this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
         this.load.image('tomb-overlay', 'assets/scenes/scen3-tomb-overlay.png');
-        this.load.image('Morte-idle', 'assets/sprites/Morte-idle.png');
+        this.load.image('Morte-idle', 'assets/sprites/Morte-idle-S.png');
 
         // Fire glow sprite (used for all braziers)
         this.load.image('fire-glow', 'assets/objects/fire/fire-glow.png');
