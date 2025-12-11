@@ -135,12 +135,23 @@ class Scene2_Crossroads extends GameScene {
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false;
 
-        // Find walkable spot near wisp
-        const target = this.findNearestWalkable(this.wisp.sprite.x, this.wisp.sprite.y, 80);
+        // Calculate direction from wisp to player
+        const dx = this.player.x - this.wisp.sprite.x;
+        const dy = this.player.y - this.wisp.sprite.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Normalize direction and calculate stop position 60px away from wisp
+        const stopDistance = 60;
+        const targetX = this.wisp.sprite.x + (dx / distance) * stopDistance;
+        const targetY = this.wisp.sprite.y + (dy / distance) * stopDistance;
+
+        // Find walkable spot near that calculated position
+        const target = this.findNearestWalkable(targetX, targetY, 50);
 
         if (target) {
-            // Start pathfinding to wisp
+            // Start pathfinding to position near wisp (not ON wisp)
             this.findPath(this.player.x, this.player.y, target.x, target.y);
+            console.log('[Scene2] Walking to position 60px from wisp:', target);
         } else {
             console.warn('[Scene2_Crossroads] No walkable spot found near wisp');
         }
