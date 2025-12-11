@@ -39,6 +39,11 @@ class Brazier {
         this.sprite = null;      // Flame sprite
         this.glow = null;        // Glow effect
 
+        // Audio components
+        this.fireSound = null;   // Fire crackling sound
+        this.soundPitchRate = 1.0;      // Playback rate (affects pitch)
+        this.soundVolumeMultiplier = 1.0;  // Volume multiplier for variation
+
         // Animation keys
         this.spriteKey = `fire-${this.color}`;
         this.animKey = `fire-${this.color}-loop`;
@@ -77,10 +82,87 @@ class Brazier {
         this.glow.setBlendMode(Phaser.BlendModes.ADD);
         this.glow.setDepth(this.config.depth - 1);
 
-        // Apply initial state visuals
+        // Create fire sound with random variations for natural layering
+        this.initializeFireSound();
+
+        // Apply initial state visuals and audio
         this.applyStateVisuals(this.state, false); // false = no animation, instant
 
         console.log(`[Brazier] Created ${this.color} brazier '${this.id}' at (${this.x}, ${this.y}) in state ${this.state}`);
+    }
+
+    /**
+     * Initialize fire sound with random pitch and volume variations
+     */
+    initializeFireSound() {
+        console.log(`[Brazier] ${this.id} - Initializing fire sound`);
+
+        // Random pitch variation (0.9 to 1.1) for unique sound per brazier
+        this.soundPitchRate = 0.9 + Math.random() * 0.2;
+
+        // Random volume multiplier (0.9 to 1.1) for slight volume variation
+        this.soundVolumeMultiplier = 0.9 + Math.random() * 0.2;
+
+        // Random start delay (0-300ms) so sounds don't sync perfectly
+        const startDelay = Math.random() * 300;
+
+        console.log(`[Brazier] ${this.id} - Pitch: ${this.soundPitchRate.toFixed(2)}, Volume mult: ${this.soundVolumeMultiplier.toFixed(2)}, Delay: ${startDelay.toFixed(0)}ms`);
+
+        this.scene.time.delayedCall(startDelay, () => {
+            console.log(`[Brazier] ${this.id} - Creating sound... scene.sound exists:`, !!this.scene.sound);
+
+            if (this.scene.sound) {
+                const fireAudio = this.scene.sound.get('fire');
+                console.log(`[Brazier] ${this.id} - Fire audio exists:`, !!fireAudio);
+
+                this.fireSound = this.scene.sound.add('fire', {
+                    loop: true,
+                    volume: 0  // Will be set by updateSoundVolume
+                });
+
+                console.log(`[Brazier] ${this.id} - Fire sound created:`, !!this.fireSound);
+
+                this.fireSound.setRate(this.soundPitchRate);
+                this.fireSound.play();
+
+                console.log(`[Brazier] ${this.id} - Sound playing, state: ${this.state}`);
+
+                // Update volume based on current state
+                this.updateSoundVolume();
+            } else {
+                console.warn(`[Brazier] ${this.id} - scene.sound not available!`);
+            }
+        });
+    }
+
+    /**
+     * Update fire sound volume based on current state
+     */
+    updateSoundVolume() {
+        if (!this.fireSound) {
+            console.log(`[Brazier] ${this.id} - Cannot update volume, fireSound is null`);
+            return;
+        }
+
+        let baseVolume = 0;
+
+        switch (this.state) {
+            case 0:
+                baseVolume = 0.225;  // Low volume for base state (increased by 50%)
+                break;
+            case 1:
+                baseVolume = 0.45;   // Medium volume for activated state (increased by 50%)
+                break;
+            case 2:
+                baseVolume = 0.75;   // High volume for completed state (increased by 50%)
+                break;
+        }
+
+        // Apply volume multiplier for variation between braziers
+        const finalVolume = baseVolume * this.soundVolumeMultiplier;
+        this.fireSound.setVolume(finalVolume);
+
+        console.log(`[Brazier] ${this.id} - Volume updated for state ${this.state}: ${finalVolume.toFixed(2)} (base: ${baseVolume}, mult: ${this.soundVolumeMultiplier.toFixed(2)})`);
     }
 
     /**
@@ -157,6 +239,9 @@ class Brazier {
             this.glow.setScale(baseScale);
             this.startBreathingAnimation(baseScale, 0.10, 0.17);
         }
+
+        // Update fire sound volume
+        this.updateSoundVolume();
     }
 
     /**
@@ -194,6 +279,9 @@ class Brazier {
             this.glow.setScale(activatedGlowScale);
             this.startBreathingAnimation(activatedGlowScale, 0.28, 0.35);
         }
+
+        // Update fire sound volume
+        this.updateSoundVolume();
     }
 
     /**
@@ -231,6 +319,9 @@ class Brazier {
             this.glow.setScale(completedGlowScale);
             this.startBreathingAnimation(completedGlowScale, 0.38, 0.45);
         }
+
+        // Update fire sound volume
+        this.updateSoundVolume();
     }
 
     /**
@@ -366,6 +457,13 @@ class Brazier {
         if (this.glow) {
             this.glow.destroy();
             this.glow = null;
+        }
+
+        // Stop and destroy fire sound
+        if (this.fireSound) {
+            this.fireSound.stop();
+            this.fireSound.destroy();
+            this.fireSound = null;
         }
 
         console.log(`[Brazier] Destroyed ${this.color} brazier '${this.id}'`);

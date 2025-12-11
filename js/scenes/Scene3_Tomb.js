@@ -39,13 +39,15 @@ class Scene3_Tomb extends GameScene {
             console.log('[Scene3] Puzzle not yet completed - loading initial state');
         }
 
-        // Switch to tomb ambient music
+        // Switch to tomb ambient music with reduced volume (30% quieter for fire sounds)
         const audioManager = this.registry.get('audioManager');
         if (audioManager) {
             audioManager.switchMusic('tomb-ambient');
+            // Reduce background music volume by 30% (0.4 * 0.7 = 0.28)
+            audioManager.setMusicVolume(0.28);
         }
 
-        console.log('[Scene3] init() - all dialog state reset, tomb music started');
+        console.log('[Scene3] init() - all dialog state reset, tomb music started at reduced volume');
     }
 
     /**
@@ -514,6 +516,11 @@ class Scene3_Tomb extends GameScene {
 
         this.showValidClickIndicator(x, y);
 
+        // Restore normal music volume before leaving
+        if (audioManager) {
+            audioManager.setMusicVolume(0.4);  // Restore to normal volume
+        }
+
         // Transition back to Scene2_Crossroads
         this.cameras.main.fadeOut(500, 0, 0, 0);
         this.time.delayedCall(500, () => {
@@ -620,7 +627,6 @@ class Scene3_Tomb extends GameScene {
                 const STEP_DISTANCE = 36;  // 50% slower than grass (24 * 1.5)
 
                 if (this.stepDistanceAccum >= STEP_DISTANCE) {
-                    console.log('[Scene3] Playing stone footstep');
                     audioManager.playStoneFootstep();
                     this.stepDistanceAccum = 0;
                 }

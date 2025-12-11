@@ -66,7 +66,6 @@ class AudioManager {
         this.stoneFootstepRight = this.scene.sound.add('stone-step-right', {
             volume: 0.4
         });
-        console.log('[AudioManager] Stone footsteps initialized:', this.stoneFootstepLeft, this.stoneFootstepRight);
 
         this.stepToggle = false;
 
@@ -218,7 +217,6 @@ class AudioManager {
         playStoneFootstep() {
             if (!this.stoneFootstepLeft || !this.stoneFootstepRight) {
                 // Sounds not initialized
-                console.warn('[AudioManager] Stone footstep sounds not initialized!');
                 return;
             }
 
@@ -226,7 +224,6 @@ class AudioManager {
             const sound = this.stepToggle ? this.stoneFootstepLeft : this.stoneFootstepRight;
             this.stepToggle = !this.stepToggle;
 
-            console.log('[AudioManager] Playing stone footstep:', this.stepToggle ? 'left' : 'right');
             sound.play();
         }
 
