@@ -41,6 +41,10 @@ class Scene2_Crossroads extends GameScene {
         this.isProcessingChoice = false;
         this.currentConversationBubble = null;
 
+        // IMPORTANT: Remove any existing scene-wide click handlers to prevent duplicates
+        // This prevents the handler from being registered multiple times when revisiting the scene
+        this.input.off('pointerdown');
+
         // Switch back to forest ambient music (in case we came from tomb)
         const audioManager = this.registry.get('audioManager');
         if (audioManager) {

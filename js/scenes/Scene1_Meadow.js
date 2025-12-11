@@ -47,6 +47,10 @@ class Scene1_Meadow extends GameScene {
             this.wispIntroBubble = null;
         }
 
+        // IMPORTANT: Remove any existing scene-wide click handlers to prevent duplicates
+        // This prevents the handler from being registered multiple times when revisiting the scene
+        this.input.off('pointerdown');
+
         // Switch back to forest ambient music (safety check)
         const audioManager = this.registry.get('audioManager');
         if (audioManager) {
