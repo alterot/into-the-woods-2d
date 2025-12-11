@@ -1,12 +1,11 @@
 GENERELLT:
-Döda pratbubblor när en ny initieras (t.ex kan ej gå här fyns samtidigt som whisp dialt)
 Move AudioManager to /systems and (oly imported by loading scene?)
 
 SCEN 2
 player ska komma närmare ingång till tomb innan den stannar
 
 SCEN 3
-Se till att pratbubbla om flammor försvinner när det blir svart
+Se till att pratbubbla om flammor försvinner när det blir svart - tror detta är fixat?
 Se till att overlay är bakom det svarta!
 Fixa att sister är rättänd i vänstra dialoger
 Uppdatera player plavering efter fade in/out

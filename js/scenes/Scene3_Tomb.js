@@ -111,8 +111,10 @@ class Scene3_Tomb extends GameScene {
                     brazier.activate();
                 }
 
-                // Show feedback
-                this.showFeedbackBubble(`The ${color} brazier flares to life!`);
+                // Show feedback only for first two steps (not the final step)
+                if (step < this.puzzleManager.sequence.length - 1) {
+                    this.showFeedbackBubble(`The ${color} brazier flares to life!`);
+                }
             },
 
             onWrongStep: (expectedColor, attemptedColor) => {
@@ -317,7 +319,8 @@ class Scene3_Tomb extends GameScene {
         this.showFeedbackBubble("The ancient flames burn brightly. The tomb's secrets are revealed!");
 
         // === DRAMATIC REVEAL SEQUENCE ===
-        this.time.delayedCall(1500, () => {
+        // Wait 5000ms to let the completion message fully display before starting reveal
+        this.time.delayedCall(5000, () => {
             console.log('[Scene3] Starting reveal sequence...');
 
             // 1. Camera shake effect (earthquake/rumble)
