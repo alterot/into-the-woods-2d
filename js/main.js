@@ -17,7 +17,7 @@ const config = {
         pixelArt: false,
         antialias: true,
         antialiasGL: true,
-        roundPixels: false
+        roundPixels: true  // Snap to whole pixels for crisper text
     },
     parent: document.body,
     backgroundColor: '#000000',
