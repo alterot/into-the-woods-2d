@@ -74,8 +74,178 @@ class DialogOverlay {
         }
     }
 
+    /**
+     * Create portrait sprites
+     * @param {number} leftX - X position for left portrait
+     * @param {number} rightX - X position for right portrait
+     * @param {number} portraitY - Y position for both portraits
+     * @param {string} leftTexture - Texture key for left portrait
+     * @param {string} rightTexture - Texture key for right portrait
+     * @param {boolean} flipX - Whether to flip portraits horizontally
+     * @returns {Object} Object containing leftPortrait and rightPortrait sprites
+     */
+    createPortraits(leftX, rightX, portraitY, leftTexture, rightTexture, flipX) {
+        const leftPortrait = this.scene.add.image(leftX, portraitY, leftTexture)
+            .setScale(this.portraitScale)
+            .setAlpha(0)  // Start invisible to prevent flash
+            .setOrigin(0.5, 0.5)
+            .setDepth(2000);
+
+        const rightPortrait = this.scene.add.image(rightX, portraitY, rightTexture)
+            .setScale(this.portraitScale)
+            .setAlpha(0)  // Start invisible to prevent flash
+            .setOrigin(0.5, 0.5)
+            .setDepth(2000);
+
+        // Apply facing direction
+        if (flipX) {
+            leftPortrait.setFlipX(true);
+            rightPortrait.setFlipX(true);
+        }
+
+        return { leftPortrait, rightPortrait };
+    }
+
+    /**
+     * Create textbox UI elements (left, right, and narrator)
+     * @param {number} leftX - X position for left textbox
+     * @param {number} rightX - X position for right textbox
+     * @param {number} narratorX - X position for narrator textbox
+     * @param {number} textboxY - Y position for all textboxes
+     * @param {number} textboxWidth - Width of side textboxes
+     * @param {number} narratorWidth - Width of narrator textbox
+     * @param {number} textboxHeight - Height of all textboxes
+     * @returns {Object} Object containing all textbox elements
+     */
+    createTextboxes(leftX, rightX, narratorX, textboxY, textboxWidth, narratorWidth, textboxHeight) {
+        // Textbox style constants
+        const bgColor = 0x8B6F47;
+        const bgAlpha = 0.85;
+        const strokeColor = 0x5C4A30;
+        const strokeWidth = 3;
+        const textStyle = {
+            fontSize: '18px',
+            fontFamily: 'Georgia',
+            color: '#FFFFFF',
+            align: 'center'
+        };
+
+        // Left textbox
+        const leftTextboxBg = this.scene.add.rectangle(
+            leftX, textboxY, textboxWidth, textboxHeight, bgColor, bgAlpha
+        ).setStrokeStyle(strokeWidth, strokeColor).setDepth(2001).setVisible(false);
+
+        const leftTextboxText = this.scene.add.text(leftX, textboxY, '', {
+            ...textStyle,
+            wordWrap: { width: textboxWidth - 30 }
+        }).setOrigin(0.5).setDepth(2002).setVisible(false);
+
+        // Right textbox
+        const rightTextboxBg = this.scene.add.rectangle(
+            rightX, textboxY, textboxWidth, textboxHeight, bgColor, bgAlpha
+        ).setStrokeStyle(strokeWidth, strokeColor).setDepth(2001).setVisible(false);
+
+        const rightTextboxText = this.scene.add.text(rightX, textboxY, '', {
+            ...textStyle,
+            wordWrap: { width: textboxWidth - 30 }
+        }).setOrigin(0.5).setDepth(2002).setVisible(false);
+
+        // Narrator textbox (centered, italic)
+        const narratorTextboxBg = this.scene.add.rectangle(
+            narratorX, textboxY, narratorWidth, textboxHeight, bgColor, bgAlpha
+        ).setStrokeStyle(strokeWidth, strokeColor).setDepth(2001).setVisible(false);
+
+        const narratorTextboxText = this.scene.add.text(narratorX, textboxY, '', {
+            ...textStyle,
+            fontStyle: 'italic',
+            wordWrap: { width: narratorWidth - 40 }
+        }).setOrigin(0.5).setDepth(2002).setVisible(false);
+
+        return {
+            leftTextboxBg,
+            leftTextboxText,
+            rightTextboxBg,
+            rightTextboxText,
+            narratorTextboxBg,
+            narratorTextboxText
+        };
+    }
+
+    /**
+     * Create choice button UI elements
+     * @param {number} choiceY - Y position for choice buttons
+     * @param {number} canvasWidth - Width of canvas for centering
+     * @returns {Array} Array of choice button objects {bg, text}
+     */
+    createChoiceButtons(choiceY, canvasWidth) {
+        const choiceContainer = [];
+
+        if (!this.choiceData || !this.choiceData.options) {
+            return choiceContainer;
+        }
+
+        const buttonSpacing = 180;
+        const buttonWidth = 160;
+        const buttonHeight = 60;
+
+        // Calculate starting X to center buttons
+        const totalWidth = (this.choiceData.options.length * buttonWidth) +
+                          ((this.choiceData.options.length - 1) * (buttonSpacing - buttonWidth));
+        let startX = (canvasWidth - totalWidth) / 2 + buttonWidth / 2;
+
+        this.choiceData.options.forEach((option, index) => {
+            const x = startX + (index * buttonSpacing);
+
+            // Button background
+            const buttonBg = this.scene.add.rectangle(
+                x, choiceY, buttonWidth, buttonHeight, 0x8B6F47, 0.95
+            ).setStrokeStyle(4, 0x5C4A30).setDepth(2001).setVisible(false);
+
+            // Button text
+            const buttonText = this.scene.add.text(x, choiceY, option.label, {
+                fontSize: '16px',
+                fontFamily: 'Georgia',
+                fontStyle: 'bold',
+                color: '#FFFFFF',
+                align: 'center'
+            }).setOrigin(0.5).setDepth(2002).setVisible(false);
+
+            // Make interactive
+            buttonBg.setInteractive({ useHandCursor: true });
+
+            // Hover effect
+            buttonBg.on('pointerover', () => {
+                buttonBg.setFillStyle(0xA08060);
+                buttonBg.setScale(1.05);
+            });
+            buttonBg.on('pointerout', () => {
+                buttonBg.setFillStyle(0x8B6F47);
+                buttonBg.setScale(1.0);
+            });
+
+            // Click handler
+            buttonBg.on('pointerdown', () => {
+                this.handleChoiceClick(option.id);
+            });
+
+            choiceContainer.push({ bg: buttonBg, text: buttonText });
+        });
+
+        return choiceContainer;
+    }
+
+    /**
+     * Setup input handlers for dialog advancement (space key and click)
+     */
+    setupInputHandlers() {
+        this.dialogSpaceHandler = () => this.advanceDialog();
+        this.dialogClickHandler = () => this.advanceDialog();
+        this.scene.input.keyboard.on('keydown-SPACE', this.dialogSpaceHandler);
+        this.scene.input.on('pointerdown', this.dialogClickHandler);
+    }
+
     createDialogUI() {
-        // Determine player and sibling based on selection
+        // ===== 1. Determine character configuration =====
         const isPlayingBig = SceneStateManager.getGlobal('selectedCharacter') === 'big';
         const playerPortrait = isPlayingBig ? 'portrait1' : 'portrait2';
         const siblingPortrait = isPlayingBig ? 'portrait2' : 'portrait1';
@@ -96,11 +266,8 @@ class DialogOverlay {
         }
 
         // Determine initial portrait textures for left/right slots
-        // Find which roles use left/right sides and get their portraits
-        let leftPortraitTexture = playerPortrait;   // Default
-        let rightPortraitTexture = siblingPortrait; // Default
-
-        // Scan roleSideMap to find what portraits should be in each slot initially
+        let leftPortraitTexture = playerPortrait;
+        let rightPortraitTexture = siblingPortrait;
         for (const [role, side] of Object.entries(this.roleSideMap)) {
             if (side === 'left' && this.rolePortraitMap[role]) {
                 leftPortraitTexture = this.rolePortraitMap[role];
@@ -109,152 +276,44 @@ class DialogOverlay {
             }
         }
 
-        // Canvas dimensions
+        // ===== 2. Define layout constants =====
         const canvasWidth = 1280;
         const canvasHeight = 720;
-
-        // Portrait positions - bottom edges
         const portraitY = canvasHeight - 100;
         const leftX = 100;
         const rightX = canvasWidth - 150;
-
-        // Textbox positions (beside portraits)
         const textboxY = portraitY - 20;
         const leftTextboxX = leftX + 250;
         const rightTextboxX = rightX - 250;
         const textboxWidth = 280;
         const textboxHeight = 150;
-
-        // Narrator textbox (centered)
         const narratorTextboxX = canvasWidth / 2;
         const narratorTextboxY = textboxY;
         const narratorTextboxWidth = 600;
 
-        // Create dialog UI
+        // ===== 3. Create all UI elements using helpers =====
+        const portraits = this.createPortraits(
+            leftX, rightX, portraitY,
+            leftPortraitTexture, rightPortraitTexture,
+            isPlayingBig
+        );
+
+        const textboxes = this.createTextboxes(
+            leftTextboxX, rightTextboxX, narratorTextboxX,
+            textboxY, textboxWidth, narratorTextboxWidth, textboxHeight
+        );
+
+        const choiceContainer = this.createChoiceButtons(narratorTextboxY, canvasWidth);
+
+        // ===== 4. Assemble dialogUI object =====
         this.dialogUI = {
-            // Portraits at bottom (start hidden, showDialogLine will reveal as needed)
-            leftPortrait: this.scene.add.image(leftX, portraitY, leftPortraitTexture)
-                .setScale(this.portraitScale)
-                .setAlpha(0)  // Start invisible to prevent flash
-                .setOrigin(0.5, 0.5)
-                .setDepth(2000),
-            rightPortrait: this.scene.add.image(rightX, portraitY, rightPortraitTexture)
-                .setScale(this.portraitScale)
-                .setAlpha(0)  // Start invisible to prevent flash
-                .setOrigin(0.5, 0.5)
-                .setDepth(2000),
-
-            // Left textbox (brown style)
-            leftTextboxBg: this.scene.add.rectangle(
-                leftTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85
-            ).setStrokeStyle(3, 0x5C4A30).setDepth(2001),
-            leftTextboxText: this.scene.add.text(leftTextboxX, textboxY, '', {
-                fontSize: '18px',
-                fontFamily: 'Georgia',
-                color: '#FFFFFF',
-                align: 'center',
-                wordWrap: { width: textboxWidth - 30 }
-            }).setOrigin(0.5).setDepth(2002),
-
-            // Right textbox (brown style)
-            rightTextboxBg: this.scene.add.rectangle(
-                rightTextboxX, textboxY, textboxWidth, textboxHeight, 0x8B6F47, 0.85
-            ).setStrokeStyle(3, 0x5C4A30).setDepth(2001),
-            rightTextboxText: this.scene.add.text(rightTextboxX, textboxY, '', {
-                fontSize: '18px',
-                fontFamily: 'Georgia',
-                color: '#FFFFFF',
-                align: 'center',
-                wordWrap: { width: textboxWidth - 30 }
-            }).setOrigin(0.5).setDepth(2002),
-
-            // Narrator textbox (centered, brown style)
-            narratorTextboxBg: this.scene.add.rectangle(
-                narratorTextboxX, narratorTextboxY, narratorTextboxWidth, textboxHeight, 0x8B6F47, 0.85
-            ).setStrokeStyle(3, 0x5C4A30).setDepth(2001),
-            narratorTextboxText: this.scene.add.text(narratorTextboxX, narratorTextboxY, '', {
-                fontSize: '18px',
-                fontFamily: 'Georgia',
-                fontStyle: 'italic',  // Italic style for narrator
-                color: '#FFFFFF',
-                align: 'center',
-                wordWrap: { width: narratorTextboxWidth - 40 }
-            }).setOrigin(0.5).setDepth(2002)
+            ...portraits,
+            ...textboxes,
+            choiceContainer
         };
 
-        // Fix portrait facing direction
-        if (isPlayingBig) {
-            this.dialogUI.leftPortrait.setFlipX(true);
-            this.dialogUI.rightPortrait.setFlipX(true);
-        }
-
-        // Initially hide textboxes
-        this.dialogUI.leftTextboxBg.setVisible(false);
-        this.dialogUI.leftTextboxText.setVisible(false);
-        this.dialogUI.rightTextboxBg.setVisible(false);
-        this.dialogUI.rightTextboxText.setVisible(false);
-        this.dialogUI.narratorTextboxBg.setVisible(false);
-        this.dialogUI.narratorTextboxText.setVisible(false);
-
-        // NEW: Create choice UI elements (initially hidden)
-        this.dialogUI.choiceContainer = [];
-        if (this.choiceData && this.choiceData.options) {
-            const choiceY = narratorTextboxY;
-            const buttonSpacing = 180;
-            const buttonWidth = 160;
-            const buttonHeight = 60;
-
-            // Calculate starting X to center buttons
-            const totalWidth = (this.choiceData.options.length * buttonWidth) +
-                              ((this.choiceData.options.length - 1) * (buttonSpacing - buttonWidth));
-            let startX = (canvasWidth - totalWidth) / 2 + buttonWidth / 2;
-
-            this.choiceData.options.forEach((option, index) => {
-                const x = startX + (index * buttonSpacing);
-
-                // Button background
-                const buttonBg = this.scene.add.rectangle(
-                    x, choiceY, buttonWidth, buttonHeight, 0x8B6F47, 0.95
-                ).setStrokeStyle(4, 0x5C4A30).setDepth(2001).setVisible(false);
-
-                // Button text
-                const buttonText = this.scene.add.text(x, choiceY, option.label, {
-                    fontSize: '16px',
-                    fontFamily: 'Georgia',
-                    fontStyle: 'bold',
-                    color: '#FFFFFF',
-                    align: 'center'
-                }).setOrigin(0.5).setDepth(2002).setVisible(false);
-
-                // Make interactive
-                buttonBg.setInteractive({ useHandCursor: true });
-
-                // Hover effect
-                buttonBg.on('pointerover', () => {
-                    buttonBg.setFillStyle(0xA08060);
-                    buttonBg.setScale(1.05);
-                });
-                buttonBg.on('pointerout', () => {
-                    buttonBg.setFillStyle(0x8B6F47);
-                    buttonBg.setScale(1.0);
-                });
-
-                // Click handler
-                buttonBg.on('pointerdown', () => {
-                    this.handleChoiceClick(option.id);
-                });
-
-                this.dialogUI.choiceContainer.push({ bg: buttonBg, text: buttonText });
-            });
-        }
-
-        // Setup input handlers
-        this.dialogSpaceHandler = () => this.advanceDialog();
-        this.dialogClickHandler = () => this.advanceDialog();
-        this.scene.input.keyboard.on('keydown-SPACE', this.dialogSpaceHandler);
-        this.scene.input.on('pointerdown', this.dialogClickHandler);
-
-        // Show first line
+        // ===== 5. Setup input handlers and show first line =====
+        this.setupInputHandlers();
         this.showDialogLine();
     }
 
