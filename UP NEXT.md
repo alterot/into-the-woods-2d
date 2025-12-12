@@ -21,48 +21,7 @@ Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
 rensa upp alla (debug( konsollogs))
 Add full screen?
 
-Övrigt från feedback: (GameScene)
-En sak som är OK nu men kommer bli teknisk skuld
-“Legacy variables” för sister1/sister2
-Du har både player/follower och legacy (sister1/sister2, bobTime etc). 
-Det är helt okej mitt i en refaktor, men målet bör vara:
-en canonical representation (player/follower)
-sister1/sister2 bara alias (eller tas bort)
-Annars blir det lätt att en ny scen råkar använda “fel” och du får buggar som är svåra att förstå.
-
 Lägg till ett standardiserat sätt att låsa input (via GameScene), så ConversationManager aldrig behöver veta om dialogActive-flaggan finns eller inte.
-
-promptförslag för att refaktor:
-I want a careful refactor focused on structure, clarity, and long-term maintainability.
-
-Scope:
-- GameScene.js
-- Related helpers used by GameScene (mask handling, movement, input routing)
-- Do NOT touch assets or scene-specific content logic.
-
-Goals:
-1. Reduce responsibility overload in GameScene:
-   - Extract mask pixel reading into a small helper (e.g. MaskHelper or similar).
-   - Avoid creating canvases repeatedly for pixel lookups; cache and reuse instead.
-2. Clarify canonical character representation:
-   - Treat player/follower as the single source of truth.
-   - Keep legacy variables (sister1/sister2) only as aliases or adapters if needed.
-3. Make GameScene easier to reason about for future scenes:
-   - Clear separation between input handling, movement, pathfinding, feedback, and audio triggers.
-   - Improve naming and grouping, but keep behavior identical.
-4. Improve cleanup safety:
-   - Ensure input listeners / timers / tweens are clearly scoped and safely cleaned up when scenes change.
-
-Constraints:
-- KEEP ALL FUNCTIONALITY EXACTLY AS IS.
-- No gameplay, timing, visuals, audio, or logic changes.
-- This is a refactor only: structure, readability, responsibility boundaries.
-- Prefer small, well-named helpers over large classes.
-- If unsure, preserve existing code paths.
-
-Deliverable IF WE START TO CODE - DONT DO ANYTHING YET, ONLY FEEDBACK REDAGRING ABOVE FOR DISCUSSION:
-- Refactored code with identical runtime behavior.
-- Brief inline comments explaining why something was extracted or renamed.
 
 
 
@@ -94,3 +53,25 @@ Goals:
 Constraints:
 - KEEP ALL FUNCTIONALITY EXACTLY
 
+STEPS FOR OVERLAY:
+
+  Phase 1: Input Locking (DO THIS FIRST) 🔴 Critical
+  - Add lockInput(reason) / unlockInput(reason) to GameScene
+  - Update DialogOverlay to use it
+  - Update ConversationManager to use it
+  - This fixes real bugs NOW
+
+  Phase 2: Extract Creation Helpers 🟡 High Value
+  - Extract createPortraits(), createTextboxes(), createChoiceButtons(), setupInputHandlers()
+  - Makes createDialogUI() readable
+  - Easier to maintain/extend
+
+  Phase 3: Cleanup Safety 🟡 Important
+  - Add destroy guards
+  - Kill tweens explicitly
+  - Hook scene shutdown
+  - Prevents crashes
+
+  Phase 4: Extract Layout Config 🟢 Nice to Have
+  - Only if complexity still feels high
+  - Could wait

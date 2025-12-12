@@ -43,10 +43,8 @@ class ConversationManager {
         this.selectedChoice = null;
         this.onCompleteCallback = onComplete;
 
-        // Block scene input during conversation
-        if (this.scene.dialogActive !== undefined) {
-            this.scene.dialogActive = true;
-        }
+        // Lock scene input during conversation
+        this.scene.lockInput('conversation-manager');
 
         this.showStep(0);
     }
@@ -138,9 +136,9 @@ class ConversationManager {
     end() {
         this.isActive = false;
 
-        // IMPORTANT: Don't clear dialogActive here!
-        // The scene's callback (handleWispChoice) will handle state cleanup
-        // If we clear it here, clicks leak through before the scene is ready
+        // Unlock scene input (conversation-specific lock)
+        // Note: Input may still be locked by other systems (e.g., scene transitions)
+        this.scene.unlockInput('conversation-manager');
 
         // Clear scene-wide bubble reference
         if (this.scene.currentConversationBubble !== undefined) {
@@ -196,6 +194,8 @@ class ConversationManager {
         if (this.currentBubble) {
             this.currentBubble.destroy();
         }
+        // Safety: ensure input is unlocked
+        this.scene.unlockInput('conversation-manager');
         this.end();
     }
 }

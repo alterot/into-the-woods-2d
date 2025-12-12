@@ -40,6 +40,12 @@ class DialogOverlay {
     }
 
     start() {
+        // Lock scene input to prevent clicks from leaking through to the game
+        // (Only if scene has lockInput method - GameScene has it, basic Phaser.Scene doesn't)
+        if (typeof this.scene.lockInput === 'function') {
+            this.scene.lockInput('dialog-overlay');
+        }
+
         // Create background overlay if needed
         if (this.backgroundDim > 0) {
             this.backgroundOverlay = this.scene.add.rectangle(
@@ -529,6 +535,11 @@ class DialogOverlay {
     endDialog() {
         if (!this.dialogUI) return;
 
+        // Unlock scene input (will be fully unlocked if no other locks exist)
+        if (typeof this.scene.unlockInput === 'function') {
+            this.scene.unlockInput('dialog-overlay');
+        }
+
         // Stop typing
         if (this.currentTypingEvent) {
             this.currentTypingEvent.remove();
@@ -576,6 +587,11 @@ class DialogOverlay {
     }
 
     destroy() {
+        // Safety: ensure input is unlocked even if endDialog wasn't called
+        if (typeof this.scene.unlockInput === 'function') {
+            this.scene.unlockInput('dialog-overlay');
+        }
+
         // Destroy all UI elements
         if (this.dialogUI) {
             this.dialogUI.leftPortrait.destroy();

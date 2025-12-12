@@ -59,6 +59,9 @@ class GameScene extends Phaser.Scene {
 
         // Dialog state (used by child scenes)
         this.dialogActive = false;
+
+        // Input locking system - tracks multiple input lock sources
+        this.inputLocks = new Set();
     }
 
     // Subclasses must implement preload() to load scene-specific assets
@@ -551,6 +554,48 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Lock input for a specific reason (e.g., dialog, conversation, transition)
+     * Multiple locks can be active simultaneously - input is only unlocked when all are released
+     * @param {string} reason - Identifier for the lock source (e.g., 'dialog-overlay', 'conversation')
+     */
+    lockInput(reason) {
+        this.inputLocks.add(reason);
+        this.dialogActive = true;
+    }
+
+    /**
+     * Unlock input for a specific reason
+     * Input is only fully unlocked when all lock sources have been removed
+     * @param {string} reason - Identifier for the lock source to remove
+     */
+    unlockInput(reason) {
+        this.inputLocks.delete(reason);
+
+        // Only unlock dialogActive if there are no remaining locks
+        if (this.inputLocks.size === 0) {
+            this.dialogActive = false;
+        }
+    }
+
+    /**
+     * Check if input is currently locked
+     * @returns {boolean} True if any input locks are active
+     */
+    isInputLocked() {
+        return this.dialogActive || this.inputLocks.size > 0;
+    }
+
+    /**
+     * Emergency unlock - clears all input locks (use with caution)
+     * Useful for debugging or error recovery
+     */
+    clearAllInputLocks() {
+        this.inputLocks.clear();
+        this.dialogActive = false;
+        console.warn('[GameScene] All input locks forcibly cleared');
+    }
+
     shutdown() {
         // Clean up input listeners
         // Note: Phaser automatically removes listeners, but we clean up references
@@ -586,7 +631,8 @@ class GameScene extends Phaser.Scene {
         this.easystar = null;
         this.grid = null;
 
-        // Reset dialog state
+        // Reset dialog state and clear all input locks
+        this.inputLocks.clear();
         this.dialogActive = false;
     }
 }
