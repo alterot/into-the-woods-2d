@@ -13,7 +13,7 @@ class DialogOverlay {
         this.choiceData = config.choiceData || null;  // NEW: Choice configuration
         this.spritesVisible = config.spritesVisible ?? false;
         this.backgroundDim = config.backgroundDim ?? 0.6;
-        this.portraitScale = config.portraitScale ?? 0.28;  // Default scale for high-res portraits
+        this.portraitScale = config.portraitScale ?? 0.4;  // Default scale for high-res portraits
         this.textSpeed = config.textSpeed ?? 75;
         this.onComplete = config.onComplete || (() => {});
         this.onLineChange = config.onLineChange || null;
