@@ -535,11 +535,6 @@ class DialogOverlay {
     endDialog() {
         if (!this.dialogUI) return;
 
-        // Unlock scene input (will be fully unlocked if no other locks exist)
-        if (typeof this.scene.unlockInput === 'function') {
-            this.scene.unlockInput('dialog-overlay');
-        }
-
         // Stop typing
         if (this.currentTypingEvent) {
             this.currentTypingEvent.remove();
@@ -579,6 +574,11 @@ class DialogOverlay {
             alpha: 0,
             duration: 500,
             onComplete: () => {
+                // Unlock AFTER fade completes to prevent click leakage
+                if (typeof this.scene.unlockInput === 'function') {
+                    this.scene.unlockInput('dialog-overlay');
+                }
+
                 this.destroy();
                 // NEW: Pass selected choice to onComplete callback
                 this.onComplete(this.selectedChoice);

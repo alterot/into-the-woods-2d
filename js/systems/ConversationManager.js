@@ -136,24 +136,27 @@ class ConversationManager {
     end() {
         this.isActive = false;
 
-        // Unlock scene input (conversation-specific lock)
-        // Note: Input may still be locked by other systems (e.g., scene transitions)
-        this.scene.unlockInput('conversation-manager');
-
         // Clear scene-wide bubble reference
         if (this.scene.currentConversationBubble !== undefined) {
             this.scene.currentConversationBubble = null;
         }
 
-        // Call completion callback
-        if (this.onCompleteCallback) {
-            this.onCompleteCallback();
-        }
-
-        // Destroy the bubble AFTER callback
+        // Destroy the bubble first
         if (this.currentBubble) {
             this.currentBubble.destroy();
             this.currentBubble = null;
+        }
+
+        // Delay unlock to prevent click leakage (current click event still propagating)
+        this.scene.time.delayedCall(100, () => {
+            // Unlock scene input (conversation-specific lock)
+            // Note: Input may still be locked by other systems (e.g., scene transitions)
+            this.scene.unlockInput('conversation-manager');
+        });
+
+        // Call completion callback
+        if (this.onCompleteCallback) {
+            this.onCompleteCallback();
         }
     }
 
@@ -194,8 +197,7 @@ class ConversationManager {
         if (this.currentBubble) {
             this.currentBubble.destroy();
         }
-        // Safety: ensure input is unlocked
-        this.scene.unlockInput('conversation-manager');
+        // end() will handle unlocking with proper delay
         this.end();
     }
 }
