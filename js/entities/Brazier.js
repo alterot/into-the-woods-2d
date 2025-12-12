@@ -132,13 +132,13 @@ class Brazier {
 
         switch (this.state) {
             case 0:
-                baseVolume = 0.34;   // Low volume for base state (increased by 125% total)
+                baseVolume = 0.408;   // Low volume for base state (increased by 20%)
                 break;
             case 1:
-                baseVolume = 0.68;   // Medium volume for activated state (increased by 125% total)
+                baseVolume = 0.816;   // Medium volume for activated state (increased by 20%)
                 break;
             case 2:
-                baseVolume = 1.0;    // High volume for completed state (increased by 125% total, capped at 1.0)
+                baseVolume = 1.2;    // High volume for completed state (increased by 20%)
                 break;
         }
 

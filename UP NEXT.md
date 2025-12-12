@@ -17,18 +17,3 @@ Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
 FULL SCREEN:
 Fix icon (out of sync)
 
-  Morte Sprite:
-
-  - Current: 1000-1500px
-  - Displayed at: ~112-168px
-  - Resize to: 300-400px (2-3x buffer)
-  - File to resize:
-    - Morte-idle.png → 300-400px DONE
-
-  ---
-  💡 Resizing Tips:
-
-  1. Maintain aspect ratio (don't squish!)
-  2. Use bicubic/lanczos resampling (best quality in Photoshop/GIMP)
-  3. Keep as PNG (with transparency)
-  4. Replace the original files (same filenames)
