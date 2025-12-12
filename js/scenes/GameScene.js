@@ -3,6 +3,7 @@
 // Handles movement, pathfinding, follower AI, mask detection, depth sorting
 import SpeechBubble from '../entities/SpeechBubble.js';
 import SceneStateManager from '../systems/SceneStateManager.js';
+import MaskHelper from '../helpers/MaskHelper.js';
 
 class GameScene extends Phaser.Scene {
     constructor(sceneKey, backgroundKey, maskKey) {
@@ -23,7 +24,7 @@ class GameScene extends Phaser.Scene {
         this.isMoving = false;
         this.moveSpeed = 2;
 
-        // Player and follower references (assigned based on selection)
+        // Player and follower references (canonical source of truth)
         this.player = null;
         this.follower = null;
         this.playerBobTime = 0;
@@ -36,16 +37,11 @@ class GameScene extends Phaser.Scene {
         this.lastStepX = null;
         this.lastStepY = null;
         this.stepDistanceAccum = 0;
-        
 
-        // Keep legacy variables for backward compatibility
+        // Sprite references (sister1 and sister2 are just references to the sprites)
+        // player/follower point to one of these based on character selection
         this.sister1 = null;
         this.sister2 = null;
-        this.bobTime = 0;
-        this.baseY = 0;
-        this.bobTime2 = 0;
-        this.baseY2 = 0;
-        this.isMoving2 = false;
 
         // Pathfinding properties
         this.easystar = null;
@@ -60,6 +56,9 @@ class GameScene extends Phaser.Scene {
             cannotWalk: "Vi kan inte gå dit, skogen är för tät."
         };
         this.feedbackBubble = null;
+
+        // Dialog state (used by child scenes)
+        this.dialogActive = false;
     }
 
     // Subclasses must implement preload() to load scene-specific assets
@@ -78,8 +77,9 @@ class GameScene extends Phaser.Scene {
         // Display the background image centered
         this.add.image(640, 360, this.backgroundKey);
 
-        // Create mask texture for pixel detection (invisible)
-        this.maskTexture = this.textures.get(this.maskKey).getSourceImage();
+        // Initialize MaskHelper for pixel detection and grid generation
+        const maskTexture = this.textures.get(this.maskKey);
+        this.maskHelper = new MaskHelper(maskTexture);
 
         // Initialize pathfinding grid and EasyStar
         this.createGridFromMask();
@@ -161,32 +161,28 @@ class GameScene extends Phaser.Scene {
             // Playing as big sister - she's the player (right)
             this.sister2 = this.add.image(150, 550, 'sister2');
             this.sister2.setScale(0.5);
-            this.baseY2 = this.sister2.y;
 
             this.sister1 = this.add.image(200, 550, 'sister1');
             this.sister1.setScale(0.55);
-            this.baseY = this.sister1.y;
 
-            // Assign player and follower
+            // Assign player and follower (canonical references)
             this.player = this.sister1;
             this.follower = this.sister2;
-            this.playerBaseY = this.baseY;
-            this.followerBaseY = this.baseY2;
+            this.playerBaseY = this.sister1.y;
+            this.followerBaseY = this.sister2.y;
         } else {
             // Playing as little sister - she's the player (right)
             this.sister1 = this.add.image(150, 550, 'sister1');
             this.sister1.setScale(0.55);
-            this.baseY = this.sister1.y;
 
             this.sister2 = this.add.image(200, 550, 'sister2');
             this.sister2.setScale(0.5);
-            this.baseY2 = this.sister2.y;
 
-            // Assign player and follower
+            // Assign player and follower (canonical references)
             this.player = this.sister2;
             this.follower = this.sister1;
-            this.playerBaseY = this.baseY2;
-            this.followerBaseY = this.baseY;
+            this.playerBaseY = this.sister2.y;
+            this.followerBaseY = this.sister1.y;
         }
 
         // Flip both sprites to face INTO the clearing
@@ -217,34 +213,19 @@ class GameScene extends Phaser.Scene {
         const { x, y } = spawn;
         const followerOffsetX = -50; // följaren står ~50px till vänster
 
-        if (!this.player || !this.follower || !this.sister1 || !this.sister2) {
+        if (!this.player || !this.follower) {
             console.warn('[GameScene] Kan inte applicera spawn, saknar sprites');
             return;
         }
 
-        // Om player = sister1 (storasyster leder)
-        if (this.player === this.sister1) {
-            this.sister1.x = x;
-            this.sister1.y = y;
-            this.baseY = y;
-            this.playerBaseY = y;
+        // Position player and follower using canonical references
+        this.player.x = x;
+        this.player.y = y;
+        this.playerBaseY = y;
 
-            this.sister2.x = x + followerOffsetX;
-            this.sister2.y = y;
-            this.baseY2 = y;
-            this.followerBaseY = y;
-        } else {
-            // Player = sister2 (lillasyster leder)
-            this.sister2.x = x;
-            this.sister2.y = y;
-            this.baseY2 = y;
-            this.playerBaseY = y;
-
-            this.sister1.x = x + followerOffsetX;
-            this.sister1.y = y;
-            this.baseY = y;
-            this.followerBaseY = y;
-        }
+        this.follower.x = x + followerOffsetX;
+        this.follower.y = y;
+        this.followerBaseY = y;
     }
 
 
@@ -267,37 +248,8 @@ class GameScene extends Phaser.Scene {
 
 
     getPixelColor(x, y) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = this.maskTexture.width;
-        canvas.height = this.maskTexture.height;
-        ctx.drawImage(this.maskTexture, 0, 0);
-
-        const imageData = ctx.getImageData(x, y, 1, 1);
-        const pixel = imageData.data;
-        const r = pixel[0];
-        const g = pixel[1];
-        const b = pixel[2];
-
-        // Grönt = gångbart
-        if (r === 0 && g === 255 && b === 0) {
-            return 'green';
-        }
-        // Rött = interaktivt objekt (kummel / runsten / liknande)
-        if (r === 255 && g === 0 && b === 0) {
-            return 'red';
-        }
-        // Blått = transitions-zon (t.ex. nästa scen)
-        if (r === 0 && g === 0 && b === 255) {
-            return 'blue';
-        }
-        // Svart = ”ingen klickyta” (osynlig vägg / utanför karta)
-        if (r === 0 && g === 0 && b === 0) {
-            return 'black';
-        }
-
-        // Övriga färger – just nu behandlar vi dem som "övrigt"
-        return 'other';
+        // Delegate to MaskHelper (no canvas creation needed - it's cached!)
+        return this.maskHelper.getPixelColor(x, y);
     }
 
     /**
@@ -333,43 +285,8 @@ class GameScene extends Phaser.Scene {
 
 
     createGridFromMask() {
-        // Create a grid by sampling the mask image
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = this.maskTexture.width;
-        canvas.height = this.maskTexture.height;
-        ctx.drawImage(this.maskTexture, 0, 0);
-
-        // Calculate grid dimensions
-        const cols = Math.ceil(canvas.width / this.gridSize);
-        const rows = Math.ceil(canvas.height / this.gridSize);
-
-        // Initialize grid array
-        this.grid = [];
-
-        // Sample each grid cell
-        for (let row = 0; row < rows; row++) {
-            this.grid[row] = [];
-            for (let col = 0; col < cols; col++) {
-                // Sample the center of the grid cell
-                const x = col * this.gridSize + this.gridSize / 2;
-                const y = row * this.gridSize + this.gridSize / 2;
-
-                // Get pixel color at this position
-                const imageData = ctx.getImageData(x, y, 1, 1);
-                const pixel = imageData.data;
-                const r = pixel[0];
-                const g = pixel[1];
-                const b = pixel[2];
-
-                // Green = walkable (0), anything else = blocked (1)
-                if (r === 0 && g === 255 && b === 0) {
-                    this.grid[row][col] = 0; // Walkable
-                } else {
-                    this.grid[row][col] = 1; // Blocked
-                }
-            }
-        }
+        // Delegate to MaskHelper (no canvas creation needed - it's cached!)
+        this.grid = this.maskHelper.createGrid(this.gridSize);
     }
 
     initializePathfinding() {
@@ -493,6 +410,13 @@ class GameScene extends Phaser.Scene {
 
 
     update() {
+        this.updatePlayerMovement();
+        this.updateFollowerMovement();
+        this.updateDepthSorting();
+        this.updateFootsteps();
+    }
+
+    updatePlayerMovement() {
         // Handle player movement along path
         if (this.isMoving && this.path && this.currentWaypoint < this.path.length) {
             // Get current waypoint
@@ -531,21 +455,22 @@ class GameScene extends Phaser.Scene {
                 this.player.y = this.playerBaseY + bobOffset;
             }
         }
+    }
 
-        // Handle follower following player
+    updateFollowerMovement() {
         // Calculate direction from follower to player
-        const dx2 = this.player.x - this.follower.x;
-        const dy2 = this.player.y - this.follower.y;
-        const angle2 = Math.atan2(dy2, dx2);
+        const dx = this.player.x - this.follower.x;
+        const dy = this.player.y - this.follower.y;
+        const angle = Math.atan2(dy, dx);
 
         // Calculate target follow position (50 pixels behind player)
-        const targetX2 = this.player.x - Math.cos(angle2) * 50;
-        const targetY2 = this.player.y - Math.sin(angle2) * 50;
+        const targetX = this.player.x - Math.cos(angle) * 50;
+        const targetY = this.player.y - Math.sin(angle) * 50;
 
         // Calculate distance to target follow position
         const distToTarget = Math.sqrt(
-            (targetX2 - this.follower.x) ** 2 +
-            (targetY2 - this.follower.y) ** 2
+            (targetX - this.follower.x) ** 2 +
+            (targetY - this.follower.y) ** 2
         );
 
         // Only move if distance to target is significant
@@ -554,8 +479,8 @@ class GameScene extends Phaser.Scene {
 
             // Lerp towards follow position (slower than player)
             const lerpFactor = 0.03;
-            const newX = this.follower.x + (targetX2 - this.follower.x) * lerpFactor;
-            const newY = this.follower.y + (targetY2 - this.follower.y) * lerpFactor;
+            const newX = this.follower.x + (targetX - this.follower.x) * lerpFactor;
+            const newY = this.follower.y + (targetY - this.follower.y) * lerpFactor;
 
             // Flip sprite based on movement direction (accounting for initial flip)
             const moveDx = newX - this.follower.x;
@@ -567,60 +492,102 @@ class GameScene extends Phaser.Scene {
 
             // Apply vertical bob animation only when moving
             this.followerBobTime += 0.15;
-            const bobOffset2 = Math.sin(this.followerBobTime) * 3;
+            const bobOffset = Math.sin(this.followerBobTime) * 3;
             this.followerBaseY += (newY - this.follower.y);
             this.follower.x = newX;
-            this.follower.y = this.followerBaseY + bobOffset2;
+            this.follower.y = this.followerBaseY + bobOffset;
         } else {
             // Stop completely when close enough
             this.isFollowerMoving = false;
             this.followerBobTime = 0;
             this.follower.y = this.followerBaseY;
         }
+    }
 
+    updateDepthSorting() {
         // Depth sorting: higher Y = closer to camera = render on top
-        this.sister1.setDepth(this.sister1.y);
-        this.sister2.setDepth(this.sister2.y);
+        this.player.setDepth(this.player.y);
+        this.follower.setDepth(this.follower.y);
+    }
 
-        // --- Fotsteg baserat på mittpunkten mellan systrarna ---
+    updateFootsteps() {
         const audioManager = this.registry.get('audioManager');
-        if (audioManager) {
-            const anyMoving = this.isMoving || this.isFollowerMoving;
+        if (!audioManager) return;
 
-            // Mittpunkt mellan player och follower
-            const centerX = (this.player.x + this.follower.x) / 2;
-            const centerY = (this.player.y + this.follower.y) / 2;
+        const anyMoving = this.isMoving || this.isFollowerMoving;
 
-            if (!anyMoving) {
-                // Ingen rör sig → nollställ fotstegstillstånd
-                this.lastStepX = null;
-                this.lastStepY = null;
-                this.stepDistanceAccum = 0;
-            } else {
-                // Se till att vi har en startpunkt
-                if (this.lastStepX == null || this.lastStepY == null) {
-                    this.lastStepX = centerX;
-                    this.lastStepY = centerY;
-                }
+        // Mittpunkt mellan player och follower
+        const centerX = (this.player.x + this.follower.x) / 2;
+        const centerY = (this.player.y + this.follower.y) / 2;
 
-                const dxCenter = centerX - this.lastStepX;
-                const dyCenter = centerY - this.lastStepY;
-                const frameDist = Math.sqrt(dxCenter * dxCenter + dyCenter * dyCenter);
-
-                this.stepDistanceAccum += frameDist;
-
-                // Glesare, lugnare steg
-                const STEP_DISTANCE = 24; // testa 24–28 vid behov
-
-                if (this.stepDistanceAccum >= STEP_DISTANCE) {
-                    audioManager.playFootstep();
-                    this.stepDistanceAccum = 0;
-                }
-
+        if (!anyMoving) {
+            // Ingen rör sig → nollställ fotstegstillstånd
+            this.lastStepX = null;
+            this.lastStepY = null;
+            this.stepDistanceAccum = 0;
+        } else {
+            // Se till att vi har en startpunkt
+            if (this.lastStepX == null || this.lastStepY == null) {
                 this.lastStepX = centerX;
                 this.lastStepY = centerY;
             }
+
+            const dxCenter = centerX - this.lastStepX;
+            const dyCenter = centerY - this.lastStepY;
+            const frameDist = Math.sqrt(dxCenter * dxCenter + dyCenter * dyCenter);
+
+            this.stepDistanceAccum += frameDist;
+
+            // Glesare, lugnare steg
+            const STEP_DISTANCE = 24; // testa 24–28 vid behov
+
+            if (this.stepDistanceAccum >= STEP_DISTANCE) {
+                audioManager.playFootstep();
+                this.stepDistanceAccum = 0;
+            }
+
+            this.lastStepX = centerX;
+            this.lastStepY = centerY;
         }
+    }
+
+    shutdown() {
+        // Clean up input listeners
+        // Note: Phaser automatically removes listeners, but we clean up references
+        this.input.off('pointerdown');
+
+        // Kill any active tweens
+        if (this.pathIndicator) {
+            this.tweens.killTweensOf(this.pathIndicator);
+            this.pathIndicator.destroy();
+            this.pathIndicator = null;
+        }
+
+        if (this.validClickIndicator) {
+            this.tweens.killTweensOf(this.validClickIndicator);
+            this.validClickIndicator.destroy();
+            this.validClickIndicator = null;
+        }
+
+        // Destroy feedback bubble
+        if (this.feedbackBubble) {
+            this.feedbackBubble.destroy();
+            this.feedbackBubble = null;
+        }
+
+        // Clean up MaskHelper
+        if (this.maskHelper) {
+            this.maskHelper.destroy();
+            this.maskHelper = null;
+        }
+
+        // Clear pathfinding references
+        this.path = null;
+        this.easystar = null;
+        this.grid = null;
+
+        // Reset dialog state
+        this.dialogActive = false;
     }
 }
 

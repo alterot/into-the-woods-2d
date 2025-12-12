@@ -60,6 +60,37 @@ Constraints:
 - Prefer small, well-named helpers over large classes.
 - If unsure, preserve existing code paths.
 
-Deliverable:
+Deliverable IF WE START TO CODE - DONT DO ANYTHING YET, ONLY FEEDBACK REDAGRING ABOVE FOR DISCUSSION:
 - Refactored code with identical runtime behavior.
 - Brief inline comments explaining why something was extracted or renamed.
+
+
+
+
+ETT TILL: (dialoge ovelay)
+Please refactor DialogOverlay.js for maintainability and future extensibility.
+
+Scope:
+- DialogOverlay.js primarily
+- Minimal changes to related callers only if required (e.g. to keep API consistent)
+- Do not touch assets or dialogue JSON formats unless absolutely necessary.
+
+Goals:
+1) Reduce “god object” complexity in DialogOverlay:
+   - Extract clearly named internal helpers for: layout config, input binding/unbinding, typing/skip logic, and choice rendering.
+   - Group related state and cleanup in a predictable lifecycle.
+
+2) Centralize and standardize input locking:
+   - Replace ad-hoc dialogActive / scene-level flags with a single, consistent API (e.g. scene.lockInput(reason) / scene.unlockInput(reason) or similar).
+   - Ensure no click/space events leak through during overlay transitions, typing, or after completion.
+
+3) Improve cleanup safety:
+   - Ensure all scene input listeners, timers, tweens, and created objects are always cleaned up on:
+     - overlay completion
+     - overlay cancel/close
+     - scene shutdown/destroy
+   - Avoid double-destroy or dangling references.
+
+Constraints:
+- KEEP ALL FUNCTIONALITY EXACTLY
+
