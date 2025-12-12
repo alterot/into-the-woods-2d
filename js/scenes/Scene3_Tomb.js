@@ -350,7 +350,7 @@ class Scene3_Tomb extends GameScene {
                     if (this.textures.exists(key)) {
                         const morte = this.add.sprite(900, 360, key);
                         morte.setDepth(850);  // Above background, below UI
-                        morte.setScale(0.112);    // Scale down high-res sprite
+                        morte.setScale(0.22);    // Scale down high-res sprite
                         this.morteSprite = morte;  // Store for later use
                         morteLoaded = true;
                         break;
@@ -448,9 +448,12 @@ class Scene3_Tomb extends GameScene {
                                 // Fix portrait facing on every line change
                                 onLineChange: (line) => {
                                     // Ensure portraits face each other after texture swaps
+                                    // Both sister portraits now face RIGHT by default in the asset files
                                     if (conversationOverlay.dialogUI) {
-                                        conversationOverlay.dialogUI.leftPortrait.setFlipX(true);   // Sisters face right
-                                        conversationOverlay.dialogUI.rightPortrait.setFlipX(true);  // Morte faces left
+                                        // Sisters on left face right (towards Morte) - no flip needed
+                                        conversationOverlay.dialogUI.leftPortrait.setFlipX(false);
+                                        // Morte on right faces left (towards sisters) - flip to reverse
+                                        conversationOverlay.dialogUI.rightPortrait.setFlipX(true);
                                     }
                                 },
 

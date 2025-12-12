@@ -106,9 +106,12 @@ class DialogOverlay {
             .setDepth(2000);
 
         // Apply facing direction
+        // Both sister portraits now face RIGHT by default
+        // Left portraits: keep facing right (no flip needed)
+        // Right portraits: flip to face left (towards the conversation partner)
         if (flipX) {
-            leftPortrait.setFlipX(true);
-            rightPortrait.setFlipX(true);
+            leftPortrait.setFlipX(false);   // Left faces right (default)
+            rightPortrait.setFlipX(true);   // Right faces left (flipped)
         }
 
         return { leftPortrait, rightPortrait };
