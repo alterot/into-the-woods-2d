@@ -99,6 +99,9 @@ class GameScene extends Phaser.Scene {
         this.lastStepY = this.player.y;
         this.stepDistanceAccum = 0;
 
+        // Create fullscreen button
+        this.createFullscreenButton();
+
         // Hook for subclasses to add scene-specific content (wisp, objects, etc.)
         this.createSceneContent();
 
@@ -411,6 +414,66 @@ class GameScene extends Phaser.Scene {
         );
     }
 
+    /**
+     * Create fullscreen toggle button in top-right corner
+     * Uses Phaser's built-in fullscreen API
+     */
+    createFullscreenButton() {
+        // Position in top-right corner
+        const buttonX = 1230;
+        const buttonY = 50;
+
+        // Create background circle for the button
+        this.fullscreenButtonBg = this.add.circle(buttonX, buttonY, 25, 0x000000, 0.5);
+        this.fullscreenButtonBg.setDepth(10000);
+        this.fullscreenButtonBg.setInteractive({ useHandCursor: true });
+
+        // Create text icon (start with "enter fullscreen" icon)
+        this.fullscreenButtonIcon = this.add.text(buttonX, buttonY, '⛶', {
+            fontSize: '32px',
+            color: '#ffffff'
+        });
+        this.fullscreenButtonIcon.setOrigin(0.5, 0.5);
+        this.fullscreenButtonIcon.setDepth(10001);
+
+        // Update icon based on current fullscreen state
+        this.updateFullscreenIcon();
+
+        // Click handler to toggle fullscreen
+        this.fullscreenButtonBg.on('pointerdown', () => {
+            if (this.scale.isFullscreen) {
+                this.scale.stopFullscreen();
+            } else {
+                this.scale.startFullscreen();
+            }
+        });
+
+        // Listen for fullscreen changes to update icon
+        this.scale.on('fullscreenchange', this.updateFullscreenIcon, this);
+
+        // Hover effect - brighten on hover
+        this.fullscreenButtonBg.on('pointerover', () => {
+            this.fullscreenButtonBg.setFillStyle(0x333333, 0.7);
+        });
+
+        this.fullscreenButtonBg.on('pointerout', () => {
+            this.fullscreenButtonBg.setFillStyle(0x000000, 0.5);
+        });
+    }
+
+    /**
+     * Update fullscreen button icon based on current state
+     */
+    updateFullscreenIcon() {
+        if (!this.fullscreenButtonIcon) return;
+
+        if (this.scale.isFullscreen) {
+            this.fullscreenButtonIcon.setText('⛉'); // Exit fullscreen icon
+        } else {
+            this.fullscreenButtonIcon.setText('⛶'); // Enter fullscreen icon
+        }
+    }
+
 
     update() {
         this.updatePlayerMovement();
@@ -619,6 +682,23 @@ class GameScene extends Phaser.Scene {
             this.feedbackBubble.destroy();
             this.feedbackBubble = null;
         }
+
+        // Clean up fullscreen button
+        if (this.fullscreenButtonBg) {
+            this.fullscreenButtonBg.off('pointerdown');
+            this.fullscreenButtonBg.off('pointerover');
+            this.fullscreenButtonBg.off('pointerout');
+            this.fullscreenButtonBg.destroy();
+            this.fullscreenButtonBg = null;
+        }
+
+        if (this.fullscreenButtonIcon) {
+            this.fullscreenButtonIcon.destroy();
+            this.fullscreenButtonIcon = null;
+        }
+
+        // Remove fullscreen change listener
+        this.scale.off('fullscreenchange', this.updateFullscreenIcon, this);
 
         // Clean up MaskHelper
         if (this.maskHelper) {

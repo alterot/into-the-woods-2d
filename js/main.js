@@ -18,6 +18,12 @@ const config = {
     },
     parent: document.body,
     backgroundColor: '#000000',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1280,
+        height: 720
+    },
     scene: [LoadingScene, CharacterSelectScene, IntroScene, Scene1_Meadow, Scene2_Crossroads, Scene3_Tomb],
     physics: {
         default: 'arcade',
