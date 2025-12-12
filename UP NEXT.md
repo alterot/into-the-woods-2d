@@ -66,7 +66,7 @@ STEPS FOR OVERLAY:
   - Makes createDialogUI() readable
   - Easier to maintain/extend
 
-  Phase 3: Cleanup Safety 🟡 Important
+  Phase 3: Cleanup Safety 🟡 Important << -- STARTA DETTA EFTER LUNCH
   - Add destroy guards
   - Kill tweens explicitly
   - Hook scene shutdown

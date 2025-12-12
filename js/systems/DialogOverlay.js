@@ -37,9 +37,17 @@ class DialogOverlay {
         this.currentFullText = '';
         this.selectedChoice = null;  // NEW: Store selected choice
 
+        // Cleanup safety flag
+        this.destroyed = false;
     }
 
     start() {
+        // Prevent start after destroy
+        if (this.destroyed) {
+            console.error('[DialogOverlay] Cannot start - overlay has been destroyed');
+            return;
+        }
+
         // Lock scene input to prevent clicks from leaking through to the game
         // (Only if scene has lockInput method - GameScene has it, basic Phaser.Scene doesn't)
         if (typeof this.scene.lockInput === 'function') {
@@ -318,6 +326,8 @@ class DialogOverlay {
     }
 
     showDialogLine() {
+        if (this.destroyed) return;
+
         // NEW: Check if we should show choices instead
         if (this.currentLine >= this.dialogueData.length) {
             if (this.choiceData && this.choiceData.options && this.choiceData.options.length > 0) {
@@ -504,7 +514,7 @@ class DialogOverlay {
 }
 
     advanceDialog() {
-        if (!this.dialogUI) return;
+        if (this.destroyed || !this.dialogUI) return;
 
         // Klick-ljud
         const audioManager = this.scene.registry.get('audioManager');
@@ -592,7 +602,7 @@ class DialogOverlay {
     }
 
     endDialog() {
-        if (!this.dialogUI) return;
+        if (this.destroyed || !this.dialogUI) return;
 
         // Stop typing
         if (this.currentTypingEvent) {
@@ -646,27 +656,82 @@ class DialogOverlay {
     }
 
     destroy() {
-        // Safety: ensure input is unlocked even if endDialog wasn't called
-        if (typeof this.scene.unlockInput === 'function') {
+        // ===== 1. DOUBLE-DESTROY GUARD =====
+        if (this.destroyed) {
+            console.warn('[DialogOverlay] Already destroyed, skipping cleanup');
+            return;
+        }
+
+        // ===== 2. CLEAR TYPING TIMER =====
+        if (this.currentTypingEvent) {
+            this.currentTypingEvent.remove();
+            this.currentTypingEvent = null;
+        }
+        this.currentTextObject = null;
+        this.currentFullText = '';
+
+        // ===== 3. KILL ALL ACTIVE TWEENS =====
+        if (this.scene && this.scene.tweens) {
+            // Kill portrait tweens (from showDialogLine)
+            if (this.dialogUI) {
+                if (this.dialogUI.leftPortrait) {
+                    this.scene.tweens.killTweensOf(this.dialogUI.leftPortrait);
+                }
+                if (this.dialogUI.rightPortrait) {
+                    this.scene.tweens.killTweensOf(this.dialogUI.rightPortrait);
+                }
+
+                // Kill choice button tweens (from showChoices)
+                if (this.dialogUI.choiceContainer) {
+                    this.dialogUI.choiceContainer.forEach(choice => {
+                        if (choice.bg) this.scene.tweens.killTweensOf(choice.bg);
+                        if (choice.text) this.scene.tweens.killTweensOf(choice.text);
+                    });
+                }
+            }
+
+            // Kill background overlay tweens (from fade animations)
+            if (this.backgroundOverlay) {
+                this.scene.tweens.killTweensOf(this.backgroundOverlay);
+            }
+        }
+
+        // ===== 4. REMOVE INPUT HANDLERS =====
+        if (this.scene && this.scene.input) {
+            if (this.dialogSpaceHandler) {
+                this.scene.input.keyboard.off('keydown-SPACE', this.dialogSpaceHandler);
+            }
+            if (this.dialogClickHandler) {
+                this.scene.input.off('pointerdown', this.dialogClickHandler);
+            }
+        }
+        this.dialogSpaceHandler = null;
+        this.dialogClickHandler = null;
+
+        // ===== 5. UNLOCK INPUT =====
+        if (this.scene && typeof this.scene.unlockInput === 'function') {
             this.scene.unlockInput('dialog-overlay');
         }
 
-        // Destroy all UI elements
+        // ===== 6. DESTROY UI ELEMENTS =====
         if (this.dialogUI) {
-            this.dialogUI.leftPortrait.destroy();
-            this.dialogUI.rightPortrait.destroy();
-            this.dialogUI.leftTextboxBg.destroy();
-            this.dialogUI.leftTextboxText.destroy();
-            this.dialogUI.rightTextboxBg.destroy();
-            this.dialogUI.rightTextboxText.destroy();
-            this.dialogUI.narratorTextboxBg.destroy();
-            this.dialogUI.narratorTextboxText.destroy();
+            // Safely destroy portraits
+            if (this.dialogUI.leftPortrait) this.dialogUI.leftPortrait.destroy();
+            if (this.dialogUI.rightPortrait) this.dialogUI.rightPortrait.destroy();
 
-            // NEW: Destroy choice elements
+            // Safely destroy textboxes
+            if (this.dialogUI.leftTextboxBg) this.dialogUI.leftTextboxBg.destroy();
+            if (this.dialogUI.leftTextboxText) this.dialogUI.leftTextboxText.destroy();
+            if (this.dialogUI.rightTextboxBg) this.dialogUI.rightTextboxBg.destroy();
+            if (this.dialogUI.rightTextboxText) this.dialogUI.rightTextboxText.destroy();
+            if (this.dialogUI.narratorTextboxBg) this.dialogUI.narratorTextboxBg.destroy();
+            if (this.dialogUI.narratorTextboxText) this.dialogUI.narratorTextboxText.destroy();
+
+            // Safely destroy choice elements
             if (this.dialogUI.choiceContainer) {
                 this.dialogUI.choiceContainer.forEach(choice => {
-                    choice.bg.destroy();
-                    choice.text.destroy();
+                    if (choice.bg) choice.bg.destroy();
+                    if (choice.text) choice.text.destroy();
                 });
                 this.dialogUI.choiceContainer = null;
             }
@@ -674,14 +739,14 @@ class DialogOverlay {
             this.dialogUI = null;
         }
 
+        // ===== 7. DESTROY BACKGROUND OVERLAY =====
         if (this.backgroundOverlay) {
             this.backgroundOverlay.destroy();
             this.backgroundOverlay = null;
         }
 
-        // Clear handlers
-        this.dialogSpaceHandler = null;
-        this.dialogClickHandler = null;
+        // ===== 8. SET DESTROYED FLAG =====
+        this.destroyed = true;
     }
 }
 
