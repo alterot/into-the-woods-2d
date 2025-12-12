@@ -102,7 +102,8 @@ class LoadingScene extends Phaser.Scene {
                         //   Normal flow:  http://localhost:3000/
                         //   Skip to Scene1: http://localhost:3000/?scene=Scene1_Meadow
                         //   Skip to Scene2: http://localhost:3000/?scene=Scene2_Crossroads
-                        //   Skip to Scene3: http://localhost:3000/?scene=Scene3_Tomb
+                        //   Skip to Scene3 (pre-puzzle): http://localhost:3000/?scene=Scene3_Tomb
+                        //   Skip to Scene3 (post-puzzle): http://localhost:3000/?scene=Scene3_Tomb&puzzleCompleted=true
                         //
                         const urlParams = new URLSearchParams(window.location.search);
                         const debugScene = urlParams.get('scene');
@@ -121,6 +122,13 @@ class LoadingScene extends Phaser.Scene {
                             if (!SceneStateManager.hasGlobal('selectedCharacter')) {
                                 SceneStateManager.setGlobal('selectedCharacter', 'big');
                                 console.log('[LoadingScene] Default character set to: big');
+                            }
+
+                            // Check for Scene3_Tomb puzzle completion state override
+                            const puzzleCompleted = urlParams.get('puzzleCompleted');
+                            if (puzzleCompleted === 'true' && debugScene === 'Scene3_Tomb') {
+                                SceneStateManager.setScene('Scene3_Tomb', 'puzzleCompleted', true);
+                                console.log('[LoadingScene] DEBUG MODE - Scene3_Tomb puzzle set to completed (Morte will appear)');
                             }
 
                             // Apply LINEAR filtering to all textures for smooth scaling

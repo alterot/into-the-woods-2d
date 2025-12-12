@@ -175,7 +175,7 @@ class Scene3_Tomb extends GameScene {
             if (this.textures.exists(key)) {
                 const morte = this.add.sprite(900, 360, key);
                 morte.setDepth(850);
-                morte.setScale(0.35);
+                morte.setScale(0.22);
                 this.morteSprite = morte;
                 morteLoaded = true;
                 break;
