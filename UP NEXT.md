@@ -7,9 +7,9 @@ BYT STENLJUD - ALLT ÄR PÅ PLATS OCH FUNLAR
 UPPDATERA BUBBLES TILL SVENSKA
 HITTA BRA STENLJUD
 ta bort emino "loggan" i fas 2 bg
-Fixa "blur" som kom efter vi skalade upp allt till full screen
+
 Se till att overlay är bakom det svarta!
-Fixa att sister är rättänd i vänstra dialoger
+
 Uppdatera player placering efter fade in/out
 Se till att player avatar är vänd åt häger
 ev. Öka styrka på aktiv halo i braziers

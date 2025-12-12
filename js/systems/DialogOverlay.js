@@ -106,13 +106,13 @@ class DialogOverlay {
             .setDepth(2000);
 
         // Apply facing direction
-        // Both sister portraits now face RIGHT by default
-        // Left portraits: keep facing right (no flip needed)
-        // Right portraits: flip to face left (towards the conversation partner)
-        if (flipX) {
-            leftPortrait.setFlipX(false);   // Left faces right (default)
-            rightPortrait.setFlipX(true);   // Right faces left (flipped)
-        }
+        // Both sister portraits now face RIGHT by default in asset files
+        // For sister-to-sister dialogues:
+        //   - Left portraits: keep facing right (no flip) to face the right side
+        //   - Right portraits: flip to face left to face the left side
+        // This works regardless of which sister the player chose
+        leftPortrait.setFlipX(false);   // Left always faces right (default)
+        rightPortrait.setFlipX(true);   // Right always faces left (flipped)
 
         return { leftPortrait, rightPortrait };
     }
