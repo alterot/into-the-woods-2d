@@ -23,7 +23,7 @@ class IntroScene extends Phaser.Scene {
             dialogueData: dialogData,
             spritesVisible: false,  // Hide background during intro
             backgroundDim: 0,       // No dark overlay needed
-            portraitScale: 1,       // Full size portraits
+            portraitScale: 0.5,     // Scale down high-res portraits
             textSpeed: 75,          // 75ms per character
             onComplete: () => {
                 // Transition to gameplay scene
