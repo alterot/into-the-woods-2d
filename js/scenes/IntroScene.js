@@ -1,6 +1,7 @@
 // ===== INTRO SCENE =====
 // Handles the intro dialog sequence with portraits
 import DialogOverlay from '../systems/DialogOverlay.js';
+import FullscreenButton from '../ui/FullscreenButton.js';
 
 class IntroScene extends Phaser.Scene {
     constructor() {
@@ -14,6 +15,9 @@ class IntroScene extends Phaser.Scene {
 
         // Fade in from black
         this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+        // Fullscreen button
+        this.fullscreenButton = new FullscreenButton(this);
 
         // Load dialogue data
         const dialogData = this.cache.json.get('introDialogue').conversations[0].lines;
