@@ -308,6 +308,13 @@ class Scene3_Tomb extends GameScene {
         // Wait 5000ms to let the completion message fully display before starting reveal
         this.time.delayedCall(5000, () => {
 
+            // FIRST: Destroy feedback bubble before starting visual effects
+            if (this.feedbackBubble) {
+                this.feedbackBubble.destroy();
+                this.feedbackBubble = null;
+            }
+
+            // THEN: Start the dramatic sequence
             // 1. Camera shake effect (earthquake/rumble)
             this.cameras.main.shake(800, 0.005);  // 800ms duration, subtle shake
 
@@ -389,11 +396,7 @@ class Scene3_Tomb extends GameScene {
                 // This allows UI elements to be visible while screen appears black
                 this.cameras.main.resetFX();  // Clear the fade effect
 
-                // Destroy any existing feedback bubble
-                if (this.feedbackBubble) {
-                    this.feedbackBubble.destroy();
-                    this.feedbackBubble = null;
-                }
+                // (Feedback bubble already destroyed before fade started)
 
                 this.dialogActive = true;
 
