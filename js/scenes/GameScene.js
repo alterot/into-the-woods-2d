@@ -166,10 +166,10 @@ class GameScene extends Phaser.Scene {
         if (isPlayingBig) {
             // Playing as big sister - she's the player (right)
             this.sister2 = this.add.image(150, 550, 'sister2');
-            this.sister2.setScale(0.25);
+            this.sister2.setScale(0.175);
 
             this.sister1 = this.add.image(200, 550, 'sister1');
-            this.sister1.setScale(0.275);
+            this.sister1.setScale(0.19);
 
             // Assign player and follower (canonical references)
             this.player = this.sister1;
@@ -179,10 +179,10 @@ class GameScene extends Phaser.Scene {
         } else {
             // Playing as little sister - she's the player (right)
             this.sister1 = this.add.image(150, 550, 'sister1');
-            this.sister1.setScale(0.275);
+            this.sister1.setScale(0.19);
 
             this.sister2 = this.add.image(200, 550, 'sister2');
-            this.sister2.setScale(0.25);
+            this.sister2.setScale(0.175);
 
             // Assign player and follower (canonical references)
             this.player = this.sister2;

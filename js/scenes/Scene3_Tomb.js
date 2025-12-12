@@ -175,7 +175,7 @@ class Scene3_Tomb extends GameScene {
             if (this.textures.exists(key)) {
                 const morte = this.add.sprite(900, 360, key);
                 morte.setDepth(850);
-                morte.setScale(0.2);
+                morte.setScale(0.14);
                 this.morteSprite = morte;
                 morteLoaded = true;
                 break;
@@ -350,7 +350,7 @@ class Scene3_Tomb extends GameScene {
                     if (this.textures.exists(key)) {
                         const morte = this.add.sprite(900, 360, key);
                         morte.setDepth(850);  // Above background, below UI
-                        morte.setScale(0.2);    // Scale down high-res sprite
+                        morte.setScale(0.14);    // Scale down high-res sprite
                         this.morteSprite = morte;  // Store for later use
                         morteLoaded = true;
                         break;
@@ -413,7 +413,6 @@ class Scene3_Tomb extends GameScene {
                     dialogueData: narratorLines,
                     spritesVisible: false,  // Don't show game sprites behind
                     backgroundDim: 1.0,     // Fully opaque black background (keeps screen black)
-                    portraitScale: 0.5,
                     onComplete: () => {
 
                         // 5. DialogOverlay will fade out automatically (500ms), revealing the scene
@@ -445,7 +444,6 @@ class Scene3_Tomb extends GameScene {
 
                                 spritesVisible: true,
                                 backgroundDim: 0.7,
-                                portraitScale: 0.5,
 
                                 // Fix portrait facing on every line change
                                 onLineChange: (line) => {
