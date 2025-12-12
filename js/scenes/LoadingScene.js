@@ -123,6 +123,9 @@ class LoadingScene extends Phaser.Scene {
                                 console.log('[LoadingScene] Default character set to: big');
                             }
 
+                            // Apply LINEAR filtering to all textures for smooth scaling
+                            this.applyTextureFiltering();
+
                             // Wait for audio to decode BEFORE starting scene and music
                             // forest-ambient.mp3 is 7.5MB and needs extra time
                             this.time.delayedCall(1500, () => {
@@ -138,6 +141,9 @@ class LoadingScene extends Phaser.Scene {
                                 this.scene.start(debugScene, { entry: 'default' });
                             });
                         } else {
+                            // Apply LINEAR filtering to all textures for smooth scaling
+                            this.applyTextureFiltering();
+
                             console.log('[LoadingScene] Transitioning to CharacterSelectScene');
                             this.scene.start('CharacterSelectScene');
                         }
@@ -222,6 +228,30 @@ class LoadingScene extends Phaser.Scene {
             frameHeight: 32
         });
 
+    }
+
+    /**
+     * Apply LINEAR texture filtering to all loaded textures
+     * This prevents pixelated edges when scaling down high-res images
+     */
+    applyTextureFiltering() {
+        const textureManager = this.textures;
+        const textureKeys = textureManager.getTextureKeys();
+
+        textureKeys.forEach(key => {
+            // Skip internal Phaser textures
+            if (key === '__DEFAULT' || key === '__MISSING' || key === '__WHITE') {
+                return;
+            }
+
+            const texture = textureManager.get(key);
+            if (texture) {
+                // Set to LINEAR filtering for smooth, anti-aliased scaling
+                texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+            }
+        });
+
+        console.log('[LoadingScene] Applied LINEAR filtering to all textures for smooth scaling');
     }
 }
 
