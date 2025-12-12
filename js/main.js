@@ -14,7 +14,10 @@ const config = {
     width: 1280,
     height: 720,
     render: {
-        pixelArt: true
+        pixelArt: false,
+        antialias: true,
+        antialiasGL: true,
+        roundPixels: false
     },
     parent: document.body,
     backgroundColor: '#000000',

@@ -173,9 +173,9 @@ class LoadingScene extends Phaser.Scene {
 
         // Intro scene assets
         this.load.image('intro-background', 'assets/scenes/scen1-meadow.png');
-        this.load.image('portrait1', 'assets/portraits/sister1-portrait-S.png');
-        this.load.image('portrait2', 'assets/portraits/sister2-portrait-S.png');
-        this.load.image('Morte-portrait', 'assets/portraits/Morte-portrait-S.png');
+        this.load.image('portrait1', 'assets/portraits/sister1-portrait.png');
+        this.load.image('portrait2', 'assets/portraits/sister2-portrait.png');
+        this.load.image('Morte-portrait', 'assets/portraits/Morte-portrait.png');
         this.load.json('introDialogue', 'assets/dialogues/intro-dialogue.json');
         this.load.json('runeDialogue', 'assets/dialogues/rune-dialogue.json');
         this.load.json('tomb-entrance', 'assets/dialogues/tomb-entrance.json');
@@ -184,8 +184,8 @@ class LoadingScene extends Phaser.Scene {
         // Game scene assets (Scene1_Meadow)
         this.load.image('background', 'assets/scenes/scen1-meadow.png');
         this.load.image('mask', 'assets/scenes/scen1-mask.png');
-        this.load.image('sister1', 'assets/sprites/sister1-idle-S.png');
-        this.load.image('sister2', 'assets/sprites/sister2-idle-S.png');
+        this.load.image('sister1', 'assets/sprites/sister1-idle.png');
+        this.load.image('sister2', 'assets/sprites/sister2-idle.png');
 
         // Game scene assets (Scene2_Crossroads)
         this.load.image('background2', 'assets/scenes/scen2-crossroads.png');
@@ -196,7 +196,7 @@ class LoadingScene extends Phaser.Scene {
         this.load.image('background3-open', 'assets/scenes/scen3-tomb-open.png');
         this.load.image('mask3', 'assets/scenes/scen3-tomb-mask.png');
         this.load.image('tomb-overlay', 'assets/scenes/scen3-tomb-overlay.png');
-        this.load.image('Morte-idle', 'assets/sprites/Morte-idle-S.png');
+        this.load.image('Morte-idle', 'assets/sprites/Morte-idle.png');
 
         // Fire glow sprite (used for all braziers)
         this.load.image('fire-glow', 'assets/objects/fire/fire-glow.png');

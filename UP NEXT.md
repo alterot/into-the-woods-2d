@@ -17,11 +17,6 @@ ev. Öka styrka på aktiv halo i braziers
 UPPDATERA OVERLAY (ska inkudea vägg + tomb)
 Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
 
-Add full screen?
-
-
-
-
-  Phase 4: Extract Layout Config 🟢 Nice to Have
-  - Only if complexity still feels high
-  - Could wait
+FULL SCREEN:
+Fix icon (out of sync)
+Fix sprites, portraits and font
