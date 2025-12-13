@@ -36,17 +36,13 @@ All sound effects from [Freesound.org](https://freesound.org)
   License: [Attribution 4.0]  
   https://freesound.org/people/spycrah/sounds/535222/
 
-- **stone-step-right.wav**  
-  Author: [GlennM]  
-  License: [Attribution 3.0]  
-  https://freesound.org/people/GlennM/sounds/386525/
+- **stone-step.wav**  
+  Author: [Fission9]  
+  License: [Creative Commons 0]  
+  https://freesound.org/people/Fission9/sounds/521590/
 
-- **stone-step-left.wav**  
-  Author: [GlennM]  
-  License: [Attribution 3.0]  
-  https://freesound.org/people/GlennM/sounds/386519/
-  
-  - **fire.wav**  
+
+- **fire.wav**  
   Author: [Glaneur de sons]  
   License: [Attribution 4.0]  
   https://freesound.org/people/Glaneur%20de%20sons/sounds/104957/

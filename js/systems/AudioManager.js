@@ -19,8 +19,8 @@ class AudioManager {
         // Footstep state
         this.footstepLeft = null;
         this.footstepRight = null;
-        this.stoneFootstepLeft = null;
-        this.stoneFootstepRight = null;
+        this.stoneFootstepSound = null;
+        this.stoneFootstepIndex = 0;  // Cycles through 6 footsteps
         this.stepToggle = false; 
     }
 
@@ -60,13 +60,45 @@ class AudioManager {
         });
 
         // Setup stone footstep sounds (for tomb)
-        this.stoneFootstepLeft = this.scene.sound.add('stone-step-left', {
-            volume: 0.4
-        });
-        this.stoneFootstepRight = this.scene.sound.add('stone-step-right', {
+        // Single file with 6 footsteps, each ~250ms with ~250ms silence between
+        this.stoneFootstepSound = this.scene.sound.add('stone-step', {
             volume: 0.4
         });
 
+        // Define markers for each of the 6 footsteps
+        // Each footstep is approximately 250ms, with 250ms of silence after
+        this.stoneFootstepSound.addMarker({
+            name: 'step1',
+            start: 0,
+            duration: 0.25
+        });
+        this.stoneFootstepSound.addMarker({
+            name: 'step2',
+            start: 0.5,
+            duration: 0.25
+        });
+        this.stoneFootstepSound.addMarker({
+            name: 'step3',
+            start: 1.0,
+            duration: 0.25
+        });
+        this.stoneFootstepSound.addMarker({
+            name: 'step4',
+            start: 1.5,
+            duration: 0.25
+        });
+        this.stoneFootstepSound.addMarker({
+            name: 'step5',
+            start: 2.0,
+            duration: 0.25
+        });
+        this.stoneFootstepSound.addMarker({
+            name: 'step6',
+            start: 2.5,
+            duration: 0.25
+        });
+
+        this.stoneFootstepIndex = 0;
         this.stepToggle = false;
 
 
@@ -211,20 +243,25 @@ class AudioManager {
         }
 
         /**
-         * Play stone footstep (for tomb scene). Alternates between left and right.
-         * NOTE: Order is reversed compared to grass footsteps
+         * Play stone footstep (for tomb scene). Cycles through all 6 footsteps for variety.
          */
         playStoneFootstep() {
-            if (!this.stoneFootstepLeft || !this.stoneFootstepRight) {
-                // Sounds not initialized
+            if (!this.stoneFootstepSound) {
+                // Sound not initialized
                 return;
             }
 
-            // Reversed order compared to grass: left when toggle is true, right when false
-            const sound = this.stepToggle ? this.stoneFootstepLeft : this.stoneFootstepRight;
-            this.stepToggle = !this.stepToggle;
+            // Cycle through all 6 footsteps for natural variation
+            const markerName = `step${this.stoneFootstepIndex + 1}`;
 
-            sound.play();
+            // Play at 2x speed (100% faster) to match sprite movement
+            this.stoneFootstepSound.play({
+                name: markerName,
+                rate: 2.0
+            });
+
+            // Move to next footstep (0-5)
+            this.stoneFootstepIndex = (this.stoneFootstepIndex + 1) % 6;
         }
 
     /**
