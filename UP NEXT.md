@@ -7,11 +7,7 @@ SCEN 2 - lägg på overlay här också, samt ta bort stigar!!
 SCEN 3
 UPPDATERA BUBBLES TILL SVENSKAare
 ta bort emino "loggan" i fas 2 bg
-Se till att overlay är bakom det svarta!
 ev. Öka styrka på aktiv halo i braziers
 UPPDATERA OVERLAY (ska inkudea vägg + tomb)
 Player ska gå fram till tarnsit area vid klick, inte bara transit direkt
-
-FULL SCREEN:
-Fix icon (out of sync)
 

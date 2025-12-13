@@ -518,9 +518,18 @@ class Scene3_Tomb extends GameScene {
             });
         }
 
+        // Stop any pending sound effect timers (scraping stone, crash, etc.)
+        this.time.removeAllEvents();
+
         // Restore normal music volume before leaving
         if (audioManager) {
             audioManager.setMusicVolume(0.4);  // Restore to normal volume
+        }
+
+        // Ensure input is unlocked before transitioning
+        this.dialogActive = false;
+        if (this.inputLocks) {
+            this.inputLocks.clear();
         }
 
         // Transition back to Scene2_Crossroads
