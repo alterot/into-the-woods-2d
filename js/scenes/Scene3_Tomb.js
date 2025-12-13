@@ -79,8 +79,9 @@ class Scene3_Tomb extends GameScene {
         }
 
         // Add tomb overlay (same for both versions)
+        // Depth 900: Above sprites (0-720) but below dialogue system (1000+)
         const overlay = this.add.image(640, 360, 'tomb-overlay');
-        overlay.setDepth(2000);
+        overlay.setDepth(900);
     }
 
     /**
