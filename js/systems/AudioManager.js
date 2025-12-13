@@ -21,7 +21,11 @@ class AudioManager {
         this.footstepRight = null;
         this.stoneFootstepSound = null;
         this.stoneFootstepIndex = 0;  // Cycles through 6 footsteps
-        this.stepToggle = false; 
+        this.stepToggle = false;
+
+        // Ambient/effect sounds
+        this.scrapingStone = null;
+        this.stoneCrash = null; 
     }
 
     /**
@@ -101,6 +105,15 @@ class AudioManager {
         this.stoneFootstepIndex = 0;
         this.stepToggle = false;
 
+        // Setup scraping stone sound (for tomb dialogue)
+        this.scrapingStone = this.scene.sound.add('scraping-stone', {
+            volume: 1.2
+        });
+
+        // Setup stone crash sound (for tomb dialogue)
+        this.stoneCrash = this.scene.sound.add('stone-crash', {
+            volume: 1.2
+        });
 
         this.initialized = true;
         console.log('[AudioManager] Initialized');
@@ -262,6 +275,40 @@ class AudioManager {
 
             // Move to next footstep (0-5)
             this.stoneFootstepIndex = (this.stoneFootstepIndex + 1) % 6;
+        }
+
+        /**
+         * Play scraping stone sound (for tomb lid opening in dialogue)
+         */
+        playScrapingStone() {
+            if (!this.scrapingStone) {
+                console.warn('[AudioManager] Scraping stone sound not initialized');
+                return;
+            }
+
+            // Stop if already playing
+            if (this.scrapingStone.isPlaying) {
+                this.scrapingStone.stop();
+            }
+
+            this.scrapingStone.play();
+        }
+
+        /**
+         * Play stone crash sound (for tomb lid crash in dialogue)
+         */
+        playStoneCrash() {
+            if (!this.stoneCrash) {
+                console.warn('[AudioManager] Stone crash sound not initialized');
+                return;
+            }
+
+            // Stop if already playing
+            if (this.stoneCrash.isPlaying) {
+                this.stoneCrash.stop();
+            }
+
+            this.stoneCrash.play();
         }
 
     /**

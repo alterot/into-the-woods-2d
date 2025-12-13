@@ -5,9 +5,7 @@ SCEN 1 - Byt tet i bubblan (kan inte stå följer efter)
 SCEN 2 - lägg på overlay här också, samt ta bort stigar!!
 
 SCEN 3
-BYT STENLJUD - ALLT ÄR PÅ PLATS OCH FUNLAR
-UPPDATERA BUBBLES TILL SVENSKA
-HITTA BRA STENLJUD
+UPPDATERA BUBBLES TILL SVENSKAare
 ta bort emino "loggan" i fas 2 bg
 Se till att overlay är bakom det svarta!
 ev. Öka styrka på aktiv halo i braziers

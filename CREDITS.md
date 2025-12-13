@@ -41,11 +41,20 @@ All sound effects from [Freesound.org](https://freesound.org)
   License: [Creative Commons 0]  
   https://freesound.org/people/Fission9/sounds/521590/
 
-
 - **fire.wav**  
   Author: [Glaneur de sons]  
   License: [Attribution 4.0]  
   https://freesound.org/people/Glaneur%20de%20sons/sounds/104957/
+
+- **scraping-stone.wav**  
+  Author: [dslrguide]  
+  License: [Creative Commons 0]  
+  https://freesound.org/people/dslrguide/sounds/321488/
+
+- **stone-crash.wav**  
+  Author: [Artninja]  
+  License: [Attribution 4.0]  
+  https://freesound.org/people/Artninja/sounds/750822/
 
 ## Visuals
 

@@ -181,6 +181,8 @@ class LoadingScene extends Phaser.Scene {
         this.load.audio('step-left', 'assets/sound/grass-step-left.wav');
         this.load.audio('step-right', 'assets/sound/grass-step-right.wav');
         this.load.audio('stone-step', 'assets/sound/stone-step.wav');
+        this.load.audio('scraping-stone', 'assets/sound/scraping-stone.wav');
+        this.load.audio('stone-crash', 'assets/sound/stone-crash.wav');
         this.load.audio('fire', 'assets/sound/fire.wav');
 
 

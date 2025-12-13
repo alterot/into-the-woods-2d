@@ -413,6 +413,24 @@ class Scene3_Tomb extends GameScene {
                     dialogueData: narratorLines,
                     spritesVisible: false,  // Don't show game sprites behind
                     backgroundDim: 1.0,     // Fully opaque black background (keeps screen black)
+
+                    // Play scraping stone sound when the tomb lid opening line appears
+                    onLineChange: (line) => {
+                        const audioManager = this.registry.get('audioManager');
+                        // Check if this is the second narrator line (index 1) about the stone lid
+                        if (line.text && line.text.includes('Ett djupt raspande ljud') && audioManager) {
+                            // Wait 2 seconds after dialogue appears, then play scraping sound
+                            this.time.delayedCall(2000, () => {
+                                audioManager.playScrapingStone();
+
+                                // Then play crash sound 1.8 seconds after scraping starts
+                                this.time.delayedCall(1800, () => {
+                                    audioManager.playStoneCrash();
+                                });
+                            });
+                        }
+                    },
+
                     onComplete: () => {
 
                         // 5. DialogOverlay will fade out automatically (500ms), revealing the scene
