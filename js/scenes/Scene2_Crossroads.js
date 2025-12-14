@@ -228,7 +228,7 @@ class Scene2_Crossroads extends GameScene {
         this.showFeedbackBubble("Vi vågar inte gå ner än, Max verkar inte klar med detta område…");
     }
 
-    // Override handleTransitionClick to handle two blue zones
+    // Override handleTransitionClick - single blue zone (tomb entrance)
     handleTransitionClick(x, y) {
 
         // Block if dialog is already active
@@ -236,51 +236,16 @@ class Scene2_Crossroads extends GameScene {
             return;
         }
 
-        // BLUE ZONE 1: Left area - placeholder message
-        // x between 150 and 400, y between 250 and 550
-        if (x >= 150 && x <= 400 && y >= 250 && y <= 550) {
-
-            // Play click sound
-            const audioManager = this.registry.get('audioManager');
-            if (audioManager) {
-                audioManager.playClick();
-            }
-
-            this.showValidClickIndicator(x, y);
-
-            // Show speech bubble over player with placeholder message
-            const bubble = new SpeechBubble(
-                this,
-                this.player.x,
-                this.player.y,
-                'Finns inget här än, hoppas det kommer en uppdatering så vi ej är fast här',
-                3000,  // Auto-destroy after 3 seconds
-                this.player  // Follow the player
-            );
-
-            return;
+        // Play click sound
+        const audioManager = this.registry.get('audioManager');
+        if (audioManager) {
+            audioManager.playClick();
         }
 
-        // BLUE ZONE 2: Middle zone at tomb entrance
-        // x between 500 and 780, y between 260 and 530
-        if (x >= 500 && x <= 780 && y >= 260 && y <= 530) {
+        this.showValidClickIndicator(x, y);
 
-            // Play click sound
-            const audioManager = this.registry.get('audioManager');
-            if (audioManager) {
-                audioManager.playClick();
-            }
-
-            this.showValidClickIndicator(x, y);
-
-            // Start tomb entrance sequence
-            this.startTombEntranceSequence(x, y);
-            return;
-        }
-
-        // Blue zone but not matching any defined zone - fallback
-        this.showNoPathIndicator(x, y);
-        this.showFeedbackBubble("Det verkar inte finnas någon väg där.");
+        // ANY blue click triggers tomb entrance (mask now has only one blue zone)
+        this.startTombEntranceSequence(x, y);
     }
 
     // Start tomb entrance sequence (similar to runestone in Scene1)
