@@ -62,8 +62,8 @@ class Scene2_Crossroads extends GameScene {
      */
     getSpawnPoint(entryTag) {
         const spawns = {
-            from_meadow: { x: 570, y: 660 },
-            from_tomb:   { x: 640, y: 480 },  // Spawn near tomb entrance when returning
+            from_meadow: { x: 550, y: 660 },
+            from_tomb:   { x: 560, y: 535 },  // Spawn near tomb entrance when returning
             default:     { x: 610, y: 690 }
         };
 
@@ -73,6 +73,12 @@ class Scene2_Crossroads extends GameScene {
 
     // Här lägger vi scen-specifika saker
     createSceneContent() {
+        // Flip sprites when entering from tomb (face left instead of default right)
+        if (this.entryTag === 'from_tomb') {
+            this.sister1.setFlipX(false);
+            this.sister2.setFlipX(false);
+        }
+
         // Hämta spawnpoint (samma som för systrarna)
         const spawn = this.getSpawnPoint(this.entryTag || 'default');
 
