@@ -70,6 +70,20 @@ class Scene2_Crossroads extends GameScene {
         return spawns[entryTag] || spawns.default;
     }
 
+    /**
+     * Returnerar spawn point för wisp beroende på varifrån vi kom.
+     * Wisp har sina egna positioner oberoende av systrarna.
+     */
+    getWispSpawnPoint(entryTag) {
+        const spawns = {
+            from_meadow: { x: 580, y: 620 },  // 30px right, 40px above sisters' from_meadow
+            from_tomb:   { x: 580, y: 620 },  // 30px right, 40px above sisters' from_tomb
+            default:     { x: 640, y: 650 }   // 30px right, 40px above sisters' default
+        };
+
+        return spawns[entryTag] || spawns.default;
+    }
+
 
     // Här lägger vi scen-specifika saker
     createSceneContent() {
@@ -79,15 +93,11 @@ class Scene2_Crossroads extends GameScene {
             this.sister2.setFlipX(false);
         }
 
-        // Hämta spawnpoint (samma som för systrarna)
-        const spawn = this.getSpawnPoint(this.entryTag || 'default');
-
-        // Placera wisp lite ovanför/åt höger om systrarna
-        const wispX = spawn.x + 30;
-        const wispY = spawn.y - 40;
+        // Hämta wisp spawn point (oberoende av systrarna)
+        const wispSpawn = this.getWispSpawnPoint(this.entryTag || 'default');
 
         // ===== WISP =====
-        this.wisp = new Wisp(this, wispX, wispY);
+        this.wisp = new Wisp(this, wispSpawn.x, wispSpawn.y);
         this.wisp.onClick(() => this.handleWispClick());
 
         // ===== WISP CONVERSATION (using ConversationManager) =====
@@ -321,6 +331,7 @@ class Scene2_Crossroads extends GameScene {
 
         if (choice === 'enter') {
             // Player chose to enter the tomb
+            this.dialogActive = false;
 
             // Fade out camera
             this.cameras.main.fadeOut(500, 0, 0, 0);
