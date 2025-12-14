@@ -128,8 +128,8 @@ class Scene1_Meadow extends GameScene {
                 text: '',
                 followTarget: this.player,
                 choices: [
-                    { text: 'Vi följer efter!', action: 'follow' },
-                    { text: 'Vi stannar kvar i gläntan.', action: 'stay' }
+                    { text: 'Följ efter Irrblosset.', action: 'follow' },
+                    { text: 'Stanna kvar i gläntan.', action: 'stay' }
                 ]
             }
         ]);
@@ -141,8 +141,8 @@ class Scene1_Meadow extends GameScene {
                 text: '',
                 followTarget: this.player,
                 choices: [
-                    { text: 'Vi följer efter!', action: 'follow' },
-                    { text: 'Vi stannar kvar i gläntan.', action: 'stay' }
+                    { text: 'Följ efter Irrblosset.', action: 'follow' },
+                    { text: 'Stanna kvar i gläntan.', action: 'stay' }
                 ]
             }
         ]);

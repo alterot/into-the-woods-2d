@@ -30,7 +30,7 @@
         },
         {
           "role": "morte",
-          "text": "En väg ut…? Det var länge sedan någon ställde den frågan."
+          "text": "En väg ut…? En väg ut ur skogen...? Det är omöjligt."
         },
         {
           "role": "morte",
@@ -42,11 +42,11 @@
         },
         {
           "role": "morte",
-          "text": "Tre fragment. Tre känslor som höll allt levande och helt: mod, nyfikenhet… och det milda vemod som gör plats för hopp."
+          "text": "Tre fragment. Tre känslor som höll allt här levande och helt: mod, nyfikenhet… och det vemod som gör plats för hopp."
         },
         {
           "role": "sister",
-          "text": "Och om vi hittar dem?"
+          "text": "Och om vi hittar dem? Får skogen tillbaka sin själ då?"
         },
         {
           "role": "morte",
@@ -54,7 +54,7 @@
         },
         {
           "role": "morte",
-          "text": "Men vägen är farlig. Fragmenten gömmer sig i mörker, vatten och hjärtan som slutits för länge sedan."
+          "text": "Men vägen är farlig, och fragmenten försvunna. Korrumperade. Och vem vet vilka prövningar som väntar er på vägen?"
         },
         {
           "role": "player",
@@ -62,7 +62,7 @@
         },
         {
           "role": "morte",
-          "text": "Då börjar er prövning här. Fortsätt genom skogen, låt Irrbloset vara er guide om ni känner er vilsna…"
+          "text": "Nåväl, då börjar ert äventyr här. Fortsätt genom skogen, låt Irrbloset vara er guide om ni känner er vilsna…"
         }
       ]
     }
