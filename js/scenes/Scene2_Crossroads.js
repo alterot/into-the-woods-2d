@@ -66,7 +66,7 @@ class Scene2_Crossroads extends GameScene {
         const spawns = {
             from_meadow: { x: 550, y: 660 },
             from_tomb:   { x: 560, y: 535 },  
-            default:     { x: 610, y: 690 }
+            default:     { x: 550, y: 660 }
         };
 
         return spawns[entryTag] || spawns.default;
@@ -78,9 +78,9 @@ class Scene2_Crossroads extends GameScene {
      */
     getWispSpawnPoint(entryTag) {
         const spawns = {
-            from_meadow: { x: 480, y: 620 }, 
-            from_tomb:   { x: 580, y: 620 },  
-            default:     { x: 640, y: 650 }   
+            from_meadow: { x: 700, y: 660 }, 
+            from_tomb:   { x: 700, y: 660 },  
+            default:     { x: 700, y: 660 }   
         };
 
         return spawns[entryTag] || spawns.default;

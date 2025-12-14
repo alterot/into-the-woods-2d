@@ -3,8 +3,7 @@ BUGS:
 
 SCEN 1 - Byt tet i bubblan (kan inte stå följer efter)
 
-SCEN 2 - lägg på overlay här också, samt ta bort stigar!!
-update transit position frpm all dircetions
+SCEN 2 - lägg på overlay här också
 click during transit walk DIRECTLY spawns at destination, should just fasten it uo
 
 SCEN 3

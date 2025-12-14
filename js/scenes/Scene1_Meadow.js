@@ -72,6 +72,23 @@ class Scene1_Meadow extends GameScene {
         this.wisp = new Wisp(this, wispSpawn.x, wispSpawn.y);
         this.wisp.onClick(() => this.handleWispClick());
 
+        // ===== WALK-IN ANIMATION (when entering from crossroads) =====
+        if (this.entryTag === 'from_crossroads') {
+            // Flip sprites to face left (they're walking from right to left)
+            this.sister1.setFlipX(false);
+            this.sister2.setFlipX(false);
+
+            // Adjust final positions - when facing left, follower should be to the RIGHT (behind)
+            this.follower.x = this.player.x + 50;  // 50px to the RIGHT
+            this.followerBaseY = this.player.y;
+
+            this.startWalkInAnimation({
+                player:   { x: 1330, y: 460 },  // Off-screen right
+                follower: { x: 1380, y: 460 },  // 50px to the RIGHT (behind when walking left)
+                wisp:     { x: 1430, y: 500 }   // Even further right
+            });
+        }
+
         // ===== RUNESTONE =====
         // Note: Runestone uses custom logic (not InteractiveObject) because:
         // - It doesn't have a fixed position (clicks anywhere on red mask)
