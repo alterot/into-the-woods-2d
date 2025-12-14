@@ -50,9 +50,6 @@ class Scene3_Tomb extends GameScene {
     /**
      * Return spawn point for sisters based on entry tag
      * x,y is the "center" between sisters - GameScene shifts them apart
-     *
-     * NOTE: If spawn point is in blue (transition) area, pathfinding won't work.
-     * Adjust Y coordinate to spawn on green walkable area inside tomb.
      */
     getSpawnPoint(entryTag) {
         const spawns = {
@@ -67,7 +64,7 @@ class Scene3_Tomb extends GameScene {
     // Scene-specific content (braziers, skeleton mage, etc.)
     createSceneContent() {
         // Custom feedback message for this scene
-        this.feedbackMessages.cannotWalk = "The tomb walls are too close here, we can't go that way.";
+        this.feedbackMessages.cannotWalk = "Vi kan inte gå dit, finns ingen väg för oss.";
 
         // Check if puzzle is already completed
         if (this.puzzleSolved) {
@@ -111,14 +108,14 @@ class Scene3_Tomb extends GameScene {
 
                 // Show feedback only for first two steps (not the final step)
                 if (step < this.puzzleManager.sequence.length - 1) {
-                    this.showFeedbackBubble(`The ${color} brazier flares to life!`);
+                    this.showFeedbackBubble(`Den ${color} lågan vaknar till liv!`);
                 }
             },
 
             onWrongStep: (expectedColor, attemptedColor) => {
 
                 // Show feedback
-                this.showFeedbackBubble(`The ${attemptedColor} flame flickers and dies. Something's not right...`);
+                this.showFeedbackBubble(`Den ${attemptedColor} lågan flämtar till och slocknar. Något är fel...`);
             },
 
             onReset: () => {
@@ -205,7 +202,7 @@ class Scene3_Tomb extends GameScene {
         // Block if puzzle already solved
         if (this.puzzleSolved) {
             this.showNoPathIndicator(x, y);
-            this.showFeedbackBubble("The braziers are already lit. The tomb feels different now.");
+            this.showFeedbackBubble("Lågorna brinner redan klart. Kryptan känns annorlunda.");
             return;
         }
 
@@ -226,7 +223,7 @@ class Scene3_Tomb extends GameScene {
 
         // Find walkable position near brazier (keep player further back)
         const brazierX = clickedBrazier.x;
-        const brazierY = clickedBrazier.y + 130; // Further below the brazier to avoid getting too close to flames
+        const brazierY = clickedBrazier.y + 130; 
         const walkablePos = this.findNearestWalkable(brazierX, brazierY, 80);
 
         if (!walkablePos) {
@@ -303,7 +300,7 @@ class Scene3_Tomb extends GameScene {
         });
 
         // Show completion feedback
-        this.showFeedbackBubble("The ancient flames burn brightly. The tomb's secrets are revealed!");
+        this.showFeedbackBubble("De uråldriga lågorna brinner klart. Gravens hemligheter avslöjas.");
 
         // === DRAMATIC REVEAL SEQUENCE ===
         // Wait 5000ms to let the completion message fully display before starting reveal
