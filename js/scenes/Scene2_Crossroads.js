@@ -63,7 +63,7 @@ class Scene2_Crossroads extends GameScene {
     getSpawnPoint(entryTag) {
         const spawns = {
             from_meadow: { x: 550, y: 660 },
-            from_tomb:   { x: 560, y: 535 },  // Spawn near tomb entrance when returning
+            from_tomb:   { x: 560, y: 535 },  
             default:     { x: 610, y: 690 }
         };
 
@@ -76,14 +76,13 @@ class Scene2_Crossroads extends GameScene {
      */
     getWispSpawnPoint(entryTag) {
         const spawns = {
-            from_meadow: { x: 580, y: 620 },  // 30px right, 40px above sisters' from_meadow
-            from_tomb:   { x: 580, y: 620 },  // 30px right, 40px above sisters' from_tomb
-            default:     { x: 640, y: 650 }   // 30px right, 40px above sisters' default
+            from_meadow: { x: 480, y: 620 }, 
+            from_tomb:   { x: 580, y: 620 },  
+            default:     { x: 640, y: 650 }   
         };
 
         return spawns[entryTag] || spawns.default;
     }
-
 
     // Här lägger vi scen-specifika saker
     createSceneContent() {
@@ -99,6 +98,15 @@ class Scene2_Crossroads extends GameScene {
         // ===== WISP =====
         this.wisp = new Wisp(this, wispSpawn.x, wispSpawn.y);
         this.wisp.onClick(() => this.handleWispClick());
+
+        // ===== WALK-IN ANIMATION (when entering from meadow) =====
+        if (this.entryTag === 'from_meadow') {
+            this.startWalkInAnimation({
+                player:   { x: 200, y: this.player.y },  // Left side of green area
+                follower: { x: 150, y: this.follower.y },
+                wisp:     { x: 230, y: this.wisp.sprite.y }
+            });
+        }
 
         // ===== WISP CONVERSATION (using ConversationManager) =====
         // Conversation: "Ska vi gå tillbaks till gläntan?" with yes/no choice

@@ -560,6 +560,105 @@ class GameScene extends Phaser.Scene {
     }
 
     /**
+     * Start walk-in animation from edge of screen to current spawn point
+     * Modular method that any scene can use for cinematic entrances
+     * @param {object} edgePositions - { player: {x, y}, follower: {x, y}, wisp: {x, y} }
+     * @param {object} options - Optional settings { wispDelay: 500, wispDuration: 1500 }
+     */
+    startWalkInAnimation(edgePositions, options = {}) {
+        const { playerDuration = 2000, followerDelay = 200, wispDelay = 500 } = options;
+
+        // Save final positions (already set by applySpawnPoint)
+        const finalPositions = {
+            player: { x: this.player.x, y: this.player.y },
+            follower: { x: this.follower.x, y: this.follower.y },
+            wisp: this.wisp ? { x: this.wisp.sprite.x, y: this.wisp.sprite.y } : null
+        };
+
+        // Move sprites to edge positions (no walkable check needed for tweens!)
+        this.player.x = edgePositions.player.x;
+        this.player.y = edgePositions.player.y;
+        this.playerBaseY = edgePositions.player.y;
+
+        this.follower.x = edgePositions.follower.x;
+        this.follower.y = edgePositions.follower.y;
+        this.followerBaseY = edgePositions.follower.y;
+
+        if (this.wisp && edgePositions.wisp) {
+            this.wisp.sprite.x = edgePositions.wisp.x;
+            this.wisp.sprite.y = edgePositions.wisp.y;
+        }
+
+        // Block input during animation
+        this.dialogActive = true;
+
+        // Click to skip - stop all tweens and teleport to final positions
+        const skipHandler = () => {
+            this.tweens.killTweensOf([this.player, this.follower]);
+            if (this.wisp) this.tweens.killTweensOf(this.wisp.sprite);
+
+            this.player.x = finalPositions.player.x;
+            this.player.y = finalPositions.player.y;
+            this.playerBaseY = finalPositions.player.y;
+
+            this.follower.x = finalPositions.follower.x;
+            this.follower.y = finalPositions.follower.y;
+            this.followerBaseY = finalPositions.follower.y;
+
+            if (this.wisp && finalPositions.wisp) {
+                this.wisp.sprite.x = finalPositions.wisp.x;
+                this.wisp.sprite.y = finalPositions.wisp.y;
+            }
+
+            this.input.off('pointerdown', skipHandler);
+            this.dialogActive = false;
+        };
+
+        this.input.once('pointerdown', skipHandler);
+
+        // Tween player first
+        this.tweens.add({
+            targets: this.player,
+            x: finalPositions.player.x,
+            duration: playerDuration,
+            ease: 'Sine.InOut'
+        });
+
+        // Tween follower after delay
+        this.time.delayedCall(followerDelay, () => {
+            this.tweens.add({
+                targets: this.follower,
+                x: finalPositions.follower.x,
+                duration: playerDuration,
+                ease: 'Sine.InOut'
+            });
+        });
+
+        // Tween wisp last
+        if (this.wisp && finalPositions.wisp) {
+            this.time.delayedCall(wispDelay, () => {
+                this.tweens.add({
+                    targets: this.wisp.sprite,
+                    x: finalPositions.wisp.x,
+                    y: finalPositions.wisp.y,
+                    duration: playerDuration,
+                    ease: 'Sine.InOut',
+                    onComplete: () => {
+                        this.input.off('pointerdown', skipHandler);
+                        this.dialogActive = false;
+                    }
+                });
+            });
+        } else {
+            // No wisp - unlock after player animation
+            this.time.delayedCall(playerDuration + followerDelay, () => {
+                this.input.off('pointerdown', skipHandler);
+                this.dialogActive = false;
+            });
+        }
+    }
+
+    /**
      * Lock input for a specific reason (e.g., dialog, conversation, transition)
      * Multiple locks can be active simultaneously - input is only unlocked when all are released
      * @param {string} reason - Identifier for the lock source (e.g., 'dialog-overlay', 'conversation')
