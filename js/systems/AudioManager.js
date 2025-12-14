@@ -49,11 +49,16 @@ class AudioManager {
             volume: 0.7
         });
 
-        // Setup background music
-        this.bgMusic = this.scene.sound.add('forest-ambient', {
-            volume: 0.4,
-            loop: true
-        });
+        // Setup background music (with safety check)
+        if (this.scene.cache.audio.exists('forest-ambient')) {
+            this.bgMusic = this.scene.sound.add('forest-ambient', {
+                volume: 0.4,
+                loop: true
+            });
+        } else {
+            console.warn('[AudioManager] forest-ambient not in cache yet, will retry...');
+            this.bgMusic = null;
+        }
 
         // Setup footstep sounds (grass)
         this.footstepLeft = this.scene.sound.add('step-left', {
@@ -198,6 +203,12 @@ class AudioManager {
         // Stop current music if playing
         if (this.bgMusic && this.bgMusic.isPlaying) {
             this.bgMusic.stop();
+        }
+
+        // Check if audio exists in cache before trying to use it
+        if (!this.scene.cache.audio.exists(trackKey)) {
+            console.warn(`[AudioManager] Audio key "${trackKey}" not in cache, cannot switch music`);
+            return;
         }
 
         // Create new music track
