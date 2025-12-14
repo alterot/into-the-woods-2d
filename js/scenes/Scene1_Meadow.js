@@ -16,6 +16,7 @@ class Scene1_Meadow extends GameScene {
         this.wispConversationActive = false;
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false;
+        this.wispClickPending = false;  // Track if movement is from wisp click
         this.wispIntroBubble = null;
         this.isProcessingChoice = false;  // Prevent click leakage during choice processing
 
@@ -38,6 +39,7 @@ class Scene1_Meadow extends GameScene {
         this.wispConversationActive = false;
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false;
+        this.wispClickPending = false;
         this.isProcessingChoice = false;
         this.currentConversationBubble = null;
 
@@ -63,8 +65,11 @@ class Scene1_Meadow extends GameScene {
     }
 
     createSceneContent() {
+        // Hämta wisp spawn point (oberoende av systrarna)
+        const wispSpawn = this.getWispSpawnPoint(this.entryTag || 'default');
+
         // ===== WISP =====
-        this.wisp = new Wisp(this, 1075, 500);
+        this.wisp = new Wisp(this, wispSpawn.x, wispSpawn.y);
         this.wisp.onClick(() => this.handleWispClick());
 
         // ===== RUNESTONE =====
@@ -157,40 +162,37 @@ class Scene1_Meadow extends GameScene {
             this.feedbackBubble = null;
         }
 
-        this.dialogActive = true;
-        this.wispConversationActive = true;
-        this.wispArrivalHandled = false;
-        this.wispWalkStarted = false;
-
         // Find walkable spot near wisp
         const target = this.findNearestWalkable(this.wisp.sprite.x, this.wisp.sprite.y, 80);
 
         if (target) {
-            // Start pathfinding to wisp
+            // Mark that wisp was clicked - flags will be set in update() when movement starts
+            this.wispClickPending = true;
             this.findPath(this.player.x, this.player.y, target.x, target.y);
-        } else {
-            console.warn('[Scene1_Meadow] No walkable spot found near wisp');
-        }
 
-        // If already seen full conversation, skip bubble #1
-        if (this.wispConversationCompleted) {
-            // Will show choice bubble directly on arrival (in update())
-            return;
-        }
+            // Safety: if movement doesn't start in 500ms, reset flag
+            this.time.delayedCall(500, () => {
+                if (this.wispClickPending) {
+                    this.wispClickPending = false;
+                }
+            });
 
-        // First time - show bubble #1 (displays while walking)
-        if (this.wispIntroBubble) {
-            this.wispIntroBubble.destroy();
-        }
+            // First time - show bubble #1 (displays while walking)
+            if (!this.wispConversationCompleted) {
+                if (this.wispIntroBubble) {
+                    this.wispIntroBubble.destroy();
+                }
 
-        this.wispIntroBubble = new SpeechBubble(
-            this,
-            this.player.x,
-            this.player.y,
-            'Vad är det som lyser där borta?',
-            null,
-            this.player
-        );
+                this.wispIntroBubble = new SpeechBubble(
+                    this,
+                    this.player.x,
+                    this.player.y,
+                    'Vad är det som lyser där borta?',
+                    null,
+                    this.player
+                );
+            }
+        }
     }
 
     handleWispChoice(choice) {
@@ -425,6 +427,16 @@ class Scene1_Meadow extends GameScene {
             }
         }
 
+        // ===== WISP CONVERSATION - Set flags when movement starts (only if wisp was clicked) =====
+        if (this.wispClickPending && (this.isMoving || this.isFollowerMoving)) {
+            // Movement started after wisp click - pathfinding succeeded
+            this.wispClickPending = false;
+            this.dialogActive = true;
+            this.wispConversationActive = true;
+            this.wispArrivalHandled = false;
+            this.wispWalkStarted = false;
+        }
+
         // ===== WISP CONVERSATION - Trigger on arrival =====
         if (this.wispConversationActive && !this.wispArrivalHandled) {
             // Track when they start walking
@@ -450,7 +462,6 @@ class Scene1_Meadow extends GameScene {
                     ? this.wispRepeatConvo
                     : this.wispFirstTimeConvo;
 
-
                 // Start conversation (bubbles #2-5)
                 conversation.start(() => {
                     this.handleWispChoice(conversation.getChoice());
@@ -462,7 +473,19 @@ class Scene1_Meadow extends GameScene {
     getSpawnPoint(entryTag) {
         const spawns = {
             default: { x: 610, y: 690 },
-            from_crossroads: { x: 1050, y: 460 }  // Right side, middle Y, facing inward towards stone
+            from_crossroads: { x: 900, y: 460 }  // Right side (moved more left), middle Y, facing inward towards stone
+        };
+        return spawns[entryTag] || spawns.default;
+    }
+
+    /**
+     * Returnerar spawn point för wisp beroende på varifrån vi kom.
+     * Wisp har sina egna positioner oberoende av systrarna.
+     */
+    getWispSpawnPoint(entryTag) {
+        const spawns = {
+            default: { x: 1075, y: 500 },        // Original position
+            from_crossroads: { x: 1075, y: 500 } // Keep wisp at same position
         };
         return spawns[entryTag] || spawns.default;
     }

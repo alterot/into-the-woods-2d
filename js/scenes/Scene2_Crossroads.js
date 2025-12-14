@@ -18,6 +18,7 @@ class Scene2_Crossroads extends GameScene {
         this.wispConversationActive = false;
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false;
+        this.wispClickPending = false;  // Track if movement is from wisp click
         this.isProcessingChoice = false;
 
         // ConversationManager instance
@@ -38,6 +39,7 @@ class Scene2_Crossroads extends GameScene {
         this.wispConversationActive = false;
         this.wispArrivalHandled = false;
         this.wispWalkStarted = false;
+        this.wispClickPending = false;
         this.isProcessingChoice = false;
         this.currentConversationBubble = null;
 
@@ -161,11 +163,6 @@ class Scene2_Crossroads extends GameScene {
             this.feedbackBubble = null;
         }
 
-        this.dialogActive = true;
-        this.wispConversationActive = true;
-        this.wispArrivalHandled = false;
-        this.wispWalkStarted = false;
-
         // Calculate direction from wisp to player
         const dx = this.player.x - this.wisp.sprite.x;
         const dy = this.player.y - this.wisp.sprite.y;
@@ -180,10 +177,16 @@ class Scene2_Crossroads extends GameScene {
         const target = this.findNearestWalkable(targetX, targetY, 50);
 
         if (target) {
-            // Start pathfinding to position near wisp (not ON wisp)
+            // Mark that wisp was clicked - flags will be set in update() when movement starts
+            this.wispClickPending = true;
             this.findPath(this.player.x, this.player.y, target.x, target.y);
-        } else {
-            console.warn('[Scene2_Crossroads] No walkable spot found near wisp');
+
+            // Safety: if movement doesn't start in 500ms, reset flag
+            this.time.delayedCall(500, () => {
+                if (this.wispClickPending) {
+                    this.wispClickPending = false;
+                }
+            });
         }
     }
 
@@ -222,6 +225,16 @@ class Scene2_Crossroads extends GameScene {
 
     update() {
         super.update();
+
+        // ===== WISP CONVERSATION - Set flags when movement starts (only if wisp was clicked) =====
+        if (this.wispClickPending && (this.isMoving || this.isFollowerMoving)) {
+            // Movement started after wisp click - pathfinding succeeded
+            this.wispClickPending = false;
+            this.dialogActive = true;
+            this.wispConversationActive = true;
+            this.wispArrivalHandled = false;
+            this.wispWalkStarted = false;
+        }
 
         // ===== WISP CONVERSATION - Trigger on arrival =====
         if (this.wispConversationActive && !this.wispArrivalHandled) {
