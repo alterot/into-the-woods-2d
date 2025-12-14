@@ -23,7 +23,7 @@ class GameScene extends Phaser.Scene {
         this.targetX = null;
         this.targetY = null;
         this.isMoving = false;
-        this.moveSpeed = 2;
+        this.moveSpeed = 1.6;  // Reduced by 20% for slower, more deliberate movement
 
         // Player and follower references (canonical source of truth)
         this.player = null;
@@ -604,26 +604,67 @@ class GameScene extends Phaser.Scene {
         // Block input during animation
         this.dialogActive = true;
 
-        // Click to skip - stop all tweens and teleport to final positions
+        // Click to skip - restart tweens at 2x speed for fast-forward effect
         const skipHandler = () => {
+            // Kill current tweens
             this.tweens.killTweensOf([this.player, this.follower]);
             if (this.wisp) this.tweens.killTweensOf(this.wisp.sprite);
 
-            this.player.x = finalPositions.player.x;
-            this.player.y = finalPositions.player.y;
-            this.playerBaseY = finalPositions.player.y;
-
-            this.follower.x = finalPositions.follower.x;
-            this.follower.y = finalPositions.follower.y;
-            this.followerBaseY = finalPositions.follower.y;
-
-            if (this.wisp && finalPositions.wisp) {
-                this.wisp.sprite.x = finalPositions.wisp.x;
-                this.wisp.sprite.y = finalPositions.wisp.y;
-            }
-
+            // Remove this handler so it only triggers once
             this.input.off('pointerdown', skipHandler);
-            this.dialogActive = false;
+
+            // Calculate remaining distance and time for player (only X movement)
+            const playerDistRemaining = Math.abs(finalPositions.player.x - this.player.x);
+            const playerTimeRemaining = (playerDistRemaining / pixelsPerSecond) * 1000; // ms
+            const playerFastDuration = playerTimeRemaining / 2; // 2x speed = half duration
+
+            // Restart player tween at 2x speed
+            this.tweens.add({
+                targets: this.player,
+                x: finalPositions.player.x,
+                duration: playerFastDuration,
+                ease: 'Linear'
+            });
+
+            // Calculate remaining distance and time for follower (only X movement)
+            const followerDistRemaining = Math.abs(finalPositions.follower.x - this.follower.x);
+            const followerTimeRemaining = (followerDistRemaining / pixelsPerSecond) * 1000;
+            const followerFastDuration = followerTimeRemaining / 2;
+
+            // Restart follower tween at 2x speed
+            this.tweens.add({
+                targets: this.follower,
+                x: finalPositions.follower.x,
+                duration: followerFastDuration,
+                ease: 'Linear'
+            });
+
+            // Handle wisp if present
+            if (this.wisp && finalPositions.wisp) {
+                const wispDistRemaining = Math.sqrt(
+                    Math.pow(finalPositions.wisp.x - this.wisp.sprite.x, 2) +
+                    Math.pow(finalPositions.wisp.y - this.wisp.sprite.y, 2)
+                );
+                const wispTimeRemaining = (wispDistRemaining / pixelsPerSecond) * 1000;
+                const wispFastDuration = wispTimeRemaining / 2;
+
+                this.tweens.add({
+                    targets: this.wisp.sprite,
+                    x: finalPositions.wisp.x,
+                    y: finalPositions.wisp.y,
+                    duration: wispFastDuration,
+                    ease: 'Linear',
+                    onComplete: () => {
+                        this.dialogActive = false;
+                    }
+                });
+            } else {
+                // No wisp - unlock after longest tween completes
+                const maxDuration = Math.max(playerFastDuration, followerFastDuration);
+                this.time.delayedCall(maxDuration, () => {
+                    this.dialogActive = false;
+                });
+            }
         };
 
         this.input.once('pointerdown', skipHandler);
