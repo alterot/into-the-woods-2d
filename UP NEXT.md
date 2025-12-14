@@ -1,3 +1,6 @@
+BUGS:
+if clikcing the whisp is the frst thing you do you lock the game
+
 SCEN 1 - Byt tet i bubblan (kan inte stå följer efter)
 
 SCEN 2 - lägg på overlay här också, samt ta bort stigar!!

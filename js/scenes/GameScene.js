@@ -566,7 +566,7 @@ class GameScene extends Phaser.Scene {
      * @param {object} options - Optional settings { wispDelay: 500, wispDuration: 1500 }
      */
     startWalkInAnimation(edgePositions, options = {}) {
-        const { playerDuration = 2000, followerDelay = 200, wispDelay = 500 } = options;
+        const { followerDelay = 200, wispDelay = 500 } = options;
 
         // Save final positions (already set by applySpawnPoint)
         const finalPositions = {
@@ -574,6 +574,18 @@ class GameScene extends Phaser.Scene {
             follower: { x: this.follower.x, y: this.follower.y },
             wisp: this.wisp ? { x: this.wisp.sprite.x, y: this.wisp.sprite.y } : null
         };
+
+        // Calculate duration based on distance and normal walking speed
+        const distance = Math.sqrt(
+            Math.pow(finalPositions.player.x - edgePositions.player.x, 2) +
+            Math.pow(finalPositions.player.y - edgePositions.player.y, 2)
+        );
+        const pixelsPerSecond = this.moveSpeed * 60; // moveSpeed is per frame, 60fps
+        const playerDuration = (distance / pixelsPerSecond) * 1000; // Convert to ms
+
+        // Kill any existing tweens to prevent conflicts (FIX: wisp moving back/forth)
+        this.tweens.killTweensOf([this.player, this.follower]);
+        if (this.wisp) this.tweens.killTweensOf(this.wisp.sprite);
 
         // Move sprites to edge positions (no walkable check needed for tweens!)
         this.player.x = edgePositions.player.x;
@@ -621,7 +633,7 @@ class GameScene extends Phaser.Scene {
             targets: this.player,
             x: finalPositions.player.x,
             duration: playerDuration,
-            ease: 'Sine.InOut'
+            ease: 'Linear'
         });
 
         // Tween follower after delay
@@ -630,7 +642,7 @@ class GameScene extends Phaser.Scene {
                 targets: this.follower,
                 x: finalPositions.follower.x,
                 duration: playerDuration,
-                ease: 'Sine.InOut'
+                ease: 'Linear'
             });
         });
 
@@ -642,7 +654,7 @@ class GameScene extends Phaser.Scene {
                     x: finalPositions.wisp.x,
                     y: finalPositions.wisp.y,
                     duration: playerDuration,
-                    ease: 'Sine.InOut',
+                    ease: 'Linear',
                     onComplete: () => {
                         this.input.off('pointerdown', skipHandler);
                         this.dialogActive = false;

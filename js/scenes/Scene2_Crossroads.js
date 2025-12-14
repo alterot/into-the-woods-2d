@@ -102,9 +102,9 @@ class Scene2_Crossroads extends GameScene {
         // ===== WALK-IN ANIMATION (when entering from meadow) =====
         if (this.entryTag === 'from_meadow') {
             this.startWalkInAnimation({
-                player:   { x: 200, y: this.player.y },  // Left side of green area
-                follower: { x: 150, y: this.follower.y },
-                wisp:     { x: 230, y: this.wisp.sprite.y }
+                player:   { x: -50, y: 550 },  // Off-screen left, higher Y position
+                follower: { x: -100, y: 550 },
+                wisp:     { x: -20, y: 510 }   // Wisp slightly above (550 - 40)
             });
         }
 
