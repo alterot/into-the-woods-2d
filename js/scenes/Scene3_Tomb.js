@@ -20,6 +20,14 @@ class Scene3_Tomb extends GameScene {
         // Puzzle manager (created in createInitialScene if puzzle not solved)
         this.puzzleManager = null;
         this.puzzleSolved = false;  // Loaded from gameState in init()
+
+        // Color translation map (English -> Swedish)
+        this.colorNames = {
+            'yellow': 'gula',
+            'green': 'gröna',
+            'blue': 'blå',
+            'purple': 'lila'
+        };
     }
 
     init(data) {
@@ -108,14 +116,16 @@ class Scene3_Tomb extends GameScene {
 
                 // Show feedback only for first two steps (not the final step)
                 if (step < this.puzzleManager.sequence.length - 1) {
-                    this.showFeedbackBubble(`Den ${color} lågan vaknar till liv!`);
+                    const colorSv = this.colorNames[color] || color;
+                    this.showFeedbackBubble(`Den ${colorSv} lågan vaknar till liv!`);
                 }
             },
 
             onWrongStep: (expectedColor, attemptedColor) => {
 
                 // Show feedback
-                this.showFeedbackBubble(`Den ${attemptedColor} lågan flämtar till och slocknar. Något är fel...`);
+                const colorSv = this.colorNames[attemptedColor] || attemptedColor;
+                this.showFeedbackBubble(`Den ${colorSv} lågan flämtar till och slocknar. Något är fel...`);
             },
 
             onReset: () => {
@@ -376,16 +386,18 @@ class Scene3_Tomb extends GameScene {
                 const bottomThirdY = 480;  // Canvas height * 2/3 (720 * 2/3)
 
                 if (this.player) {
-                    this.player.x = centerX - 25;  // Slightly left of center
+                    this.player.x = centerX;  // Center
                     this.player.y = bottomThirdY;
-                    this.player.setFlipX(false);  // Face right
+                    this.playerBaseY = bottomThirdY;  // Update base Y to prevent jump
+                    this.player.setFlipX(true);  // Face right (towards Morte)
                     this.player.setDepth(bottomThirdY);  // Ensure visible
                 }
 
                 if (this.follower) {
-                    this.follower.x = centerX + 25;  // Slightly right of center
+                    this.follower.x = centerX - 50;  // 50px left of player (correct follow distance)
                     this.follower.y = bottomThirdY;
-                    this.follower.setFlipX(false);  // Face right
+                    this.followerBaseY = bottomThirdY;  // Update base Y to prevent jump
+                    this.follower.setFlipX(true);  // Face right (towards Morte)
                     this.follower.setDepth(bottomThirdY);  // Ensure visible
                 }
 
