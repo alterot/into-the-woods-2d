@@ -6,6 +6,7 @@ import Wisp from '../entities/Wisp.js';
 import ConversationManager from '../systems/ConversationManager.js';
 import SpeechBubble from '../entities/SpeechBubble.js';
 import DialogOverlay from '../systems/DialogOverlay.js';
+import SceneStateManager from '../systems/SceneStateManager.js';
 
 class Scene2_Crossroads extends GameScene {
     constructor() {
@@ -56,6 +57,20 @@ class Scene2_Crossroads extends GameScene {
             }
         }
 
+        // Check if player completed prologue (returned from tomb after puzzle completion)
+        const fromTomb = this.entryTag === 'from_tomb';
+        const puzzleComplete = SceneStateManager.getScene('Scene3_Tomb', 'puzzleCompleted', false);
+        const alreadyShown = SceneStateManager.getGlobal('prologueCompleteShown', false);
+
+        if (fromTomb && puzzleComplete && !alreadyShown) {
+            // Mark as shown immediately to prevent duplicate triggers
+            SceneStateManager.setGlobal('prologueCompleteShown', true);
+
+            // Wait 2000ms before showing overlay
+            this.time.delayedCall(2000, () => {
+                this.showPrologueCompleteOverlay();
+            });
+        }
     }
 
     /**
@@ -374,6 +389,60 @@ class Scene2_Crossroads extends GameScene {
             });
         } else {
             // No choice was made (user just advanced through dialog without choices)
+            this.time.delayedCall(200, () => {
+                this.dialogActive = false;
+            });
+        }
+    }
+
+    // Show prologue completion overlay (narrator-only with choices)
+    showPrologueCompleteOverlay() {
+        // Block input during dialog
+        this.dialogActive = true;
+
+        // Load prologue completion dialog data
+        const prologueData = this.cache.json.get('prologue-complete');
+        if (!prologueData) {
+            console.error('[Scene2] prologue-complete JSON not found in cache!');
+            this.dialogActive = false;
+            return;
+        }
+
+        const conversation = prologueData.conversations[0];
+        const dialogData = conversation.lines;
+        const choiceData = conversation.choice;
+
+        // Create DialogOverlay with narrator-only mode (no portraits)
+        const overlay = new DialogOverlay(this, {
+            dialogueData: dialogData,
+            choiceData: choiceData,
+            spritesVisible: false,
+            backgroundDim: 0.6,
+            roleSideMap: {
+                narrator: 'narrator'
+            },
+            onComplete: (selectedChoice) => {
+                this.handlePrologueChoice(selectedChoice);
+            }
+        });
+
+        overlay.start();
+    }
+
+    // Handle choice from prologue completion overlay
+    handlePrologueChoice(choice) {
+        if (choice === 'restart') {
+            // Clear all state and restart game
+            SceneStateManager.reset();
+
+            // Fade out camera
+            this.cameras.main.fadeOut(500, 0, 0, 0);
+            this.time.delayedCall(500, () => {
+                // Go back to character selection
+                this.scene.start('CharacterSelectScene');
+            });
+        } else if (choice === 'explore') {
+            // Stay in Scene2 and continue exploring
             this.time.delayedCall(200, () => {
                 this.dialogActive = false;
             });

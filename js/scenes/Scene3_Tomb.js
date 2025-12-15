@@ -341,7 +341,7 @@ class Scene3_Tomb extends GameScene {
         });
 
         // Show completion feedback
-        this.showFeedbackBubble("De uråldriga lågorna brinner klart. Gravens hemligheter avslöjas.");
+        this.showFeedbackBubble("De uråldriga lågorna brinner klart. Kryptans hemligheter avslöjas.");
 
         // === DRAMATIC REVEAL SEQUENCE ===
         // Wait 5000ms to let the completion message fully display before starting reveal

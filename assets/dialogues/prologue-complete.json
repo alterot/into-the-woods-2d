@@ -1,0 +1,24 @@
+{
+  "conversations": [
+    {
+      "lines": [
+        {
+          "role": "narrator",
+          "text": "Bra gjort äventyrare! Du har klarat prologen i denna berättelse. Medan resterande kapitel blir klara (målbilden är att bli klar med nästa innan GTA VI), har du två val:"
+        }
+      ],
+      "choice": {
+        "options": [
+          {
+            "id": "explore",
+            "label": "Utforska mer."
+          },
+          {
+            "id": "restart",
+            "label": "Börja om."
+          }
+        ]
+      }
+    }
+  ]
+}
