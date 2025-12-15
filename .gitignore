@@ -1,5 +1,6 @@
 # Claude Code
 .claude/
+CLAUDE.md
 
 #Documentation
 docs/
@@ -12,6 +13,9 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Old assets
+/assets/scenes/OLD
 
 # Logs
 *.log
