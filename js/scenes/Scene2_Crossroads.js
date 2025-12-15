@@ -149,6 +149,11 @@ class Scene2_Crossroads extends GameScene {
 
         // Egen text för blockerat område i denna scen
         this.feedbackMessages.cannotWalk = "Skogen är för djup här också, vi måste hitta en annan väg.";
+
+        // Add crossroads overlay (tree branches, foliage in foreground)
+        // Depth 900: Above sprites (0-720) but below dialogue system (1000+)
+        const overlay = this.add.image(640, 360, 'crossroads-overlay');
+        overlay.setDepth(900);
     }
 
     handleWispClick() {
