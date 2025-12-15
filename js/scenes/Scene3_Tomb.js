@@ -21,6 +21,10 @@ class Scene3_Tomb extends GameScene {
         this.puzzleManager = null;
         this.puzzleSolved = false;  // Loaded from gameState in init()
 
+        // Transition state tracking
+        this.transitionPending = false;
+        this.transitionTarget = null;
+
         // Color translation map (English -> Swedish)
         this.colorNames = {
             'yellow': 'gula',
@@ -37,6 +41,10 @@ class Scene3_Tomb extends GameScene {
         // CRITICAL: Reset ALL dialog state when scene starts
         // (Scene might be reused, so constructor isn't always called)
         this.dialogActive = false;
+
+        // Reset transition state
+        this.transitionPending = false;
+        this.transitionTarget = null;
 
         // Check if puzzle was already completed in a previous visit
         if (SceneStateManager.getScene('Scene3_Tomb', 'puzzleCompleted', false)) {
@@ -504,11 +512,10 @@ class Scene3_Tomb extends GameScene {
     // Blue pixels in mask (exit back to crossroads)
     handleTransitionClick(x, y) {
 
-        // Block if dialog is already active
-        if (this.dialogActive) {
+        // Block if dialog is already active or transition already pending
+        if (this.dialogActive || this.transitionPending) {
             return;
         }
-
 
         // Play click sound
         const audioManager = this.registry.get('audioManager');
@@ -518,39 +525,63 @@ class Scene3_Tomb extends GameScene {
 
         this.showValidClickIndicator(x, y);
 
-        // Stop all fire sounds from braziers
-        if (this.braziers) {
-            this.braziers.forEach(brazier => {
-                if (brazier.fireSound) {
-                    brazier.fireSound.stop();
-                }
-            });
+        // Find nearest walkable spot near the exit
+        const target = this.findNearestWalkable(x, y, 100);
+
+        if (target) {
+            // Store target and mark transition as pending
+            this.transitionTarget = { x: target.x, y: target.y };
+            this.transitionPending = true;
+
+            // Start pathfinding to the exit
+            this.findPath(this.player.x, this.player.y, target.x, target.y);
+        } else {
+            console.warn('[Scene3] No walkable spot found near exit');
         }
-
-        // Stop any pending sound effect timers (scraping stone, crash, etc.)
-        this.time.removeAllEvents();
-
-        // Restore normal music volume before leaving
-        if (audioManager) {
-            audioManager.setMusicVolume(0.4);  // Restore to normal volume
-        }
-
-        // Ensure input is unlocked before transitioning
-        this.dialogActive = false;
-        if (this.inputLocks) {
-            this.inputLocks.clear();
-        }
-
-        // Transition back to Scene2_Crossroads
-        this.cameras.main.fadeOut(500, 0, 0, 0);
-        this.time.delayedCall(500, () => {
-            this.scene.start('Scene2_Crossroads', { entry: 'from_tomb' });
-        });
     }
 
     update() {
         // COPY of GameScene.update() but with stone footsteps instead of grass
         // (We can't call super.update() because it plays grass footsteps)
+
+        // Check if player is close enough to exit to trigger transition
+        if (this.transitionPending && this.transitionTarget) {
+            const dx = this.player.x - this.transitionTarget.x;
+            const dy = this.player.y - this.transitionTarget.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Trigger transition when within 50px and player has stopped
+            if (distance < 50 && !this.isMoving) {
+                this.transitionPending = false;
+                this.transitionTarget = null;
+
+                // Stop all fire sounds from braziers
+                if (this.braziers) {
+                    this.braziers.forEach(brazier => {
+                        if (brazier.fireSound) {
+                            brazier.fireSound.stop();
+                        }
+                    });
+                }
+
+                // Stop any pending sound effect timers (scraping stone, crash, etc.)
+                this.time.removeAllEvents();
+
+                // Restore normal music volume before leaving
+                const audioManager = this.registry.get('audioManager');
+                if (audioManager) {
+                    audioManager.setMusicVolume(0.4);  // Restore to normal volume
+                }
+
+                // Transition back to Scene2_Crossroads
+                this.cameras.main.fadeOut(500, 0, 0, 0);
+                this.time.delayedCall(500, () => {
+                    this.scene.start('Scene2_Crossroads', { entry: 'from_tomb' });
+                });
+
+                return;  // Skip rest of update this frame
+            }
+        }
 
         // Handle player movement along path
         if (this.isMoving && this.path && this.currentWaypoint < this.path.length) {
