@@ -70,8 +70,8 @@ class Scene3_Tomb extends GameScene {
     getSpawnPoint(entryTag) {
         const spawns = {
             // Spawn further up/inside tomb to avoid blue entrance area
-            from_crossroads: { x: 640, y: 580 },
-            default:         { x: 640, y: 580 }
+            from_crossroads: { x: 620, y: 700 },
+            default:         { x: 620, y: 700 }
         };
 
         return spawns[entryTag] || spawns.default;
@@ -189,7 +189,7 @@ class Scene3_Tomb extends GameScene {
 
         for (const key of morteKeys) {
             if (this.textures.exists(key)) {
-                const morte = this.add.sprite(750, 450, key);
+                const morte = this.add.sprite(750, 440, key);
                 morte.setDepth(850);
                 morte.setScale(0.22);
                 this.morteSprite = morte;
@@ -387,7 +387,7 @@ class Scene3_Tomb extends GameScene {
 
                 for (const key of morteKeys) {
                     if (this.textures.exists(key)) {
-                        const morte = this.add.sprite(900, 360, key);
+                        const morte = this.add.sprite(750, 440, key);
                         morte.setDepth(850);  // Above background, below UI
                         morte.setScale(0.22);    // Scale down high-res sprite
                         this.morteSprite = morte;  // Store for later use
@@ -414,7 +414,7 @@ class Scene3_Tomb extends GameScene {
 
                 // Position sisters center X, bottom third Y, facing right (towards Morte)
                 const centerX = 640;  // Canvas width / 2
-                const bottomThirdY = 480;  // Canvas height * 2/3 (720 * 2/3)
+                const bottomThirdY = 440;  // Canvas height * 2/3 (720 * 2/3)
 
                 if (this.player) {
                     this.player.x = centerX;  // Center
