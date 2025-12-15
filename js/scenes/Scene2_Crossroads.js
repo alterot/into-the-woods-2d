@@ -66,8 +66,8 @@ class Scene2_Crossroads extends GameScene {
             // Mark as shown immediately to prevent duplicate triggers
             SceneStateManager.setGlobal('prologueCompleteShown', true);
 
-            // Wait 2000ms before showing overlay
-            this.time.delayedCall(2000, () => {
+            // Wait 500ms before showing overlay
+            this.time.delayedCall(500, () => {
                 this.showPrologueCompleteOverlay();
             });
         }
