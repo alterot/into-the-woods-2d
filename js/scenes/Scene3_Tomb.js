@@ -241,8 +241,8 @@ class Scene3_Tomb extends GameScene {
 
         // Find walkable position near brazier (keep player further back)
         const brazierX = clickedBrazier.x;
-        const brazierY = clickedBrazier.y + 130; 
-        const walkablePos = this.findNearestWalkable(brazierX, brazierY, 80);
+        const brazierY = clickedBrazier.y + 130;
+        const walkablePos = this.findNearestWalkable(brazierX, brazierY, 150);
 
         if (!walkablePos) {
             console.warn('[Scene3] No walkable position found near brazier');
@@ -254,12 +254,35 @@ class Scene3_Tomb extends GameScene {
         // Show valid click indicator
         this.showValidClickIndicator(x, y);
 
-        // Move player to walkable position
-        this.findPath(this.player.x, this.player.y, walkablePos.x, walkablePos.y);
+        // Move player to walkable position (silent - no red indicator if path fails)
+        this.findPathSilent(this.player.x, this.player.y, walkablePos.x, walkablePos.y);
 
         // Apply puzzle logic immediately (simple approach)
         // In a more complex implementation, you could wait for player to arrive
         this.activateBrazier(clickedBrazier);
+    }
+
+    /**
+     * Find path without showing red indicator (for brazier clicks)
+     * Used when we want to attempt movement but don't want to show error feedback
+     */
+    findPathSilent(startX, startY, endX, endY) {
+        const start = this.worldToGrid(startX, startY);
+        const end = this.worldToGrid(endX, endY);
+
+        this.easystar.findPath(start.col, start.row, end.col, end.row, (path) => {
+            if (path === null) {
+                // Path not found - fail silently without red indicator
+                this.path = null;
+            } else {
+                // Path found - start movement
+                this.path = path.map(point => this.gridToWorld(point.x, point.y));
+                this.currentWaypoint = 0;
+                this.isMoving = true;
+            }
+        });
+
+        this.easystar.calculate();
     }
 
     /**
