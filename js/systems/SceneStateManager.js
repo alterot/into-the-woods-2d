@@ -293,10 +293,8 @@ class SceneStateManager {
         if (keepGlobal) {
             this.state.scenes = {};
         } else {
-            this.state = {
-                global: {},
-                scenes: {}
-            };
+            this.state.global = {};
+            this.state.scenes = {};
         }
 
         if (this.persistenceEnabled) {
