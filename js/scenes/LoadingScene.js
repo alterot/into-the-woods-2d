@@ -199,6 +199,7 @@ class LoadingScene extends Phaser.Scene {
         // Game scene assets (Scene1_Meadow)
         this.load.image('background', 'assets/scenes/scen1-meadow.png');
         this.load.image('mask', 'assets/scenes/scen1-mask.png');
+        this.load.image('meadow-overlay', 'assets/scenes/scen1-meadow-overlay.png');
         this.load.image('sister1', 'assets/sprites/sister1-idle.png');
         this.load.image('sister2', 'assets/sprites/sister2-idle.png');
 

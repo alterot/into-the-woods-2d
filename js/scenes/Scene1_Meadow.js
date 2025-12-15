@@ -165,6 +165,11 @@ class Scene1_Meadow extends GameScene {
                 return;
             }
         });
+
+        // Add meadow overlay (foliage, branches in foreground)
+        // Depth 900: Above sprites (0-720) but below dialogue system (1000+)
+        const overlay = this.add.image(640, 360, 'meadow-overlay');
+        overlay.setDepth(900);
     }
 
     handleWispClick() {
